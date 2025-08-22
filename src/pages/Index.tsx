@@ -104,7 +104,7 @@ const Index = () => {
                 />
               </div>
               <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
-                Khanya: Affordable bulk new and secondhand clothing in South Africa
+                Khanya: Affordable bulk new and secondhand clothing in South Africa!
               </h1>
               <p className="text-lg text-muted-foreground mb-6 max-w-xl">
                 We supply 35kg bales of mixed men’s and women’s clothing so entrepreneurs can resell at prices ordinary South Africans can afford.
