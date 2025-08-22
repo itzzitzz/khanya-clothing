@@ -84,9 +84,6 @@ const Location = () => {
               <Button variant="hero" asChild>
                 <a href="https://wa.me/27828521112" target="_blank" rel="noreferrer">Arrange collection</a>
               </Button>
-              <Button variant="outline" asChild>
-                <a href="mailto:sales@khanya.co.za?subject=Arrange%20Collection%20%E2%80%93%20Khanya">Email us</a>
-              </Button>
             </div>
           </article>
 
@@ -111,9 +108,6 @@ const Location = () => {
               <div className="mt-3 flex flex-wrap gap-3">
                 <Button variant="sun" asChild>
                   <a href="https://wa.me/27828521112?text=Hi%20Khanya%2C%20please%20quote%20delivery%20to%20[YOUR%20AREA]%20for%20[bales]%20bale(s)." target="_blank" rel="noreferrer">Get delivery quote</a>
-                </Button>
-                <Button variant="outline" asChild>
-                  <a href="mailto:sales@khanya.co.za?subject=Delivery%20Quote%20Request%20%E2%80%93%20Khanya">Email for quote</a>
                 </Button>
               </div>
             </section>
