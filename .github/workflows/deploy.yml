@@ -18,10 +18,13 @@ jobs:
       - name: Install dependencies
         run: npm install
         env:
-          CI: false  # Prevents treating warnings as errors
+          CI: false
       
       - name: Build app
         run: npm run build
+      
+      - name: List dist contents  # Debugging: Check if build produced files
+        run: ls -R ./dist/ || echo "No dist folder found - build may have failed"
       
       - name: Deploy to server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -30,9 +33,12 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
-          server-dir: /public_html/  # Adjust to your server's root path
-          protocol: ftp  # Change to 'ftps' if supported for security
-          exclude: |  # Optional: Customize exclusions if needed
+          server-dir: public_html/  # Try without leading '/' first; adjust based on FTP client test
+          protocol: ftp
+          dry-run: true  # Temporary: Logs actions without applying; remove after debugging
+          dangerous-clean-slate: true  # Temporary: Forces full upload; remove after first success
+          log-credentials-on-error: true  # For debug if connection issues
+          exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
