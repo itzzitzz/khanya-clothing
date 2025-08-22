@@ -1,0 +1,74 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export type ActiveKey = "business" | "gallery" | "contact" | "location" | "brand" | undefined;
+
+const Header = ({ active }: { active?: ActiveKey }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const navItems = [
+    { key: "business" as const, label: "Home", href: "/" },
+    { key: "brand" as const, label: "Our Brand", href: "/brand" },
+    { key: "location" as const, label: "Location & Payments", href: "/location" },
+    { key: "contact" as const, label: "Contact", href: "/contact" },
+  ];
+
+  const LinkItem = ({ href, label, isActive }: { href: string; label: string; isActive: boolean }) => (
+    <a
+      href={href}
+      aria-current={isActive ? "page" : undefined}
+      className={cn(
+        "text-sm px-1 py-2 relative hover:underline",
+        isActive && "after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-full after:bg-accent after:rounded-full"
+      )}
+    >
+      {label}
+    </a>
+  );
+
+  return (
+    <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-background/70 border-b">
+      <nav className="container mx-auto flex items-center justify-between py-3 relative">
+        <a href="/" className="flex items-center gap-3" aria-label="Khanya home">
+          <img
+            src="/lovable-uploads/5b6d7d92-ae7b-4906-b2ef-216c9365a312.png"
+            alt="Khanya sun logo"
+            className="h-12 w-auto md:h-12 lg:h-14"
+            loading="eager"
+          />
+          <span className="font-extrabold text-xl md:text-2xl tracking-wide">Khanya</span>
+        </a>
+        <div className="hidden md:flex items-center gap-4">
+          {navItems.map((item) => (
+            <LinkItem key={item.key} href={item.href} label={item.label} isActive={active === item.key} />
+          ))}
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          className="md:hidden"
+          aria-label="Toggle menu"
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          <Menu />
+        </Button>
+      </nav>
+      {menuOpen && (
+        <div className="md:hidden border-t bg-background">
+          <div className="container mx-auto py-2 flex flex-col">
+            {navItems.map((item) => (
+              <a key={item.key} href={item.href} className={cn("px-1 py-2 hover:underline", active === item.key && "font-semibold")}
+                 aria-current={active === item.key ? "page" : undefined}>
+                {item.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </header>
+  );
+};
+
+export default Header;
