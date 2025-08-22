@@ -23,7 +23,7 @@ jobs:
       - name: Build app
         run: npm run build
       
-      - name: List dist contents  # Optional: Keep for now to confirm files
+      - name: List dist contents  # Optional: For confirming build output
         run: ls -R ./dist/ || echo "No dist folder found - build may have failed"
       
       - name: Deploy to server
@@ -32,12 +32,12 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/  # Trailing / ensures contents only (no nested dist folder)
-          server-dir: /public_html/  # Adjust if needed (e.g., ./ or /home/yourusername/public_html/)
-          protocol: ftp  # Change to 'ftps' if supported
-          dry-run: false  # Now actually deploys!
-          dangerous-clean-slate: true  # For first real run; set to false after
-          log-credentials-on-error: true
+          local-dir: ./dist/  # Trailing / uploads contents only
+          server-dir: public_html/  # Adjust if your FTP root differs (e.g., ./)
+          protocol: ftp
+          dry-run: false
+          dangerous-clean-slate: false  # Set to true if you want auto-clean (deletes everything!)
+          log-level: verbose  # For detailed logs
           exclude: |
             **/.git*
             **/.git*/**
