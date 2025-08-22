@@ -33,7 +33,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/  # Trailing / ensures contents only (no nested dist folder)
-          server-dir: public_html/  # Adjust if needed (e.g., ./ or /home/yourusername/public_html/)
+          server-dir: /public_html/  # Adjust if needed (e.g., ./ or /home/yourusername/public_html/)
           protocol: ftp  # Change to 'ftps' if supported
           dry-run: false  # Now actually deploys!
           dangerous-clean-slate: true  # For first real run; set to false after
