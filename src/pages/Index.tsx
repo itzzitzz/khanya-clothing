@@ -12,7 +12,8 @@ const Index = () => {
   const [coords, setCoords] = useState<{ x: number; y: number }>({ x: 0.5, y: 0.3 });
   const [active, setActive] = useState<"business" | "gallery" | "contact" | "location" | undefined>(undefined);
 
-  const handleMove = (e: React.MouseEvent<HTMLDivDivElement>) => {
+  // Fixed the typo in HTMLDivElement
+  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width;
     const y = (e.clientY - r.top) / r.height;
@@ -149,18 +150,18 @@ const Index = () => {
           <article className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4 leading-relaxed text-base">
               <p>
-                Khanya provides affordable secondhand clothing in bulk to entrepreneurs who want to earn an income by serving their communities. Most people in South Africa can’t pay R250 for a sing[...]  
+                Khanya provides affordable secondhand clothing in bulk to entrepreneurs who want to earn an income by serving their communities. Most people in South Africa can’t pay R250 for a single item, but at Khanya you can buy bales and resell at prices ordinary people can afford.
               </p>
               <p>
-                We sell 35kg bales containing a variety of men’s and women’s items: jackets, pants, shirts, skirts, dresses and shorts. Clothing weights differ—jackets weigh more than T‑shirts[...]  
+                We sell 35kg bales containing a variety of men’s and women’s items: jackets, pants, shirts, skirts, dresses and shorts. Clothing weights differ—jackets weigh more than T‑shirts, so the number of items per bale will vary.
               </p>
               <p>
-                Each bale sells for <strong>R6,500</strong>. That’s about <strong>R65 per item</strong>. Resellers commonly price pieces at around <strong>R130</strong>, which means you can realisti[...]  
+                Each bale sells for <strong>R6,500</strong>. That’s about <strong>R65 per item</strong>. Resellers commonly price pieces at around <strong>R130</strong>, which means you can realistically double your investment.
               </p>
               <div className="mb-8">
                 <div className="bg-accent/10 border border-accent/30 rounded-xl p-4">
                   <p className="text-sm md:text-base">
-                    Goal for informal traders: Sell about <strong>100 items/week</strong> (one 35kg bale) at an average of <strong>R130</strong> per item to make roughly <strong>R6,500 profit per week[...]  
+                    Goal for informal traders: Sell about <strong>100 items/week</strong> (one 35kg bale) at an average of <strong>R130</strong> per item to make roughly <strong>R6,500 profit per week</strong>.
                   </p>
                 </div>
               </div>
