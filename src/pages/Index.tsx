@@ -12,7 +12,7 @@ const Index = () => {
   const [coords, setCoords] = useState<{ x: number; y: number }>({ x: 0.5, y: 0.3 });
   const [active, setActive] = useState<"business" | "gallery" | "contact" | "location" | undefined>(undefined);
 
-  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMove = (e: React.MouseEvent<HTMLDivDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width;
     const y = (e.clientY - r.top) / r.height;
@@ -49,9 +49,9 @@ const Index = () => {
     <div>
       <Helmet>
         <title>Bulk Clothing Bales | Second-hand Wholesale South Africa | Khanya</title>
-        <meta name="description" content="Buy affordable bulk clothing bales (35kg) for resale. Second-hand clothing supplier in South Africa. Mixed men’s & women’s clothing and children's clothing. Great ROI for traders." />
+        <meta name="description" content="Buy affordable bulk clothing bales (35kg) for resale. Second-hand clothing supplier in South Africa. Mixed men’s & women’s clothing and children's clothin[...]" />
         <meta name="robots" content="index, follow" />
-        <meta name="keywords" content="bulk clothing, clothing bales, second hand clothes, second-hand clothing, wholesale clothing South Africa, used clothes bales, 35kg bales, reseller clothing, Khanya" />
+        <meta name="keywords" content="bulk clothing, clothing bales, second hand clothes, second-hand clothing, wholesale clothing South Africa, used clothes bales, 35kg bales, reseller clothing, Kha[...]" />
         <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/` : "/"} />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Bulk Clothing Bales | Second-hand Wholesale South Africa | Khanya" />
@@ -104,7 +104,7 @@ const Index = () => {
                 />
               </div>
               <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
-                Khanya: Affordable bulk new and secondhand clothing in South Africa
+                Khanya: Affordable bulk new and secondhand clothing in South Africa!
               </h1>
               <p className="text-lg text-muted-foreground mb-6 max-w-xl">
                 We supply 35kg bales of mixed men’s and women’s clothing so entrepreneurs can resell at prices ordinary South Africans can afford.
@@ -149,18 +149,18 @@ const Index = () => {
           <article className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4 leading-relaxed text-base">
               <p>
-                Khanya provides affordable secondhand clothing in bulk to entrepreneurs who want to earn an income by serving their communities. Most people in South Africa can’t pay R250 for a single item of clothing, but they can often afford around R130.
+                Khanya provides affordable secondhand clothing in bulk to entrepreneurs who want to earn an income by serving their communities. Most people in South Africa can’t pay R250 for a sing[...]  
               </p>
               <p>
-                We sell 35kg bales containing a variety of men’s and women’s items: jackets, pants, shirts, skirts, dresses and shorts. Clothing weights differ—jackets weigh more than T‑shirts—so the mix varies, but you can expect roughly 100 items per bale.
+                We sell 35kg bales containing a variety of men’s and women’s items: jackets, pants, shirts, skirts, dresses and shorts. Clothing weights differ—jackets weigh more than T‑shirts[...]  
               </p>
               <p>
-                Each bale sells for <strong>R6,500</strong>. That’s about <strong>R65 per item</strong>. Resellers commonly price pieces at around <strong>R130</strong>, which means you can realistically <strong>double your investment</strong> while keeping clothing affordable for customers.
+                Each bale sells for <strong>R6,500</strong>. That’s about <strong>R65 per item</strong>. Resellers commonly price pieces at around <strong>R130</strong>, which means you can realisti[...]  
               </p>
               <div className="mb-8">
                 <div className="bg-accent/10 border border-accent/30 rounded-xl p-4">
                   <p className="text-sm md:text-base">
-                    Goal for informal traders: Sell about <strong>100 items/week</strong> (one 35kg bale) at an average of <strong>R130</strong> per item to make roughly <strong>R6,500 profit per week</strong>. Start this business for as little as <strong>R6,500</strong>.
+                    Goal for informal traders: Sell about <strong>100 items/week</strong> (one 35kg bale) at an average of <strong>R130</strong> per item to make roughly <strong>R6,500 profit per week[...]  
                   </p>
                 </div>
               </div>
