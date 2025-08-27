@@ -50,13 +50,13 @@ const Index = () => {
     <div>
       <Helmet>
         <title>Bulk Clothing Bales | Second-hand Wholesale South Africa | Khanya</title>
-        <meta name="description" content="Buy affordable bulk clothing bales (35kg) for resale. Second-hand clothing supplier in South Africa. Mixed men’s & women’s clothing and children's clothin[...]" />
+        <meta name="description" content="Buy affordable bulk clothing bales (35kg) for resale. Second-hand clothing supplier in South Africa. Mixed men’s & women’s clothing and children's clothing." />
         <meta name="robots" content="index, follow" />
-        <meta name="keywords" content="bulk clothing, clothing bales, second hand clothes, second-hand clothing, wholesale clothing South Africa, used clothes bales, 35kg bales, reseller clothing, Kha[...]" />
+        <meta name="keywords" content="bulk clothing, clothing bales, second hand clothes, second-hand clothing, wholesale clothing South Africa, used clothes bales, 35kg bales, reseller clothing, children's clothing" />
         <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/` : "/"} />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Bulk Clothing Bales | Second-hand Wholesale South Africa | Khanya" />
-        <meta property="og:description" content="Affordable bulk second-hand clothing bales (35kg) for South African resellers. Great ROI, mixed clothing for men and women." />
+        <meta property="og:description" content="Affordable bulk second-hand clothing bales (35kg) for South African resellers. Great ROI, mixed clothing for men, women, and children." />
         <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -108,7 +108,7 @@ const Index = () => {
                 Khanya: Affordable bulk new and secondhand clothing in South Africa!
               </h1>
               <p className="text-lg text-muted-foreground mb-6 max-w-xl">
-                We supply 35kg bales of mixed men’s and women’s clothing so entrepreneurs can resell at prices ordinary South Africans can afford.
+                We supply 35kg bales of mixed men’s, women’s and children's clothing so entrepreneurs can resell at low prices that ordinary South Africans can afford.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button variant="hero" size="xl" asChild>
@@ -119,12 +119,7 @@ const Index = () => {
                 </Button>
               </div>
               <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                {[
-                  "35kg bales (~100 items)",
-                  "R6,500 per bale (~R65 per item)",
-                  "Resell at ~R130 per item",
-                  "2× return on investment",
-                ].map((t) => (
+                {["35kg bales (~100 items)", "R6,500 per bale (~R65 per item)", "Resell at ~R130 per item", "2× return on investment"].map((t) => (
                   <li className="flex items-start gap-2" key={t}>
                     <CheckCircle2 className="text-accent" />
                     <span>{t}</span>
@@ -150,18 +145,18 @@ const Index = () => {
           <article className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4 leading-relaxed text-base">
               <p>
-                Khanya provides affordable secondhand clothing in bulk to entrepreneurs who want to earn an income by serving their communities. Most people in South Africa can’t pay R250 for a single item, but at Khanya you can buy bales and resell at prices ordinary people can afford.
+                Khanya provides affordable secondhand clothing in bulk to entrepreneurs who want to earn an income by serving their communities. Most people in South Africa can’t pay R250 for a brand-new pair of jeans, but with Khanya bales, you can offer quality clothes at half the price.
               </p>
               <p>
-                We sell 35kg bales containing a variety of men’s and women’s items: jackets, pants, shirts, skirts, dresses and shorts. Clothing weights differ—jackets weigh more than T‑shirts, so the number of items per bale will vary.
+                We sell 35kg bales containing a variety of men’s, women’s and children's items: jackets, pants, shirts, skirts, dresses, shorts and kidswear. Clothing weights differ—jackets weigh more than T‑shirts, and children's clothes are typically lighter.
               </p>
               <p>
-                Each bale sells for <strong>R6,500</strong>. That’s about <strong>R65 per item</strong>. Resellers commonly price pieces at around <strong>R130</strong>, which means you can realistically double your investment.
+                Each bale sells for <strong>R6,500</strong>. That’s about <strong>R65 per item</strong>. Resellers commonly price pieces at around <strong>R130</strong>, which means you can really double your investment.
               </p>
               <div className="mb-8">
                 <div className="bg-accent/10 border border-accent/30 rounded-xl p-4">
                   <p className="text-sm md:text-base">
-                    Goal for informal traders: Sell about <strong>100 items/week</strong> (one 35kg bale) at an average of <strong>R130</strong> per item to make roughly <strong>R6,500 profit per week</strong>.
+                    Goal for informal traders: Sell about <strong>100 items/week</strong> (one 35kg bale) at an average of <strong>R130</strong> per item to make roughly <strong>R6,500 profit per bale</strong>.
                   </p>
                 </div>
               </div>
@@ -203,24 +198,7 @@ const Index = () => {
               <p className="text-muted-foreground">Realistic examples of bales and mixed clothing.</p>
             </header>
             <div className="grid md:grid-cols-3 gap-6">
-              {[
-                {
-                  src: baleImg,
-                  alt: "Wrapped bales of secondhand clothing stacked on pallets",
-                },
-                {
-                  src: flatlayImg,
-                  alt: "Assorted men’s and women’s clothing laid out neatly",
-                },
-                {
-                  src: marketImg,
-                  alt: "Market table with folded clothing and R50 price cards",
-                },
-                {
-                  src: "/lovable-uploads/2c9af322-a6d3-4b2a-8692-a7f8bddb0726.png",
-                  alt: "Informal trader selling affordable clothing at a township market stall",
-                },
-              ].map((img) => (
+              {[{ src: baleImg, alt: "Wrapped bales of secondhand clothing stacked on pallets" }, { src: flatlayImg, alt: "Assorted men’s, women’s and children's clothing laid out neatly" }, { src: marketImg, alt: "Market table with folded clothing and R50 price cards" }, { src: "/lovable-uploads/2c9af322-a6d3-4b2a-8692-a7f8bddb0726.png", alt: "Informal trader selling affordable clothing at a township market stall" }].map((img) => (
                 <figure key={img.alt} className="group overflow-hidden rounded-xl border bg-card">
                   <img
                     src={img.src}
