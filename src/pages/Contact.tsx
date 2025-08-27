@@ -19,6 +19,7 @@ const Contact = () => {
     setIsSubmitting(true);
 
     const form = new FormData(e.currentTarget);
+    const formElement = e.currentTarget; // Store reference to form element
     const name = String(form.get("name") || "");
     const phone = String(form.get("phone") || "");
     const email = String(form.get("email") || "");
@@ -59,10 +60,10 @@ const Contact = () => {
       });
 
       // Reset form
-      e.currentTarget.reset();
+      formElement.reset();
       setMethod("delivery");
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error sending enquiry:', error);
       toast({
         title: "Failed to send enquiry",
@@ -128,7 +129,7 @@ const Contact = () => {
                   <RadioGroup
                     name="method"
                     value={method}
-                    onValueChange={(v) => setMethod(v as any)}
+                    onValueChange={(v) => setMethod(v as "delivery" | "collect")}
                     className="flex items-center gap-6"
                   >
                     <div className="flex items-center space-x-2">
