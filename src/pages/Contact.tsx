@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { Helmet } from "react-helmet-async";
+import { supabase } from "@/integrations/supabase/client";
 
 
 const Contact = () => {
@@ -19,6 +20,7 @@ const Contact = () => {
     setIsSubmitting(true);
 
     const form = new FormData(e.currentTarget);
+    const formElement = e.currentTarget; // Store reference to form element
     const name = String(form.get("name") || "");
     const phone = String(form.get("phone") || "");
     const email = String(form.get("email") || "");
@@ -32,25 +34,33 @@ const Contact = () => {
         description: "Please wait while we process your request.",
       });
 
-      const response = await fetch('/send-contact-email.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          phone,
-          email,
-          bales,
-          method: fulfilment,
-          address: fulfilment === "delivery" ? address : undefined,
-        }),
-      });
+      // In development, simulate a successful email send
+      if (import.meta.env.DEV) {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Simulate success
+        console.log('Development mode: simulating successful email send');
+      } else {
+        // In production, use Supabase function
+        const { data, error } = await supabase.functions.invoke('send-contact-email', {
+          body: {
+            name,
+            phone,
+            email,
+            bales,
+            method: fulfilment,
+            address: fulfilment === "delivery" ? address : undefined,
+          },
+        });
 
-      const result = await response.json();
+        if (error) {
+          throw new Error(error.message || 'Failed to send email');
+        }
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to send email');
+        if (!data?.success) {
+          throw new Error(data?.error || 'Failed to send email');
+        }
       }
 
       toast({
@@ -58,12 +68,13 @@ const Contact = () => {
         description: "We'll get back to you as soon as possible.",
       });
 
-      // Reset form
-      e.currentTarget.reset();
+      // Reset form using stored reference
+      formElement.reset();
       setMethod("delivery");
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error sending enquiry:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: "Failed to send enquiry",
         description: "Please try again or contact us directly.",
@@ -128,7 +139,7 @@ const Contact = () => {
                   <RadioGroup
                     name="method"
                     value={method}
-                    onValueChange={(v) => setMethod(v as any)}
+                    onValueChange={(v) => setMethod(v as "delivery" | "collect")}
                     className="flex items-center gap-6"
                   >
                     <div className="flex items-center space-x-2">
