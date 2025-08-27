@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
-import heroImg from "@/assets/hero-bales.jpg";
 import baleImg from "@/assets/bale-warehouse.jpg";
 import flatlayImg from "@/assets/mixed-clothing-flatlay.jpg";
 import marketImg from "@/assets/market-stall-r50.jpg";
@@ -129,8 +128,8 @@ const Index = () => {
             </div>
             <div className="relative">
               <img
-                src={heroImg}
-                alt="Neat stacks of secondhand clothing bales in a clean warehouse"
+                src="/lovable-uploads/df5c6b0b-4c44-4f6c-93af-a4d8d2be9312.png"
+                alt="Person wearing yellow jacket during golden hour sunrise, representing Khanya's community focus"
                 className="w-full aspect-[4/3] rounded-xl shadow-[var(--shadow-elegant)] object-cover"
                 loading="eager"
               />
