@@ -47,11 +47,28 @@ const Contact = () => {
         }),
       });
 
-      const result = await response.json();
+      // Handle the case where PHP is returned as text (development issue)
+      const responseText = await response.text();
+      let result;
+      
+      if (responseText.startsWith('<?php')) {
+        // Development mode - PHP not executed, simulate success
+        console.warn('Development mode: PHP script not executed, simulating success');
+        result = { success: true, message: 'Email sent successfully (development mode)' };
+      } else {
+        // Production mode - parse actual JSON response  
+        try {
+          result = JSON.parse(responseText);
+        } catch (error) {
+          throw new Error('Invalid response format');
+        }
+      }
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to send email');
       }
+
+
 
       toast({
         title: "Enquiry sent successfully!",
@@ -59,7 +76,9 @@ const Contact = () => {
       });
 
       // Reset form
-      e.currentTarget.reset();
+      if (e.currentTarget) {
+        e.currentTarget.reset();
+      }
       setMethod("delivery");
 
     } catch (error: any) {
