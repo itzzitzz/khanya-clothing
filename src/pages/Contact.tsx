@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { Helmet } from "react-helmet-async";
+import { supabase } from "@/integrations/supabase/client";
 
 
 const Contact = () => {
@@ -32,25 +33,23 @@ const Contact = () => {
         description: "Please wait while we process your request.",
       });
 
-      const response = await fetch('/send-contact-email.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: {
           name,
           phone,
           email,
           bales,
           method: fulfilment,
           address: fulfilment === "delivery" ? address : undefined,
-        }),
+        },
       });
 
-      const result = await response.json();
+      if (error) {
+        throw new Error(error.message || 'Failed to send email');
+      }
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to send email');
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to send email');
       }
 
       toast({
@@ -62,7 +61,7 @@ const Contact = () => {
       e.currentTarget.reset();
       setMethod("delivery");
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error sending enquiry:', error);
       toast({
         title: "Failed to send enquiry",
@@ -128,7 +127,7 @@ const Contact = () => {
                   <RadioGroup
                     name="method"
                     value={method}
-                    onValueChange={(v) => setMethod(v as any)}
+                    onValueChange={(v) => setMethod(v as "delivery" | "collect")}
                     className="flex items-center gap-6"
                   >
                     <div className="flex items-center space-x-2">
