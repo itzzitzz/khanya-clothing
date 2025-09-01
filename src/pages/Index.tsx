@@ -119,7 +119,7 @@ const Index = () => {
                 </Button>
               </div>
               <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                {["10kg bales (~40 items)", "R1,500 per bale (~R37.50 per item)", "Resell at ~R75 per item", "2× return on investment"].map((t) => (
+                {["10kg bales (~40 items)", "R2,600 per bale (~R65 per item)", "Resell at ~R130 per item", "2× return on investment"].map((t) => (
                   <li className="flex items-start gap-2" key={t}>
                     <CheckCircle2 className="text-accent" />
                     <span>{t}</span>
@@ -151,12 +151,12 @@ const Index = () => {
                 We sell 10kg bales containing a variety of men's, women's and children's items: jackets, pants, shirts, skirts, dresses, shorts and kidswear. Clothing weights differ—jackets weigh more than T‑shirts, and children's clothes are typically lighter.
               </p>
               <p>
-                Each bale sells for <strong>R1,500</strong>. That's about <strong>R37.50 per item</strong>. Resellers commonly price pieces at around <strong>R75</strong>, which means you can really double your investment.
+                Each bale sells for <strong>R2,600</strong>. That's about <strong>R65 per item</strong>. Resellers commonly price pieces at around <strong>R130</strong>, which means you can really double your investment.
               </p>
               <div className="mb-8">
                 <div className="bg-accent/10 border border-accent/30 rounded-xl p-4">
                   <p className="text-sm md:text-base">
-                    Goal for informal traders: Sell about <strong>40 items/week</strong> (one 10kg bale) at an average of <strong>R75</strong> per item to make roughly <strong>R1,500 profit per bale</strong>.
+                    Goal for informal traders: Sell about <strong>40 items/week</strong> (one 10kg bale) at an average of <strong>R130</strong> per item to make roughly <strong>R2,600 profit per bale</strong>.
                   </p>
                 </div>
               </div>
@@ -169,20 +169,20 @@ const Index = () => {
                 <dt className="text-muted-foreground">Approx. items</dt>
                 <dd className="font-semibold">~40</dd>
                 <dt className="text-muted-foreground">Bale price</dt>
-                <dd className="font-semibold">R1,500</dd>
+                <dd className="font-semibold">R2,600</dd>
                 <dt className="text-muted-foreground">Avg. cost/item</dt>
-                <dd className="font-semibold">~R37.50</dd>
+                <dd className="font-semibold">~R65</dd>
                 <dt className="text-muted-foreground">Sell from</dt>
-                <dd className="font-semibold">~R75/item</dd>
+                <dd className="font-semibold">~R130/item</dd>
                 <dt className="text-muted-foreground">Potential ROI</dt>
                 <dd className="font-semibold">≈ 2×</dd>
                 <dd className="col-span-2">
                   <hr className="my-2 border-muted" />
                 </dd>
                 <dt className="text-muted-foreground">Your sales</dt>
-                <dd className="font-semibold">R3,000!</dd>
+                <dd className="font-semibold">R5,200!</dd>
                 <dt className="text-muted-foreground">Your profit</dt>
-                <dd className="font-semibold">R1,500!</dd>
+                <dd className="font-semibold">R2,600!</dd>
               </dl>
               <Button variant="sun" className="mt-6 w-full" asChild>
                 <a href="/contact">Buy a bale</a>
@@ -208,6 +208,45 @@ const Index = () => {
                   />
                 </figure>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-primary/5 py-16">
+          <div className="container mx-auto">
+            <header className="mb-8 text-center">
+              <h2 className="text-3xl font-extrabold mb-3">Supporting informal traders</h2>
+              <p className="text-muted-foreground">Building your brand and growing your business with exclusive deals.</p>
+            </header>
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <div className="bg-card border rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckCircle2 className="text-accent h-6 w-6" />
+                  <h3 className="font-bold text-lg">Loyalty Reward</h3>
+                </div>
+                <p className="text-muted-foreground mb-4">Place a second order within 1 week of your previous order to receive:</p>
+                <div className="bg-accent/10 border border-accent/30 rounded-lg p-4">
+                  <p className="font-semibold text-accent">10 free coat-hangers</p>
+                  <p className="text-sm text-muted-foreground mt-1">Perfect for displaying your clothing professionally</p>
+                </div>
+              </div>
+              <div className="bg-card border rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckCircle2 className="text-accent h-6 w-6" />
+                  <h3 className="font-bold text-lg">Brand Builder Package</h3>
+                </div>
+                <p className="text-muted-foreground mb-4">Order 8 bales in a month to receive your choice of:</p>
+                <div className="space-y-2">
+                  <div className="bg-accent/10 border border-accent/30 rounded-lg p-3">
+                    <p className="font-semibold text-accent">8 free Khanya branded caps</p>
+                  </div>
+                  <div className="text-center text-sm text-muted-foreground">OR</div>
+                  <div className="bg-accent/10 border border-accent/30 rounded-lg p-3">
+                    <p className="font-semibold text-accent">8 free Khanya branded t-shirts</p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-3">Use yourself or give to your favourite customers!</p>
+              </div>
             </div>
           </div>
         </section>
