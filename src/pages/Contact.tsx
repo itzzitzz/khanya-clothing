@@ -78,7 +78,7 @@ const Contact = () => {
     <div>
       <Helmet>
         <title>Contact Khanya | Bulk Clothing Bales Supplier South Africa</title>
-        <meta name="description" content="Contact Khanya to order bulk clothing bales (35kg). Delivery or collection available. Email sales@khanya.store or WhatsApp +27 82 852 1112." />
+        <meta name="description" content="Contact Khanya to order bulk clothing bales (10kg). Delivery or collection available. Email sales@khanya.store or WhatsApp +27 82 852 1112." />
         <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/contact` : "/contact"} />
         <meta name="robots" content="index, follow" />
         <script type="application/ld+json">
