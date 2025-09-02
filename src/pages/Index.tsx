@@ -119,7 +119,7 @@ const Index = () => {
                 </Button>
               </div>
               <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                {["10kg bales (~40 items)", "R2,600 per bale (~R65 per item)", "Resell at ~R130 per item", "2× return on investment"].map((t) => (
+                {["10kg bales (~40 items)", "R1,500 per bale (~R35 per item)", "Resell at ~R70 per item", "2× return on investment"].map((t) => (
                   <li className="flex items-start gap-2" key={t}>
                     <CheckCircle2 className="text-accent" />
                     <span>{t}</span>
@@ -151,12 +151,12 @@ const Index = () => {
                 We sell 10kg bales containing a variety of men's, women's and children's items: jackets, pants, shirts, skirts, dresses, shorts and kidswear. Clothing weights differ—jackets weigh more than T‑shirts, and children's clothes are typically lighter.
               </p>
               <p>
-                Each bale sells for <strong>R2,600</strong>. That's about <strong>R65 per item</strong>. Resellers commonly price pieces at around <strong>R130</strong>, which means you can really double your investment.
+                Each bale sells for <strong>R1,500</strong>. That's about <strong>R35 per item</strong>. Resellers commonly price pieces at around <strong>R70</strong>, which means you can really double your investment.
               </p>
               <div className="mb-8">
                 <div className="bg-accent/10 border border-accent/30 rounded-xl p-4">
                   <p className="text-sm md:text-base">
-                    Goal for informal traders: Sell about <strong>40 items/week</strong> (one 10kg bale) at an average of <strong>R130</strong> per item to make roughly <strong>R2,600 profit per bale</strong>.
+                    Goal for informal traders: Sell about <strong>40 items/week</strong> (one 10kg bale) at an average of <strong>R70</strong> per item to make roughly <strong>R1,500 profit</strong> and <strong>R2,800 sales</strong>.
                   </p>
                 </div>
               </div>
@@ -169,20 +169,20 @@ const Index = () => {
                 <dt className="text-muted-foreground">Approx. items</dt>
                 <dd className="font-semibold">~40</dd>
                 <dt className="text-muted-foreground">Bale price</dt>
-                <dd className="font-semibold">R2,600</dd>
+                <dd className="font-semibold">R1,500</dd>
                 <dt className="text-muted-foreground">Avg. cost/item</dt>
-                <dd className="font-semibold">~R65</dd>
+                <dd className="font-semibold">~R35</dd>
                 <dt className="text-muted-foreground">Sell from</dt>
-                <dd className="font-semibold">~R130/item</dd>
+                <dd className="font-semibold">~R70/item</dd>
                 <dt className="text-muted-foreground">Potential ROI</dt>
                 <dd className="font-semibold">≈ 2×</dd>
                 <dd className="col-span-2">
                   <hr className="my-2 border-muted" />
                 </dd>
                 <dt className="text-muted-foreground">Your sales</dt>
-                <dd className="font-semibold">R5,200!</dd>
+                <dd className="font-semibold">R2,800!</dd>
                 <dt className="text-muted-foreground">Your profit</dt>
-                <dd className="font-semibold">R2,600!</dd>
+                <dd className="font-semibold">R1,500!</dd>
               </dl>
               <Button variant="sun" className="mt-6 w-full" asChild>
                 <a href="/contact">Buy a bale</a>
