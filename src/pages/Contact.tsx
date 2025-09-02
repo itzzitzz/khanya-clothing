@@ -18,7 +18,8 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const form = new FormData(e.currentTarget);
+    const formElement = e.currentTarget; // Store reference before async operation
+    const form = new FormData(formElement);
     const name = String(form.get("name") || "");
     const phone = String(form.get("phone") || "");
     const email = String(form.get("email") || "");
@@ -79,7 +80,7 @@ const Contact = () => {
       });
 
       // Reset form
-      e.currentTarget.reset();
+      formElement.reset();
       setMethod("delivery");
 
     } catch (error: any) {
