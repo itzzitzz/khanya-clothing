@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type ActiveKey = "business" | "gallery" | "contact" | "location" | "brand" | undefined;
+export type ActiveKey = "business" | "gallery" | "contact" | "location" | "brand" | "bales" | undefined;
 
 const Header = ({ active }: { active?: ActiveKey }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -11,6 +11,7 @@ const Header = ({ active }: { active?: ActiveKey }) => {
   const navItems = [
     { key: "business" as const, label: "Home", href: "/" },
     { key: "brand" as const, label: "Our Brand", href: "/brand" },
+    { key: "bales" as const, label: "What's in the bales", href: "/whats-in-bales" },
     { key: "location" as const, label: "Location & Payments", href: "/location" },
     { key: "contact" as const, label: "Contact", href: "/contact" },
   ];

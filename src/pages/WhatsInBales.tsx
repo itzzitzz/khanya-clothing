@@ -1,0 +1,167 @@
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, Package, Shirt, Users } from "lucide-react";
+import Header from "@/components/Header";
+import { Helmet } from "react-helmet-async";
+
+const WhatsInBales = () => {
+  return (
+    <div>
+      <Helmet>
+        <title>What's in Our Clothing Bales | Mixed Second-hand Items | Khanya</title>
+        <meta name="description" content="Discover what's inside our 10kg clothing bales. Mixed men's, women's, and children's clothing including jackets, pants, shirts, dresses and more." />
+        <meta name="robots" content="index, follow" />
+        <meta name="keywords" content="clothing bale contents, mixed clothing items, secondhand clothing types, men's women's children's clothes, jacket pants shirts dresses" />
+        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/whats-in-bales` : "/whats-in-bales"} />
+        <meta property="og:type" content="webpage" />
+        <meta property="og:title" content="What's in Our Clothing Bales | Mixed Second-hand Items | Khanya" />
+        <meta property="og:description" content="See exactly what types of clothing you'll find in our 10kg mixed bales - perfect variety for resellers." />
+        <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
+      </Helmet>
+      <Header active="bales" />
+
+      <main>
+        <section className="bg-gradient-to-br from-primary/10 to-accent/10 py-16">
+          <div className="container mx-auto text-center">
+            <div className="mb-6">
+              <Package className="h-16 w-16 mx-auto text-primary mb-4" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
+              What's in the bales?
+            </h1>
+            <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
+              Each 10kg bale contains approximately 40 mixed clothing items across different categories, sizes, and styles. Here's what you can expect to find.
+            </p>
+          </div>
+        </section>
+
+        <section className="container mx-auto py-16">
+          <div className="grid lg:grid-cols-3 gap-8 mb-12">
+            <div className="bg-card border rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Users className="h-8 w-8 text-primary" />
+                <h2 className="text-xl font-bold">Men's Clothing</h2>
+              </div>
+              <ul className="space-y-2 text-sm">
+                {[
+                  "Casual shirts & t-shirts",
+                  "Dress shirts & polo shirts", 
+                  "Jeans & casual pants",
+                  "Formal trousers",
+                  "Jackets & blazers",
+                  "Hoodies & sweatshirts",
+                  "Shorts",
+                  "Work wear items"
+                ].map((item) => (
+                  <li className="flex items-start gap-2" key={item}>
+                    <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-card border rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Users className="h-8 w-8 text-accent" />
+                <h2 className="text-xl font-bold">Women's Clothing</h2>
+              </div>
+              <ul className="space-y-2 text-sm">
+                {[
+                  "Blouses & tops",
+                  "Dresses (casual & formal)",
+                  "Skirts & pants", 
+                  "Jeans & leggings",
+                  "Jackets & cardigans",
+                  "Sweaters & knitwear",
+                  "Professional wear",
+                  "Summer clothing"
+                ].map((item) => (
+                  <li className="flex items-start gap-2" key={item}>
+                    <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-card border rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Shirt className="h-8 w-8 text-primary" />
+                <h2 className="text-xl font-bold">Children's Clothing</h2>
+              </div>
+              <ul className="space-y-2 text-sm">
+                {[
+                  "Baby & toddler clothes",
+                  "School-age clothing",
+                  "Teenage fashion items",
+                  "Seasonal wear",
+                  "Play clothes & sportswear",
+                  "Formal & party outfits",
+                  "Shoes & accessories",
+                  "Mixed age ranges"
+                ].map((item) => (
+                  <li className="flex items-start gap-2" key={item}>
+                    <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="bg-secondary/30 border rounded-xl p-8">
+            <h2 className="text-2xl font-bold mb-6">Important to know</h2>
+            <div className="grid md:grid-cols-2 gap-6 text-sm leading-relaxed">
+              <div>
+                <h3 className="font-semibold mb-3 text-base">Mixed variety every bale</h3>
+                <p className="text-muted-foreground mb-4">
+                  Each bale is different and contains a random mix of clothing types, sizes, and styles. This variety gives your customers more choices and helps you serve different market segments.
+                </p>
+                <h3 className="font-semibold mb-3 text-base">Quality second-hand items</h3>
+                <p className="text-muted-foreground">
+                  All clothing is pre-sorted to ensure good resale quality. While items are second-hand, they're selected for durability and appearance suitable for retail.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold mb-3 text-base">Weight considerations</h3>
+                <p className="text-muted-foreground mb-4">
+                  Heavier items like jackets and jeans mean fewer pieces per bale, while lighter items like t-shirts and children's clothes mean more pieces. The 40-item average accounts for this natural variation.
+                </p>
+                <h3 className="font-semibold mb-3 text-base">Seasonal availability</h3>
+                <p className="text-muted-foreground">
+                  Bale contents may vary slightly by season, but we maintain year-round availability of all clothing categories to keep your business consistent.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-primary/5 py-16">
+          <div className="container mx-auto text-center">
+            <h2 className="text-3xl font-extrabold mb-4">Ready to see what's in your bale?</h2>
+            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+              Start with your first 10kg mixed bale and discover the variety that will help grow your clothing business.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Button variant="hero" size="lg" asChild>
+                <a href="/contact">Order Your First Bale</a>
+              </Button>
+              <Button variant="sun" size="lg" asChild>
+                <a href="/">See Pricing</a>
+              </Button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t">
+        <div className="container mx-auto py-8 flex items-center justify-between text-sm">
+          <p>&copy; {typeof window !== "undefined" ? new Date().getFullYear() : "2025"} Khanya. All rights reserved.</p>
+          <a href="#" className="hover:underline">Back to top</a>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default WhatsInBales;
