@@ -44,7 +44,7 @@ const WhatsInBales = () => {
               <ul className="space-y-2 text-sm">
                 {[
                   "Ripped jeans. 10kg = ~20 pairs for R1000 (~R50 per pair).",
-                  "T-shirts. 10kg = ~150 pieces for R2900 (~R19 per piece)."
+                  "T-shirts. 10kg = ~40 pieces for R2000 (~R50 per piece)."
                 ].map((item) => (
                   <li className="flex items-start gap-2" key={item}>
                     <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
