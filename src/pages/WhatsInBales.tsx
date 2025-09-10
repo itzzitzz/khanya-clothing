@@ -61,14 +61,8 @@ const WhatsInBales = () => {
               </div>
               <ul className="space-y-2 text-sm">
                 {[
-                  "Blouses & tops",
-                  "Dresses (casual & formal)",
-                  "Skirts & pants", 
-                  "Jeans & leggings",
-                  "Jackets & cardigans",
-                  "Sweaters & knitwear",
-                  "Professional wear",
-                  "Summer clothing"
+                  "T-shirts. 10kg = ~40 pieces for R2000 (~R50 per piece).",
+                  "Zipper Jackets. 10kg = ~23 pieces for R1000 (~R44 per piece)."
                 ].map((item) => (
                   <li className="flex items-start gap-2" key={item}>
                     <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
