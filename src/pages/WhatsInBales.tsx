@@ -2,6 +2,11 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Package, Shirt, Users } from "lucide-react";
 import Header from "@/components/Header";
 import { Helmet } from "react-helmet-async";
+import mensRippedJeans from "@/assets/mens-ripped-jeans.jpg";
+import mensTshirts from "@/assets/mens-tshirts.jpg";
+import womensTshirts from "@/assets/womens-tshirts.jpg";
+import womensZipperJackets from "@/assets/womens-zipper-jackets.jpg";
+import childrensSummerWear from "@/assets/childrens-summer-wear.jpg";
 
 const WhatsInBales = () => {
   return (
@@ -35,58 +40,115 @@ const WhatsInBales = () => {
         </section>
 
         <section className="container mx-auto py-16">
-          <div className="grid lg:grid-cols-3 gap-8 mb-12">
-            <div className="bg-card border rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Users className="h-8 w-8 text-primary" />
-                <h2 className="text-xl font-bold">Men's Clothing</h2>
-              </div>
-              <ul className="space-y-2 text-sm">
-                {[
-                  "Ripped jeans. 10kg = ~20 pairs for R1000 (~R50 per pair).",
-                  "T-shirts. 10kg = ~40 pieces for R2000 (~R50 per piece)."
-                ].map((item) => (
-                  <li className="flex items-start gap-2" key={item}>
-                    <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+          {/* Men's Clothing Section */}
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <Users className="h-8 w-8 text-primary" />
+              <h2 className="text-2xl font-bold">Men's Clothing</h2>
             </div>
-
-            <div className="bg-card border rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Users className="h-8 w-8 text-accent" />
-                <h2 className="text-xl font-bold">Women's Clothing</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-card border rounded-xl p-6">
+                <img 
+                  src={mensRippedJeans} 
+                  alt="Men's ripped jeans - distressed denim for resale" 
+                  className="w-full h-48 object-cover rounded-lg mb-4"
+                />
+                <h3 className="text-lg font-semibold mb-2">Ripped Jeans</h3>
+                <p className="text-muted-foreground text-sm mb-3">
+                  Trendy distressed denim jeans with fashionable tears and fraying. Perfect for casual streetwear market.
+                </p>
+                <div className="text-sm">
+                  <p className="font-medium">10kg = ~20 pairs</p>
+                  <p className="text-xl font-bold text-primary">R1,000</p>
+                  <p className="text-muted-foreground">~R50 per pair</p>
+                </div>
               </div>
-              <ul className="space-y-2 text-sm">
-                {[
-                  "T-shirts. 10kg = ~40 pieces for R2000 (~R50 per piece).",
-                  "Zipper Jackets. 10kg = ~23 pieces for R1000 (~R44 per piece)."
-                ].map((item) => (
-                  <li className="flex items-start gap-2" key={item}>
-                    <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+              
+              <div className="bg-card border rounded-xl p-6">
+                <img 
+                  src={mensTshirts} 
+                  alt="Men's casual t-shirts in various colors and styles" 
+                  className="w-full h-48 object-cover rounded-lg mb-4"
+                />
+                <h3 className="text-lg font-semibold mb-2">T-Shirts</h3>
+                <p className="text-muted-foreground text-sm mb-3">
+                  Comfortable cotton blend t-shirts in various colors and styles. Essential everyday wear items.
+                </p>
+                <div className="text-sm">
+                  <p className="font-medium">10kg = ~40 pieces</p>
+                  <p className="text-xl font-bold text-primary">R2,000</p>
+                  <p className="text-muted-foreground">~R50 per piece</p>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <div className="bg-card border rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Shirt className="h-8 w-8 text-primary" />
-                <h2 className="text-xl font-bold">Children's Clothing</h2>
+          {/* Women's Clothing Section */}
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <Users className="h-8 w-8 text-accent" />
+              <h2 className="text-2xl font-bold">Women's Clothing</h2>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-card border rounded-xl p-6">
+                <img 
+                  src={womensTshirts} 
+                  alt="Women's fashionable t-shirts and tops in various styles" 
+                  className="w-full h-48 object-cover rounded-lg mb-4"
+                />
+                <h3 className="text-lg font-semibold mb-2">T-Shirts</h3>
+                <p className="text-muted-foreground text-sm mb-3">
+                  Stylish women's t-shirts and tops in various cuts and designs. Perfect for casual and semi-casual wear.
+                </p>
+                <div className="text-sm">
+                  <p className="font-medium">10kg = ~40 pieces</p>
+                  <p className="text-xl font-bold text-primary">R2,000</p>
+                  <p className="text-muted-foreground">~R50 per piece</p>
+                </div>
               </div>
-              <ul className="space-y-2 text-sm">
-                {[
-                  "Mixed Summer Wear (ages 5 to 12). 10kg = ~57 items for R2900 (~R50 per item)."
-                ].map((item) => (
-                  <li className="flex items-start gap-2" key={item}>
-                    <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+              
+              <div className="bg-card border rounded-xl p-6">
+                <img 
+                  src={womensZipperJackets} 
+                  alt="Women's zipper jackets and hoodies for casual outerwear" 
+                  className="w-full h-48 object-cover rounded-lg mb-4"
+                />
+                <h3 className="text-lg font-semibold mb-2">Zipper Jackets</h3>
+                <p className="text-muted-foreground text-sm mb-3">
+                  Comfortable hoodies and jackets with full front zippers. Great layering pieces for all seasons.
+                </p>
+                <div className="text-sm">
+                  <p className="font-medium">10kg = ~23 pieces</p>
+                  <p className="text-xl font-bold text-primary">R1,000</p>
+                  <p className="text-muted-foreground">~R44 per piece</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Children's Clothing Section */}
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <Shirt className="h-8 w-8 text-primary" />
+              <h2 className="text-2xl font-bold">Children's Clothing</h2>
+            </div>
+            <div className="grid md:grid-cols-1 max-w-md mx-auto">
+              <div className="bg-card border rounded-xl p-6">
+                <img 
+                  src={childrensSummerWear} 
+                  alt="Children's summer clothing for ages 5-12, colorful and fun designs" 
+                  className="w-full h-48 object-cover rounded-lg mb-4"
+                />
+                <h3 className="text-lg font-semibold mb-2">Mixed Summer Wear (ages 5-12)</h3>
+                <p className="text-muted-foreground text-sm mb-3">
+                  Bright and colorful summer clothing including shorts, t-shirts, and sundresses. Perfect for active kids.
+                </p>
+                <div className="text-sm">
+                  <p className="font-medium">10kg = ~57 items</p>
+                  <p className="text-xl font-bold text-primary">R2,900</p>
+                  <p className="text-muted-foreground">~R50 per item</p>
+                </div>
+              </div>
             </div>
           </div>
 
