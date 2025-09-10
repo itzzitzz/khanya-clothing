@@ -79,14 +79,7 @@ const WhatsInBales = () => {
               </div>
               <ul className="space-y-2 text-sm">
                 {[
-                  "Baby & toddler clothes",
-                  "School-age clothing",
-                  "Teenage fashion items",
-                  "Seasonal wear",
-                  "Play clothes & sportswear",
-                  "Formal & party outfits",
-                  "Shoes & accessories",
-                  "Mixed age ranges"
+                  "Mixed Summer Wear (ages 5 to 12). 10kg = ~57 items for R2900 (~R50 per item)."
                 ].map((item) => (
                   <li className="flex items-start gap-2" key={item}>
                     <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
