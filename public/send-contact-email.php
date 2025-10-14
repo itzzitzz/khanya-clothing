@@ -57,6 +57,13 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit();
 }
 
+// Prevent email header injection by rejecting emails with newline characters
+if (preg_match('/[\r\n]/', $email) || preg_match('/[\r\n]/', $name)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'Invalid characters detected']);
+    exit();
+}
+
 // Email configuration
 $to = 'sales@khanya.store';
 $subject = 'New Khanya website enquiry';
