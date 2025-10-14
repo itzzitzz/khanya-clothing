@@ -1,4 +1,9 @@
 <?php
+// Error reporting for debugging (remove in production if needed)
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
@@ -114,13 +119,17 @@ $headers = array(
     'X-Mailer: PHP/' . phpversion()
 );
 
-// Send email
-$mail_sent = mail($to, $subject, $email_body, implode("\r\n", $headers));
+// Send email using mail() function
+$mail_sent = @mail($to, $subject, $email_body, implode("\r\n", $headers));
 
 if ($mail_sent) {
+    // Log success
+    error_log("Contact form email sent successfully to $to from $name ($email)");
     echo json_encode(['success' => true, 'message' => 'Email sent successfully']);
 } else {
+    // Log failure
+    error_log("Contact form email failed to send to $to from $name ($email)");
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Failed to send email']);
+    echo json_encode(['success' => false, 'error' => 'Failed to send email. Please contact us directly at sales@khanya.store or WhatsApp +27 82 852 1112']);
 }
 ?>
