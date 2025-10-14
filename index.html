@@ -54,7 +54,17 @@
   </head>
 
   <body>
+    <noscript>
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;">
+        <img src="/lovable-uploads/5b6d7d92-ae7b-4906-b2ef-216c9365a312.png" alt="Khanya logo" style="height: 80px; margin-bottom: 2rem;">
+        <img src="/browser-outdated.png" alt="Browser warning" style="height: 120px; margin-bottom: 2rem; opacity: 0.7;">
+        <p style="font-size: 1.125rem; color: #333; max-width: 600px; line-height: 1.6;">Your browser version is outdated. Please use a modern browser or upgrade this browser to the latest version to view this site.</p>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script nomodule>
+      document.getElementById('root').innerHTML = '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; text-align: center; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;"><img src="/lovable-uploads/5b6d7d92-ae7b-4906-b2ef-216c9365a312.png" alt="Khanya logo" style="height: 80px; margin-bottom: 2rem;"><img src="/browser-outdated.png" alt="Browser warning" style="height: 120px; margin-bottom: 2rem; opacity: 0.7;"><p style="font-size: 1.125rem; color: #333; max-width: 600px; line-height: 1.6;">Your browser version is outdated. Please use a modern browser or upgrade this browser to the latest version to view this site.</p></div>';
+    </script>
   </body>
 </html>
