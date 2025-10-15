@@ -10,6 +10,7 @@ interface Product {
   id: number;
   category_id: number;
   name: string;
+  description: string;
   image_path: string;
   quantity_per_10kg: number;
   price_per_10kg: number;
@@ -59,10 +60,11 @@ serve(async (req) => {
     
     // Fetch products
     const productsResult = await client.query(
-      `SELECT id, category_id, name, image_path, quantity_per_10kg, 
+      `SELECT id, category_id, name, description, image_path, quantity_per_10kg, 
               price_per_10kg, price_per_piece, age_range 
        FROM products 
-       ORDER BY category_id, id`
+       WHERE is_active = 1
+       ORDER BY category_id, display_order, id`
     );
 
     await client.close();

@@ -14,6 +14,7 @@ interface Product {
   id: number;
   category_id: number;
   name: string;
+  description: string;
   image_path: string;
   quantity_per_10kg: number;
   price_per_10kg: number;
@@ -140,13 +141,16 @@ const WhatsInBales = () => {
                         <div key={product.id} className="bg-card border rounded-xl p-6">
                           <img 
                             src={getImageForProduct(product.image_path)} 
-                            alt={`${product.name} clothing item`}
+                            alt={`${product.name} - ${product.description.substring(0, 50)}`}
                             className="w-full h-48 object-cover rounded-lg mb-4"
                           />
                           <h3 className="text-lg font-semibold mb-2">
                             {product.name}
                             {product.age_range && ` (${product.age_range})`}
                           </h3>
+                          <p className="text-muted-foreground text-sm mb-3">
+                            {product.description}
+                          </p>
                           <div className="text-sm">
                             <p className="font-medium">10kg = ~{product.quantity_per_10kg} {product.name.toLowerCase().includes('jean') ? 'pairs' : product.name.toLowerCase().includes('wear') ? 'items' : 'pieces'}</p>
                             <p className="text-xl font-bold text-primary">R{product.price_per_10kg.toLocaleString()}</p>
