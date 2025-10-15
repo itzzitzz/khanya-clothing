@@ -9,7 +9,7 @@ import mensTshirts from "@/assets/mens-tshirts.jpg";
 import womensTshirts from "@/assets/womens-tshirts.jpg";
 import womensZipperJackets from "@/assets/womens-zipper-jackets.jpg";
 import childrensSummerWear from "@/assets/childrens-summer-wear.jpg";
-
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 interface Product {
   id: number;
   category_id: number;
@@ -32,6 +32,7 @@ const WhatsInBales = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -44,8 +45,10 @@ const WhatsInBales = () => {
           setProducts(data.products || []);
           setCategories(data.categories || []);
         }
-      } catch (error) {
-        console.error('Error fetching products:', error);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        const message = err instanceof Error ? err.message : 'Failed to load products';
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -100,9 +103,25 @@ const WhatsInBales = () => {
         </section>
 
         <section className="container mx-auto py-16">
+        <section className="container mx-auto py-16">
           {loading ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">Loading products...</p>
+            </div>
+          ) : (error || categories.length === 0) ? (
+            <div className="max-w-2xl mx-auto py-8">
+              <Alert variant="destructive">
+                <AlertTitle>We couldn’t load products</AlertTitle>
+                <AlertDescription>
+                  {error ? error : 'No products available yet. Please try again shortly.'}
+                </AlertDescription>
+              </Alert>
+              <div className="mt-4 flex gap-3 justify-center">
+                <Button onClick={() => window.location.reload()}>Try again</Button>
+                <Button variant="outline" asChild>
+                  <a href="/contact">Contact us</a>
+                </Button>
+              </div>
             </div>
           ) : (
             <>
@@ -146,6 +165,7 @@ const WhatsInBales = () => {
               })}
             </>
           )}
+        </section>
 
           <div className="bg-secondary/30 border rounded-xl p-8">
             <h2 className="text-2xl font-bold mb-6">Important to know</h2>
