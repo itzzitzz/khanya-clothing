@@ -40,7 +40,7 @@ serve(async (req) => {
       throw new Error('Missing database configuration');
     }
 
-    console.log('Connecting to MySQL database...');
+    console.log(`Connecting to MySQL database ${mysqlDatabase} at ${mysqlHost}...`);
 
     // Import MySQL client
     const mysql = await import('https://deno.land/x/mysql@v2.12.1/mod.ts');

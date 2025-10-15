@@ -109,7 +109,7 @@ const WhatsInBales = () => {
             <div className="text-center py-12">
               <p className="text-muted-foreground">Loading products...</p>
             </div>
-          ) : (error || categories.length === 0) ? (
+          ) : (error) ? (
             <div className="max-w-2xl mx-auto py-8">
               <Alert variant="destructive">
                 <AlertTitle>We couldn’t load products</AlertTitle>
@@ -126,44 +126,24 @@ const WhatsInBales = () => {
             </div>
           ) : (
             <>
-              {categories.map((category) => {
-                const categoryProducts = getProductsByCategory(category.id);
-                if (categoryProducts.length === 0) return null;
-
-                return (
-                  <div key={category.id} className="mb-12">
-                    <div className="flex items-center gap-3 mb-6">
-                      {category.name.includes('Men') && <Users className="h-8 w-8 text-primary" />}
-                      {category.name.includes('Women') && <Users className="h-8 w-8 text-accent" />}
-                      {category.name.includes('Children') && <Shirt className="h-8 w-8 text-primary" />}
-                      <h2 className="text-2xl font-bold">{category.name}</h2>
+              <div className="mb-12">
+                <h2 className="text-2xl font-bold mb-6">Categories (Testing Database Connection)</h2>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {categories.map((category) => (
+                    <div key={category.id} className="bg-card border rounded-xl p-6 text-center">
+                      <div className="mb-4">
+                        {category.icon_name === 'Users' && <Users className="h-12 w-12 mx-auto text-primary" />}
+                        {category.icon_name === 'Shirt' && <Shirt className="h-12 w-12 mx-auto text-primary" />}
+                      </div>
+                      <h3 className="text-xl font-semibold">{category.name}</h3>
+                      <p className="text-sm text-muted-foreground mt-2">ID: {category.id} | Order: {category.display_order}</p>
                     </div>
-                    <div className={`grid ${categoryProducts.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' : 'md:grid-cols-2'} gap-6`}>
-                      {categoryProducts.map((product) => (
-                        <div key={product.id} className="bg-card border rounded-xl p-6">
-                          <img 
-                            src={getImageForProduct(product.image_path)} 
-                            alt={`${product.name} - ${product.description.substring(0, 50)}`}
-                            className="w-full h-48 object-cover rounded-lg mb-4"
-                          />
-                          <h3 className="text-lg font-semibold mb-2">
-                            {product.name}
-                            {product.age_range && ` (${product.age_range})`}
-                          </h3>
-                          <p className="text-muted-foreground text-sm mb-3">
-                            {product.description}
-                          </p>
-                          <div className="text-sm">
-                            <p className="font-medium">10kg = ~{product.quantity_per_10kg} {product.name.toLowerCase().includes('jean') ? 'pairs' : product.name.toLowerCase().includes('wear') ? 'items' : 'pieces'}</p>
-                            <p className="text-xl font-bold text-primary">R{product.price_per_10kg.toLocaleString()}</p>
-                            <p className="text-muted-foreground">~R{product.price_per_piece} per {product.name.toLowerCase().includes('jean') ? 'pair' : product.name.toLowerCase().includes('wear') ? 'item' : 'piece'}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+                {categories.length === 0 && (
+                  <p className="text-muted-foreground text-center mt-6">No categories found in the database.</p>
+                )}
+              </div>
             </>
           )}
         </section>
