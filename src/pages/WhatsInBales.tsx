@@ -2,13 +2,73 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Package, Shirt, Users } from "lucide-react";
 import Header from "@/components/Header";
 import { Helmet } from "react-helmet-async";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import mensRippedJeans from "@/assets/mens-ripped-jeans.jpg";
 import mensTshirts from "@/assets/mens-tshirts.jpg";
 import womensTshirts from "@/assets/womens-tshirts.jpg";
 import womensZipperJackets from "@/assets/womens-zipper-jackets.jpg";
 import childrensSummerWear from "@/assets/childrens-summer-wear.jpg";
 
+interface Product {
+  id: number;
+  category_id: number;
+  name: string;
+  description: string;
+  image_path: string;
+  quantity_per_10kg: number;
+  price_per_10kg: number;
+  price_per_piece: number;
+  age_range: string | null;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  description: string;
+}
+
 const WhatsInBales = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-bale-products');
+        
+        if (error) throw error;
+        
+        if (data?.success) {
+          setProducts(data.products || []);
+          setCategories(data.categories || []);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const getImageForProduct = (imagePath: string) => {
+    // Map database image paths to imported assets
+    const imageMap: Record<string, string> = {
+      'mens-ripped-jeans.jpg': mensRippedJeans,
+      'mens-tshirts.jpg': mensTshirts,
+      'womens-tshirts.jpg': womensTshirts,
+      'womens-zipper-jackets.jpg': womensZipperJackets,
+      'childrens-summer-wear.jpg': childrensSummerWear,
+    };
+    return imageMap[imagePath] || imagePath;
+  };
+
+  const getProductsByCategory = (categoryId: number) => {
+    return products.filter(p => p.category_id === categoryId);
+  };
   return (
     <div>
       <Helmet>
@@ -40,117 +100,52 @@ const WhatsInBales = () => {
         </section>
 
         <section className="container mx-auto py-16">
-          {/* Men's Clothing Section */}
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-6">
-              <Users className="h-8 w-8 text-primary" />
-              <h2 className="text-2xl font-bold">Men's Clothing</h2>
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading products...</p>
             </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-card border rounded-xl p-6">
-                <img 
-                  src={mensRippedJeans} 
-                  alt="Men's ripped jeans - distressed denim for resale" 
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
-                <h3 className="text-lg font-semibold mb-2">Ripped Jeans</h3>
-                <p className="text-muted-foreground text-sm mb-3">
-                  Trendy distressed denim jeans with fashionable tears and fraying. Perfect for casual streetwear market.
-                </p>
-                <div className="text-sm">
-                  <p className="font-medium">10kg = ~20 pairs</p>
-                  <p className="text-xl font-bold text-primary">R1,000</p>
-                  <p className="text-muted-foreground">~R50 per pair</p>
-                </div>
-              </div>
-              
-              <div className="bg-card border rounded-xl p-6">
-                <img 
-                  src={mensTshirts} 
-                  alt="Men's casual t-shirts in various colors and styles" 
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
-                <h3 className="text-lg font-semibold mb-2">T-Shirts</h3>
-                <p className="text-muted-foreground text-sm mb-3">
-                  Comfortable cotton blend t-shirts in various colors and styles. Essential everyday wear items.
-                </p>
-                <div className="text-sm">
-                  <p className="font-medium">10kg = ~40 pieces</p>
-                  <p className="text-xl font-bold text-primary">R2,000</p>
-                  <p className="text-muted-foreground">~R50 per piece</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          ) : (
+            <>
+              {categories.map((category) => {
+                const categoryProducts = getProductsByCategory(category.id);
+                if (categoryProducts.length === 0) return null;
 
-          {/* Women's Clothing Section */}
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-6">
-              <Users className="h-8 w-8 text-accent" />
-              <h2 className="text-2xl font-bold">Women's Clothing</h2>
-            </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-card border rounded-xl p-6">
-                <img 
-                  src={womensTshirts} 
-                  alt="Women's fashionable t-shirts and tops in various styles" 
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
-                <h3 className="text-lg font-semibold mb-2">T-Shirts</h3>
-                <p className="text-muted-foreground text-sm mb-3">
-                  Stylish women's t-shirts and tops in various cuts and designs. Perfect for casual and semi-casual wear.
-                </p>
-                <div className="text-sm">
-                  <p className="font-medium">10kg = ~40 pieces</p>
-                  <p className="text-xl font-bold text-primary">R2,000</p>
-                  <p className="text-muted-foreground">~R50 per piece</p>
-                </div>
-              </div>
-              
-              <div className="bg-card border rounded-xl p-6">
-                <img 
-                  src={womensZipperJackets} 
-                  alt="Women's zipper jackets and hoodies for casual outerwear" 
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
-                <h3 className="text-lg font-semibold mb-2">Zipper Jackets</h3>
-                <p className="text-muted-foreground text-sm mb-3">
-                  Comfortable hoodies and jackets with full front zippers. Great layering pieces for all seasons.
-                </p>
-                <div className="text-sm">
-                  <p className="font-medium">10kg = ~23 pieces</p>
-                  <p className="text-xl font-bold text-primary">R1,000</p>
-                  <p className="text-muted-foreground">~R44 per piece</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Children's Clothing Section */}
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-6">
-              <Shirt className="h-8 w-8 text-primary" />
-              <h2 className="text-2xl font-bold">Children's Clothing</h2>
-            </div>
-            <div className="grid md:grid-cols-1 max-w-md mx-auto">
-              <div className="bg-card border rounded-xl p-6">
-                <img 
-                  src={childrensSummerWear} 
-                  alt="Children's summer clothing for ages 5-12, colorful and fun designs" 
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
-                <h3 className="text-lg font-semibold mb-2">Mixed Summer Wear (ages 5-12)</h3>
-                <p className="text-muted-foreground text-sm mb-3">
-                  Bright and colorful summer clothing including shorts, t-shirts, and sundresses. Perfect for active kids.
-                </p>
-                <div className="text-sm">
-                  <p className="font-medium">10kg = ~57 items</p>
-                  <p className="text-xl font-bold text-primary">R2,900</p>
-                  <p className="text-muted-foreground">~R50 per item</p>
-                </div>
-              </div>
-            </div>
-          </div>
+                return (
+                  <div key={category.id} className="mb-12">
+                    <div className="flex items-center gap-3 mb-6">
+                      {category.name.includes('Men') && <Users className="h-8 w-8 text-primary" />}
+                      {category.name.includes('Women') && <Users className="h-8 w-8 text-accent" />}
+                      {category.name.includes('Children') && <Shirt className="h-8 w-8 text-primary" />}
+                      <h2 className="text-2xl font-bold">{category.name}</h2>
+                    </div>
+                    <div className={`grid ${categoryProducts.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' : 'md:grid-cols-2'} gap-6`}>
+                      {categoryProducts.map((product) => (
+                        <div key={product.id} className="bg-card border rounded-xl p-6">
+                          <img 
+                            src={getImageForProduct(product.image_path)} 
+                            alt={`${product.name} - ${product.description.substring(0, 50)}`}
+                            className="w-full h-48 object-cover rounded-lg mb-4"
+                          />
+                          <h3 className="text-lg font-semibold mb-2">
+                            {product.name}
+                            {product.age_range && ` (${product.age_range})`}
+                          </h3>
+                          <p className="text-muted-foreground text-sm mb-3">
+                            {product.description}
+                          </p>
+                          <div className="text-sm">
+                            <p className="font-medium">10kg = ~{product.quantity_per_10kg} {product.name.toLowerCase().includes('jean') ? 'pairs' : product.name.toLowerCase().includes('wear') ? 'items' : 'pieces'}</p>
+                            <p className="text-xl font-bold text-primary">R{product.price_per_10kg.toLocaleString()}</p>
+                            <p className="text-muted-foreground">~R{product.price_per_piece} per {product.name.toLowerCase().includes('jean') ? 'pair' : product.name.toLowerCase().includes('wear') ? 'item' : 'piece'}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </>
+          )}
 
           <div className="bg-secondary/30 border rounded-xl p-8">
             <h2 className="text-2xl font-bold mb-6">Important to know</h2>

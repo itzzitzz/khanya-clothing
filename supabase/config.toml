@@ -2,3 +2,6 @@ project_id = "gozasfvvgshljziijuwr"
 
 [functions.send-contact-email]
 verify_jwt = false
+
+[functions.get-bale-products]
+verify_jwt = false
