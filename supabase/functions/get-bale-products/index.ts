@@ -21,6 +21,8 @@ interface Product {
 interface Category {
   id: number;
   name: string;
+  icon_name: string;
+  display_order: number;
 }
 
 serve(async (req) => {
@@ -53,32 +55,23 @@ serve(async (req) => {
 
     console.log('Connected to MySQL successfully');
 
-    // Fetch categories
+    // Fetch categories only for now
     const categoriesResult = await client.query(
-      `SELECT id, name FROM categories ORDER BY id`
-    );
-    
-    // Fetch products
-    const productsResult = await client.query(
-      `SELECT id, category_id, name, description, image_path, quantity_per_10kg, 
-              price_per_10kg, price_per_piece, age_range 
-       FROM products 
-       WHERE is_active = 1
-       ORDER BY category_id, display_order, id`
+      `SELECT id, name, icon_name, display_order FROM categories ORDER BY display_order, id`
     );
 
     await client.close();
 
     const categories = categoriesResult.rows || [];
-    const products = productsResult.rows || [];
 
-    console.log(`Fetched ${categories.length} categories and ${products.length} products`);
+    console.log(`Fetched ${categories.length} categories`);
+    console.log('Categories:', JSON.stringify(categories));
 
     return new Response(
       JSON.stringify({ 
         success: true,
         categories,
-        products 
+        products: [] // Empty for now
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

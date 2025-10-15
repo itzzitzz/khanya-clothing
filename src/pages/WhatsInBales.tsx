@@ -25,6 +25,8 @@ interface Product {
 interface Category {
   id: number;
   name: string;
+  icon_name: string;
+  display_order: number;
 }
 
 const WhatsInBales = () => {
