@@ -21,7 +21,6 @@ interface Product {
 interface Category {
   id: number;
   name: string;
-  description: string;
 }
 
 serve(async (req) => {
@@ -56,7 +55,7 @@ serve(async (req) => {
 
     // Fetch categories
     const categoriesResult = await client.query(
-      `SELECT id, name, description FROM categories ORDER BY id`
+      `SELECT id, name FROM categories ORDER BY id`
     );
     
     // Fetch products
