@@ -60,9 +60,13 @@ serve(async (req) => {
       `SELECT id, name, icon_name, display_order FROM categories ORDER BY display_order, id`
     );
 
+    console.log('Raw query result:', JSON.stringify(categoriesResult));
+    console.log('Result keys:', Object.keys(categoriesResult));
+
     await client.close();
 
-    const categories = categoriesResult.rows || [];
+    // The MySQL client returns results directly, not in a .rows property
+    const categories = Array.isArray(categoriesResult) ? categoriesResult : (categoriesResult.rows || []);
 
     console.log(`Fetched ${categories.length} categories`);
     console.log('Categories:', JSON.stringify(categories));
