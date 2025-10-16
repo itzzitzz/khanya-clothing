@@ -55,27 +55,33 @@ serve(async (req) => {
 
     console.log('Connected to MySQL successfully');
 
-    // Fetch categories only for now
+    // Fetch categories
     const categoriesResult = await client.query(
       `SELECT id, name, icon_name, display_order FROM categories ORDER BY display_order, id`
     );
 
-    console.log('Raw query result:', JSON.stringify(categoriesResult));
-    console.log('Result keys:', Object.keys(categoriesResult));
+    // Fetch active products
+    const productsResult = await client.query(
+      `SELECT id, category_id, name, description, image_path, image_alt_text, 
+              quantity_per_10kg, price_per_10kg, price_per_piece, age_range, display_order
+       FROM products 
+       WHERE is_active = 1 
+       ORDER BY category_id, display_order, id`
+    );
 
     await client.close();
 
-    // The MySQL client returns results directly, not in a .rows property
+    // The MySQL client returns results directly
     const categories = Array.isArray(categoriesResult) ? categoriesResult : (categoriesResult.rows || []);
+    const products = Array.isArray(productsResult) ? productsResult : (productsResult.rows || []);
 
-    console.log(`Fetched ${categories.length} categories`);
-    console.log('Categories:', JSON.stringify(categories));
+    console.log(`Fetched ${categories.length} categories and ${products.length} products`);
 
     return new Response(
       JSON.stringify({ 
         success: true,
         categories,
-        products: [] // Empty for now
+        products
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

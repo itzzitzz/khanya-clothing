@@ -16,6 +16,7 @@ interface Product {
   name: string;
   description: string;
   image_path: string;
+  image_alt_text: string;
   quantity_per_10kg: number;
   price_per_10kg: number;
   price_per_piece: number;
@@ -59,7 +60,10 @@ const WhatsInBales = () => {
   }, []);
 
   const getImageForProduct = (imagePath: string) => {
-    // Map database image paths to imported assets
+    // Extract filename from path
+    const filename = imagePath.split('/').pop() || imagePath;
+    
+    // Map database image filenames to imported assets
     const imageMap: Record<string, string> = {
       'mens-ripped-jeans.jpg': mensRippedJeans,
       'mens-tshirts.jpg': mensTshirts,
@@ -67,7 +71,7 @@ const WhatsInBales = () => {
       'womens-zipper-jackets.jpg': womensZipperJackets,
       'childrens-summer-wear.jpg': childrensSummerWear,
     };
-    return imageMap[imagePath] || imagePath;
+    return imageMap[filename] || imagePath;
   };
 
   const getProductsByCategory = (categoryId: number) => {
@@ -109,13 +113,11 @@ const WhatsInBales = () => {
             <div className="text-center py-12">
               <p className="text-muted-foreground">Loading products...</p>
             </div>
-          ) : (error) ? (
+          ) : error ? (
             <div className="max-w-2xl mx-auto py-8">
               <Alert variant="destructive">
-                <AlertTitle>We couldn’t load products</AlertTitle>
-                <AlertDescription>
-                  {error ? error : 'No products available yet. Please try again shortly.'}
-                </AlertDescription>
+                <AlertTitle>We couldn't load products</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
               <div className="mt-4 flex gap-3 justify-center">
                 <Button onClick={() => window.location.reload()}>Try again</Button>
@@ -126,24 +128,56 @@ const WhatsInBales = () => {
             </div>
           ) : (
             <>
-              <div className="mb-12">
-                <h2 className="text-2xl font-bold mb-6">Categories (Testing Database Connection)</h2>
-                <div className="grid md:grid-cols-3 gap-6">
-                  {categories.map((category) => (
-                    <div key={category.id} className="bg-card border rounded-xl p-6 text-center">
-                      <div className="mb-4">
-                        {category.icon_name === 'Users' && <Users className="h-12 w-12 mx-auto text-primary" />}
-                        {category.icon_name === 'Shirt' && <Shirt className="h-12 w-12 mx-auto text-primary" />}
-                      </div>
-                      <h3 className="text-xl font-semibold">{category.name}</h3>
-                      <p className="text-sm text-muted-foreground mt-2">ID: {category.id} | Order: {category.display_order}</p>
+              {categories.map((category) => {
+                const categoryProducts = getProductsByCategory(category.id);
+                if (categoryProducts.length === 0) return null;
+
+                return (
+                  <div key={category.id} className="mb-16">
+                    <div className="flex items-center gap-3 mb-8">
+                      {category.icon_name === 'Users' && <Users className="h-8 w-8 text-primary" />}
+                      {category.icon_name === 'Shirt' && <Shirt className="h-8 w-8 text-primary" />}
+                      <h2 className="text-3xl font-bold">{category.name}</h2>
                     </div>
-                  ))}
-                </div>
-                {categories.length === 0 && (
-                  <p className="text-muted-foreground text-center mt-6">No categories found in the database.</p>
-                )}
-              </div>
+                    <div className="grid md:grid-cols-2 gap-8">
+                      {categoryProducts.map((product) => (
+                        <div key={product.id} className="bg-card border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
+                          <div className="aspect-video overflow-hidden">
+                            <img 
+                              src={getImageForProduct(product.image_path)} 
+                              alt={product.image_alt_text || `${product.name} - ${product.description.substring(0, 50)}`}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                          <div className="p-6">
+                            <h3 className="text-xl font-bold mb-2">
+                              {product.name}
+                              {product.age_range && <span className="text-sm font-normal text-muted-foreground ml-2">({product.age_range})</span>}
+                            </h3>
+                            <p className="text-muted-foreground mb-4 leading-relaxed">
+                              {product.description}
+                            </p>
+                            <div className="bg-primary/5 rounded-lg p-4 space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-muted-foreground">Per 10kg bale:</span>
+                                <span className="font-semibold">~{product.quantity_per_10kg} pieces</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-muted-foreground">Bale price:</span>
+                                <span className="text-2xl font-bold text-primary">R{product.price_per_10kg.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between items-center pt-2 border-t border-border/50">
+                                <span className="text-xs text-muted-foreground">Cost per piece:</span>
+                                <span className="text-sm font-medium">~R{product.price_per_piece}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </>
           )}
         </section>
