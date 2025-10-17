@@ -17,3 +17,7 @@ verify_jwt = false
 
 [functions.manage-product-images]
 verify_jwt = false
+
+[functions.generate-product-images]
+verify_jwt = false
+

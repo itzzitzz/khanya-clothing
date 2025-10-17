@@ -44,6 +44,7 @@ export const ProductManager = () => {
   const [productImages, setProductImages] = useState<ProductImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [draggedImage, setDraggedImage] = useState<ProductImage | null>(null);
   const [dragOverImage, setDragOverImage] = useState<ProductImage | null>(null);
@@ -341,6 +342,43 @@ export const ProductManager = () => {
     setDragOverImage(null);
   };
 
+  const handleGenerateImages = async () => {
+    if (!editing) return;
+    
+    if (!confirm(`Generate 5 new portrait images for "${editing.name}"? This will replace all existing images.`)) {
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await supabase.functions.invoke('generate-product-images', {
+        body: {
+          product_id: editing.id,
+          product_name: editing.name,
+          product_description: editing.description
+        },
+        headers: { Authorization: `Bearer ${session?.access_token}` }
+      });
+
+      if (response.data?.success) {
+        toast({ title: "Success", description: `Generated ${response.data.images.length} portrait images` });
+        await loadProductImages(editing.id);
+        await loadData();
+      } else {
+        throw new Error(response.data?.error || 'Failed to generate images');
+      }
+    } catch (error: any) {
+      toast({ 
+        title: "Error", 
+        description: error.message || 'Failed to generate images',
+        variant: "destructive" 
+      });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
 
   return (
@@ -374,7 +412,7 @@ export const ProductManager = () => {
           <div className="space-y-4">
             <Label>Product Images</Label>
             
-            {/* Upload new image */}
+            {/* Upload new image or generate with AI */}
             <div className="flex gap-2">
               <input
                 ref={fileInputRef}
@@ -387,11 +425,21 @@ export const ProductManager = () => {
                 type="button"
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
+                disabled={uploading || generating}
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {uploading ? 'Uploading...' : 'Upload New Image'}
+                {uploading ? 'Uploading...' : 'Upload Image'}
               </Button>
+              {editing && (
+                <Button
+                  type="button"
+                  variant="default"
+                  onClick={handleGenerateImages}
+                  disabled={uploading || generating}
+                >
+                  {generating ? 'Generating...' : 'Generate 5 AI Portrait Images'}
+                </Button>
+              )}
             </div>
 
             {/* Display all images for editing product */}
@@ -439,7 +487,7 @@ export const ProductManager = () => {
                           <img
                             src={image.image_path}
                             alt="Product image"
-                            className="w-full h-32 object-cover rounded mb-2"
+                            className="w-full h-48 object-contain rounded mb-2 bg-gray-50"
                           />
                           <div className="flex gap-1">
                             {!isDefault && (
@@ -471,11 +519,11 @@ export const ProductManager = () => {
 
             {/* Show preview for new products */}
             {!editing && formData.image_path && (
-              <div className="border rounded-lg p-4">
+              <div className="border rounded-lg p-4 bg-gray-50">
                 <img 
                   src={formData.image_path} 
                   alt="Product preview" 
-                  className="w-32 h-32 object-cover rounded"
+                  className="w-48 mx-auto object-contain"
                 />
               </div>
             )}

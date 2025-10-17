@@ -192,7 +192,7 @@ export const ProductImageModal = ({
                     <img
                       src={getImageUrl(image.image_path)}
                       alt={image.image_alt_text || `Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain bg-gray-50"
                     />
                     {image.is_primary && (
                       <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] px-1 rounded-bl">

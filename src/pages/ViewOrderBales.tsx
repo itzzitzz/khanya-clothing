@@ -173,11 +173,11 @@ const ViewOrderBales = () => {
                           className="bg-card border rounded-2xl overflow-hidden hover:shadow-lg transition-all cursor-pointer group"
                           onClick={() => handleProductClick(product)}
                         >
-                          <div className="aspect-video overflow-hidden relative">
+                          <div className="aspect-[3/4] overflow-hidden relative">
                             <img 
                               src={getImageForProduct(getPrimaryImage(product))} 
                               alt={product.image_alt_text || `${product.name} - ${product.description.substring(0, 50)}`}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-contain bg-gray-50 group-hover:scale-105 transition-transform duration-300"
                             />
                             {product.images && product.images.length > 1 && (
                               <div className="absolute bottom-2 right-2 bg-background/90 px-2 py-1 rounded-full text-xs font-medium">
