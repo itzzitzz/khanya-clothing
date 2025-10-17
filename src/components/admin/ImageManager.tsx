@@ -39,6 +39,7 @@ export const ImageManager = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const response = await supabase.functions.invoke('manage-products', {
+        body: { action: 'list' },
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
 
@@ -53,7 +54,8 @@ export const ImageManager = () => {
   const loadImages = async (productId: number) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const response = await supabase.functions.invoke(`manage-product-images?product_id=${productId}`, {
+      const response = await supabase.functions.invoke('manage-product-images', {
+        body: { action: 'list', product_id: productId },
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
 
@@ -82,9 +84,12 @@ export const ImageManager = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const response = await supabase.functions.invoke('manage-product-images', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-        body: { ...formData, product_id: selectedProduct }
+        body: { 
+          action: 'create',
+          product_id: selectedProduct,
+          ...formData 
+        },
+        headers: { Authorization: `Bearer ${session?.access_token}` }
       });
 
       if (response.data?.success) {
@@ -102,8 +107,8 @@ export const ImageManager = () => {
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const response = await supabase.functions.invoke(`manage-product-images?id=${id}`, {
-        method: 'DELETE',
+      const response = await supabase.functions.invoke('manage-product-images', {
+        body: { action: 'delete', id },
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
 

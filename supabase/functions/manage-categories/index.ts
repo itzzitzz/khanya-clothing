@@ -59,11 +59,10 @@ serve(async (req) => {
       port: 3306,
     });
 
-    const method = req.method;
-    const url = new URL(req.url);
-    const id = url.searchParams.get('id');
+    const body = await req.json();
+    const { action, id, name, icon_name, display_order } = body;
 
-    if (method === 'GET') {
+    if (action === 'list') {
       // List all categories
       const result = await client.query(
         'SELECT id, name, icon_name, display_order FROM categories ORDER BY display_order, id'
@@ -78,10 +77,8 @@ serve(async (req) => {
       );
     }
 
-    if (method === 'POST') {
+    if (action === 'create') {
       // Create new category
-      const body = await req.json();
-      const { name, icon_name, display_order } = body;
 
       await client.execute(
         'INSERT INTO categories (name, icon_name, display_order) VALUES (?, ?, ?)',
@@ -96,12 +93,9 @@ serve(async (req) => {
       );
     }
 
-    if (method === 'PUT') {
+    if (action === 'update') {
       // Update category
       if (!id) throw new Error('Category ID required');
-      
-      const body = await req.json();
-      const { name, icon_name, display_order } = body;
 
       await client.execute(
         'UPDATE categories SET name = ?, icon_name = ?, display_order = ? WHERE id = ?',
@@ -116,7 +110,7 @@ serve(async (req) => {
       );
     }
 
-    if (method === 'DELETE') {
+    if (action === 'delete') {
       // Delete category
       if (!id) throw new Error('Category ID required');
 

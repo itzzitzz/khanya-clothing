@@ -57,9 +57,11 @@ export const ProductManager = () => {
       
       const [productsRes, categoriesRes] = await Promise.all([
         supabase.functions.invoke('manage-products', {
+          body: { action: 'list' },
           headers: { Authorization: `Bearer ${session?.access_token}` }
         }),
         supabase.functions.invoke('manage-categories', {
+          body: { action: 'list' },
           headers: { Authorization: `Bearer ${session?.access_token}` }
         })
       ]);
@@ -81,13 +83,15 @@ export const ProductManager = () => {
     e.preventDefault();
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const method = editing ? 'PUT' : 'POST';
-      const url = editing ? `manage-products?id=${editing.id}` : 'manage-products';
+      const action = editing ? 'update' : 'create';
 
-      const response = await supabase.functions.invoke(url, {
-        method,
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-        body: formData
+      const response = await supabase.functions.invoke('manage-products', {
+        body: { 
+          action,
+          id: editing?.id,
+          ...formData 
+        },
+        headers: { Authorization: `Bearer ${session?.access_token}` }
       });
 
       if (response.data?.success) {
@@ -105,8 +109,8 @@ export const ProductManager = () => {
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const response = await supabase.functions.invoke(`manage-products?id=${id}`, {
-        method: 'DELETE',
+      const response = await supabase.functions.invoke('manage-products', {
+        body: { action: 'delete', id },
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
 

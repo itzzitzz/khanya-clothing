@@ -59,11 +59,10 @@ serve(async (req) => {
       port: 3306,
     });
 
-    const method = req.method;
-    const url = new URL(req.url);
-    const id = url.searchParams.get('id');
+    const body = await req.json();
+    const { action, id } = body;
 
-    if (method === 'GET') {
+    if (action === 'list') {
       // List all products (including inactive)
       const result = await client.query(
         `SELECT id, category_id, name, description, image_path, image_alt_text,
@@ -82,9 +81,8 @@ serve(async (req) => {
       );
     }
 
-    if (method === 'POST') {
+    if (action === 'create') {
       // Create new product
-      const body = await req.json();
       const {
         category_id, name, description, image_path, image_alt_text,
         quantity_per_10kg, price_per_10kg, price_per_piece, age_range, display_order
@@ -107,11 +105,10 @@ serve(async (req) => {
       );
     }
 
-    if (method === 'PUT') {
+    if (action === 'update') {
       // Update product
       if (!id) throw new Error('Product ID required');
       
-      const body = await req.json();
       const {
         category_id, name, description, image_path, image_alt_text,
         quantity_per_10kg, price_per_10kg, price_per_piece, age_range, 
@@ -137,7 +134,7 @@ serve(async (req) => {
       );
     }
 
-    if (method === 'DELETE') {
+    if (action === 'delete') {
       // Delete product
       if (!id) throw new Error('Product ID required');
 

@@ -59,21 +59,19 @@ serve(async (req) => {
       port: 3306,
     });
 
-    const method = req.method;
-    const url = new URL(req.url);
-    const productId = url.searchParams.get('product_id');
-    const imageId = url.searchParams.get('id');
+    const body = await req.json();
+    const { action, product_id, id, image_path, image_alt_text, is_primary, display_order } = body;
 
-    if (method === 'GET') {
+    if (action === 'list') {
       // List images for a product
-      if (!productId) throw new Error('Product ID required');
+      if (!product_id) throw new Error('Product ID required');
       
       const result = await client.query(
         `SELECT id, product_id, image_path, image_alt_text, is_primary, display_order
          FROM product_images
          WHERE product_id = ?
          ORDER BY is_primary DESC, display_order`,
-        [productId]
+        [product_id]
       );
       const images = Array.isArray(result) ? result : (result.rows || []);
       
@@ -85,10 +83,8 @@ serve(async (req) => {
       );
     }
 
-    if (method === 'POST') {
+    if (action === 'create') {
       // Add new image
-      const body = await req.json();
-      const { product_id, image_path, image_alt_text, is_primary, display_order } = body;
 
       await client.execute(
         `INSERT INTO product_images (product_id, image_path, image_alt_text, is_primary, display_order)
@@ -104,18 +100,15 @@ serve(async (req) => {
       );
     }
 
-    if (method === 'PUT') {
+    if (action === 'update') {
       // Update image
-      if (!imageId) throw new Error('Image ID required');
-      
-      const body = await req.json();
-      const { image_alt_text, is_primary, display_order } = body;
+      if (!id) throw new Error('Image ID required');
 
       await client.execute(
         `UPDATE product_images 
          SET image_alt_text = ?, is_primary = ?, display_order = ?
          WHERE id = ?`,
-        [image_alt_text, is_primary ? 1 : 0, display_order, imageId]
+        [image_alt_text, is_primary ? 1 : 0, display_order, id]
       );
 
       await client.close();
@@ -126,11 +119,11 @@ serve(async (req) => {
       );
     }
 
-    if (method === 'DELETE') {
+    if (action === 'delete') {
       // Delete image
-      if (!imageId) throw new Error('Image ID required');
+      if (!id) throw new Error('Image ID required');
 
-      await client.execute('DELETE FROM product_images WHERE id = ?', [imageId]);
+      await client.execute('DELETE FROM product_images WHERE id = ?', [id]);
       await client.close();
 
       return new Response(

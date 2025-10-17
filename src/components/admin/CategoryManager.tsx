@@ -26,7 +26,7 @@ export const CategoryManager = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const response = await supabase.functions.invoke('manage-categories', {
-        method: 'GET',
+        body: { action: 'list' },
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
 
@@ -48,13 +48,15 @@ export const CategoryManager = () => {
     e.preventDefault();
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const method = editing ? 'PUT' : 'POST';
-      const url = editing ? `manage-categories?id=${editing.id}` : 'manage-categories';
+      const action = editing ? 'update' : 'create';
 
-      const response = await supabase.functions.invoke(url, {
-        method,
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-        body: formData
+      const response = await supabase.functions.invoke('manage-categories', {
+        body: { 
+          action, 
+          id: editing?.id,
+          ...formData 
+        },
+        headers: { Authorization: `Bearer ${session?.access_token}` }
       });
 
       if (response.data?.success) {
@@ -73,8 +75,8 @@ export const CategoryManager = () => {
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const response = await supabase.functions.invoke(`manage-categories?id=${id}`, {
-        method: 'DELETE',
+      const response = await supabase.functions.invoke('manage-categories', {
+        body: { action: 'delete', id },
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
 
