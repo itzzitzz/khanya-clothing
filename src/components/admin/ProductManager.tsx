@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pencil, Trash2, Upload } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from "@/components/ui/table";
+import { Pencil, Trash2, Upload, Star, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 
@@ -35,6 +35,8 @@ interface ProductImage {
   id: number;
   product_id: number;
   image_path: string;
+  image_alt_text: string;
+  is_primary: number;
   display_order: number;
 }
 
@@ -45,6 +47,7 @@ export const ProductManager = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
+  const [draggedImage, setDraggedImage] = useState<ProductImage | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     category_id: 0,
@@ -124,20 +127,29 @@ export const ProductManager = () => {
 
       // If editing a product, add to product_images table
       if (editing) {
+        const isFirst = productImages.length === 0;
         await supabase.functions.invoke('manage-product-images', {
           body: {
             action: 'create',
             product_id: editing.id,
             image_path: publicUrl,
+            image_alt_text: formData.image_alt_text || 'Product image',
+            is_primary: isFirst ? true : false,
             display_order: productImages.length
           },
           headers: { Authorization: `Bearer ${session?.access_token}` }
         });
         await loadProductImages(editing.id);
+        
+        // If it's the first image, set it as default
+        if (isFirst) {
+          setFormData({ ...formData, image_path: publicUrl });
+        }
+      } else {
+        // For new products, just set the form image
+        setFormData({ ...formData, image_path: publicUrl });
       }
 
-      // Update form with new image path
-      setFormData({ ...formData, image_path: publicUrl });
       toast({ title: "Success", description: "Image uploaded successfully" });
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -231,6 +243,95 @@ export const ProductManager = () => {
     });
   };
 
+  const handleDeleteImage = async (imageId: number) => {
+    if (!confirm('Delete this image?')) return;
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await supabase.functions.invoke('manage-product-images', {
+        body: { action: 'delete', id: imageId },
+        headers: { Authorization: `Bearer ${session?.access_token}` }
+      });
+
+      if (response.data?.success && editing) {
+        toast({ title: "Success", description: "Image deleted" });
+        await loadProductImages(editing.id);
+      }
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleSetDefaultImage = async (image: ProductImage) => {
+    if (!editing) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Update product's default image_path
+      const response = await supabase.functions.invoke('manage-products', {
+        body: { 
+          action: 'update',
+          id: editing.id,
+          ...formData,
+          image_path: image.image_path
+        },
+        headers: { Authorization: `Bearer ${session?.access_token}` }
+      });
+
+      if (response.data?.success) {
+        setFormData({ ...formData, image_path: image.image_path });
+        toast({ title: "Success", description: "Default image updated" });
+        await loadData();
+      }
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleDragStart = (image: ProductImage) => {
+    setDraggedImage(image);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetImage: ProductImage) => {
+    e.preventDefault();
+    if (!draggedImage || !editing || draggedImage.id === targetImage.id) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Swap display orders
+      await Promise.all([
+        supabase.functions.invoke('manage-product-images', {
+          body: {
+            action: 'update',
+            id: draggedImage.id,
+            display_order: targetImage.display_order
+          },
+          headers: { Authorization: `Bearer ${session?.access_token}` }
+        }),
+        supabase.functions.invoke('manage-product-images', {
+          body: {
+            action: 'update',
+            id: targetImage.id,
+            display_order: draggedImage.display_order
+          },
+          headers: { Authorization: `Bearer ${session?.access_token}` }
+        })
+      ]);
+
+      await loadProductImages(editing.id);
+      setDraggedImage(null);
+      toast({ title: "Success", description: "Image order updated" });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
 
   return (
@@ -261,38 +362,8 @@ export const ProductManager = () => {
           </div>
           
           <div className="space-y-4">
-            <Label>Product Image</Label>
+            <Label>Product Images</Label>
             
-            {/* Current image preview */}
-            {formData.image_path && (
-              <div className="border rounded-lg p-4">
-                <img 
-                  src={formData.image_path} 
-                  alt="Current product" 
-                  className="w-32 h-32 object-cover rounded"
-                />
-              </div>
-            )}
-
-            {/* Select from existing images */}
-            {editing && productImages.length > 0 && (
-              <div>
-                <Label className="text-sm text-muted-foreground">Select from existing images</Label>
-                <Select value={formData.image_path} onValueChange={(v) => setFormData({ ...formData, image_path: v })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose an image" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {productImages.map((img) => (
-                      <SelectItem key={img.id} value={img.image_path}>
-                        Image {img.display_order + 1}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
             {/* Upload new image */}
             <div className="flex gap-2">
               <input
@@ -312,6 +383,80 @@ export const ProductManager = () => {
                 {uploading ? 'Uploading...' : 'Upload New Image'}
               </Button>
             </div>
+
+            {/* Display all images for editing product */}
+            {editing && productImages.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">
+                  Product Images (Drag to reorder)
+                </Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {productImages
+                    .sort((a, b) => a.display_order - b.display_order)
+                    .map((image) => {
+                      const isDefault = image.image_path === formData.image_path;
+                      return (
+                        <div
+                          key={image.id}
+                          draggable
+                          onDragStart={() => handleDragStart(image)}
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, image)}
+                          className={`relative border rounded-lg p-2 cursor-move hover:border-primary transition-colors ${
+                            isDefault ? 'border-primary ring-2 ring-primary' : ''
+                          }`}
+                        >
+                          <div className="absolute top-1 left-1 z-10">
+                            <GripVertical className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          {isDefault && (
+                            <div className="absolute top-1 right-1 z-10 bg-primary text-primary-foreground rounded-full p-1">
+                              <Star className="h-4 w-4 fill-current" />
+                            </div>
+                          )}
+                          <img
+                            src={image.image_path}
+                            alt={image.image_alt_text}
+                            className="w-full h-32 object-cover rounded mb-2"
+                          />
+                          <div className="flex gap-1">
+                            {!isDefault && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 text-xs"
+                                onClick={() => handleSetDefaultImage(image)}
+                              >
+                                Set Default
+                              </Button>
+                            )}
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDeleteImage(image.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
+            {/* Show preview for new products */}
+            {!editing && formData.image_path && (
+              <div className="border rounded-lg p-4">
+                <img 
+                  src={formData.image_path} 
+                  alt="Product preview" 
+                  className="w-32 h-32 object-cover rounded"
+                />
+              </div>
+            )}
           </div>
 
           <div>

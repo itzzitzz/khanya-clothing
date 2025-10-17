@@ -3,10 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Package, FolderOpen, Image } from "lucide-react";
+import { LogOut, Package, FolderOpen } from "lucide-react";
 import { CategoryManager } from "@/components/admin/CategoryManager";
 import { ProductManager } from "@/components/admin/ProductManager";
-import { ImageManager } from "@/components/admin/ImageManager";
 import Header from "@/components/Header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
@@ -117,7 +116,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="categories" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsList className="grid w-full grid-cols-2 max-w-md">
             <TabsTrigger value="categories">
               <FolderOpen className="h-4 w-4 mr-2" />
               Categories
@@ -125,10 +124,6 @@ const Admin = () => {
             <TabsTrigger value="products">
               <Package className="h-4 w-4 mr-2" />
               Products
-            </TabsTrigger>
-            <TabsTrigger value="images">
-              <Image className="h-4 w-4 mr-2" />
-              Images
             </TabsTrigger>
           </TabsList>
 
@@ -138,10 +133,6 @@ const Admin = () => {
 
           <TabsContent value="products" className="mt-6">
             <ProductManager />
-          </TabsContent>
-
-          <TabsContent value="images" className="mt-6">
-            <ImageManager />
           </TabsContent>
         </Tabs>
       </main>
