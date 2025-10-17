@@ -69,19 +69,42 @@ serve(async (req) => {
        ORDER BY category_id, display_order, id`
     );
 
+    // Fetch all product images
+    const imagesResult = await client.query(
+      `SELECT id, product_id, image_path, image_alt_text, is_primary, display_order
+       FROM product_images
+       ORDER BY product_id, is_primary DESC, display_order`
+    );
+
     await client.close();
 
     // The MySQL client returns results directly
     const categories = Array.isArray(categoriesResult) ? categoriesResult : (categoriesResult.rows || []);
     const products = Array.isArray(productsResult) ? productsResult : (productsResult.rows || []);
+    const images = Array.isArray(imagesResult) ? imagesResult : (imagesResult.rows || []);
 
-    console.log(`Fetched ${categories.length} categories and ${products.length} products`);
+    // Group images by product_id
+    const imagesByProduct = images.reduce((acc: any, img: any) => {
+      if (!acc[img.product_id]) {
+        acc[img.product_id] = [];
+      }
+      acc[img.product_id].push(img);
+      return acc;
+    }, {});
+
+    // Add images array to each product
+    const productsWithImages = products.map((product: any) => ({
+      ...product,
+      images: imagesByProduct[product.id] || []
+    }));
+
+    console.log(`Fetched ${categories.length} categories, ${products.length} products, and ${images.length} images`);
 
     return new Response(
       JSON.stringify({ 
         success: true,
         categories,
-        products
+        products: productsWithImages
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

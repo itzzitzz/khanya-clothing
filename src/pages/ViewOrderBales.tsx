@@ -10,6 +10,15 @@ import womensTshirts from "@/assets/womens-tshirts.jpg";
 import womensZipperJackets from "@/assets/womens-zipper-jackets.jpg";
 import childrensSummerWear from "@/assets/childrens-summer-wear.jpg";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { ProductImageModal } from "@/components/ProductImageModal";
+interface ProductImage {
+  id: number;
+  image_path: string;
+  image_alt_text: string;
+  is_primary: boolean;
+  display_order: number;
+}
+
 interface Product {
   id: number;
   category_id: number;
@@ -21,6 +30,7 @@ interface Product {
   price_per_10kg: number;
   price_per_piece: number;
   age_range: string | null;
+  images: ProductImage[];
 }
 
 interface Category {
@@ -35,6 +45,8 @@ const ViewOrderBales = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -76,6 +88,16 @@ const ViewOrderBales = () => {
 
   const getProductsByCategory = (categoryId: number) => {
     return products.filter(p => p.category_id === categoryId);
+  };
+
+  const getPrimaryImage = (product: Product) => {
+    const primaryImage = product.images?.find(img => img.is_primary);
+    return primaryImage ? primaryImage.image_path : product.image_path;
+  };
+
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setModalOpen(true);
   };
   return (
     <div>
@@ -141,13 +163,22 @@ const ViewOrderBales = () => {
                     </div>
                     <div className="grid md:grid-cols-2 gap-8">
                       {categoryProducts.map((product) => (
-                        <div key={product.id} className="bg-card border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
-                          <div className="aspect-video overflow-hidden">
+                        <div 
+                          key={product.id} 
+                          className="bg-card border rounded-2xl overflow-hidden hover:shadow-lg transition-all cursor-pointer group"
+                          onClick={() => handleProductClick(product)}
+                        >
+                          <div className="aspect-video overflow-hidden relative">
                             <img 
-                              src={getImageForProduct(product.image_path)} 
+                              src={getImageForProduct(getPrimaryImage(product))} 
                               alt={product.image_alt_text || `${product.name} - ${product.description.substring(0, 50)}`}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
+                            {product.images && product.images.length > 1 && (
+                              <div className="absolute bottom-2 right-2 bg-background/90 px-2 py-1 rounded-full text-xs font-medium">
+                                +{product.images.length - 1} more
+                              </div>
+                            )}
                           </div>
                           <div className="p-6">
                             <h3 className="text-xl font-bold mb-2">
@@ -226,6 +257,16 @@ const ViewOrderBales = () => {
           </div>
         </section>
       </main>
+
+      {selectedProduct && (
+        <ProductImageModal
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          images={selectedProduct.images || []}
+          productName={selectedProduct.name}
+          getImageUrl={getImageForProduct}
+        />
+      )}
 
       <footer className="border-t">
         <div className="container mx-auto py-8 flex items-center justify-between text-sm">
