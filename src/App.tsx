@@ -9,7 +9,8 @@ import Location from "./pages/Location";
 import Brand from "./pages/Brand";
 import Contact from "./pages/Contact";
 import ViewOrderBales from "./pages/ViewOrderBales";
-import AdminImportImages from "./pages/AdminImportImages";
+import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 import { HelmetProvider } from "react-helmet-async";
 
 const queryClient = new QueryClient();
@@ -27,7 +28,8 @@ const App = () => (
             <Route path="/brand" element={<Brand />} />
             <Route path="/view-order-bales" element={<ViewOrderBales />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/admin-import-images" element={<AdminImportImages />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/admin" element={<Admin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
