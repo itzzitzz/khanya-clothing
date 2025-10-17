@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Trash2 } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Product {
@@ -27,7 +26,10 @@ export const ImageManager = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
   const [images, setImages] = useState<ProductImage[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
+    image_path: '',
     image_alt_text: '',
     display_order: 0
   });
@@ -75,6 +77,36 @@ export const ImageManager = () => {
     }
   }, [selectedProduct]);
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedProduct) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, image_path: publicUrl });
+      toast({ title: "Success", description: "Image uploaded successfully" });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProduct) return;
@@ -92,7 +124,7 @@ export const ImageManager = () => {
 
       if (response.data?.success) {
         toast({ title: "Success", description: "Image added" });
-        setFormData({ image_alt_text: '', display_order: 0 });
+        setFormData({ image_path: '', image_alt_text: '', display_order: 0 });
         loadImages(selectedProduct);
       }
     } catch (error: any) {
@@ -140,6 +172,39 @@ export const ImageManager = () => {
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Add Image</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-4">
+                <Label>Product Image</Label>
+                
+                {formData.image_path && (
+                  <div className="border rounded-lg p-4">
+                    <img 
+                      src={formData.image_path} 
+                      alt="Preview" 
+                      className="w-32 h-32 object-cover rounded"
+                    />
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {uploading ? 'Uploading...' : 'Upload Image'}
+                  </Button>
+                </div>
+              </div>
+
               <div>
                 <Label>Alt Text</Label>
                 <Input
@@ -157,7 +222,7 @@ export const ImageManager = () => {
                   required
                 />
               </div>
-              <Button type="submit">Add Image</Button>
+              <Button type="submit" disabled={!formData.image_path}>Add Image</Button>
             </form>
           </Card>
 
