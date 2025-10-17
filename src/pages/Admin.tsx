@@ -116,15 +116,15 @@ const Admin = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="products" className="w-full">
+        <Tabs defaultValue="categories" className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
-            <TabsTrigger value="products">
-              <Package className="h-4 w-4 mr-2" />
-              Products
-            </TabsTrigger>
             <TabsTrigger value="categories">
               <FolderOpen className="h-4 w-4 mr-2" />
               Categories
+            </TabsTrigger>
+            <TabsTrigger value="products">
+              <Package className="h-4 w-4 mr-2" />
+              Products
             </TabsTrigger>
             <TabsTrigger value="images">
               <Image className="h-4 w-4 mr-2" />
@@ -132,12 +132,12 @@ const Admin = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="products" className="mt-6">
-            <ProductManager />
-          </TabsContent>
-
           <TabsContent value="categories" className="mt-6">
             <CategoryManager />
+          </TabsContent>
+
+          <TabsContent value="products" className="mt-6">
+            <ProductManager />
           </TabsContent>
 
           <TabsContent value="images" className="mt-6">
