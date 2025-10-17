@@ -11,7 +11,7 @@ const Header = ({ active }: { active?: ActiveKey }) => {
   const navItems = [
     { key: "business" as const, label: "Home", href: "/" },
     { key: "brand" as const, label: "Our Brand", href: "/brand" },
-    { key: "bales" as const, label: "What's in the bales", href: "/whats-in-bales" },
+    { key: "bales" as const, label: "View & Order Bales", href: "/view-order-bales" },
     { key: "location" as const, label: "Location & Payments", href: "/location" },
     { key: "contact" as const, label: "Contact", href: "/contact" },
   ];

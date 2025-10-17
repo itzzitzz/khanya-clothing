@@ -30,7 +30,7 @@ interface Category {
   display_order: number;
 }
 
-const WhatsInBales = () => {
+const ViewOrderBales = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,14 +80,14 @@ const WhatsInBales = () => {
   return (
     <div>
       <Helmet>
-        <title>What's in Our Clothing Bales | Mixed Second-hand Items | Khanya</title>
-        <meta name="description" content="Discover what's inside our 10kg clothing bales. Mixed men's, women's, and children's clothing including jackets, pants, shirts, dresses and more." />
+        <title>View & Order Clothing Bales | Mixed Second-hand Items | Khanya</title>
+        <meta name="description" content="View our 10kg clothing bales and place your order. Mixed men's, women's, and children's clothing including jackets, pants, shirts, dresses and more." />
         <meta name="robots" content="index, follow" />
-        <meta name="keywords" content="clothing bale contents, mixed clothing items, secondhand clothing types, men's women's children's clothes, jacket pants shirts dresses" />
-        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/whats-in-bales` : "/whats-in-bales"} />
+        <meta name="keywords" content="order clothing bales, view clothing bales, mixed clothing items, secondhand clothing types, men's women's children's clothes, jacket pants shirts dresses" />
+        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/view-order-bales` : "/view-order-bales"} />
         <meta property="og:type" content="webpage" />
-        <meta property="og:title" content="What's in Our Clothing Bales | Mixed Second-hand Items | Khanya" />
-        <meta property="og:description" content="See exactly what types of clothing you'll find in our 10kg mixed bales - perfect variety for resellers." />
+        <meta property="og:title" content="View & Order Clothing Bales | Mixed Second-hand Items | Khanya" />
+        <meta property="og:description" content="View and order our 10kg mixed bales - perfect variety for resellers." />
         <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
       </Helmet>
       <Header active="bales" />
@@ -99,7 +99,7 @@ const WhatsInBales = () => {
               <Package className="h-16 w-16 mx-auto text-primary mb-4" />
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
-              What's in the bales?
+              View & Order Bales
             </h1>
             <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
               Each 10kg bale contains approximately 40 mixed clothing items across different categories, sizes, and styles. Here's what you can expect to find.
@@ -237,4 +237,4 @@ const WhatsInBales = () => {
   );
 };
 
-export default WhatsInBales;
+export default ViewOrderBales;

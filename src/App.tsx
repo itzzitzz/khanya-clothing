@@ -8,7 +8,7 @@ import NotFound from "./pages/NotFound";
 import Location from "./pages/Location";
 import Brand from "./pages/Brand";
 import Contact from "./pages/Contact";
-import WhatsInBales from "./pages/WhatsInBales";
+import ViewOrderBales from "./pages/ViewOrderBales";
 import { HelmetProvider } from "react-helmet-async";
 
 const queryClient = new QueryClient();
@@ -24,7 +24,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/location" element={<Location />} />
             <Route path="/brand" element={<Brand />} />
-            <Route path="/whats-in-bales" element={<WhatsInBales />} />
+            <Route path="/view-order-bales" element={<ViewOrderBales />} />
             <Route path="/contact" element={<Contact />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
