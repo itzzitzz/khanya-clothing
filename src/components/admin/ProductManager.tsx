@@ -48,6 +48,7 @@ export const ProductManager = () => {
   const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [draggedImage, setDraggedImage] = useState<ProductImage | null>(null);
+  const [dragOverImage, setDragOverImage] = useState<ProductImage | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     category_id: 0,
@@ -293,12 +294,21 @@ export const ProductManager = () => {
     setDraggedImage(image);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, targetImage: ProductImage) => {
     e.preventDefault();
+    if (draggedImage && draggedImage.id !== targetImage.id) {
+      setDragOverImage(targetImage);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverImage(null);
   };
 
   const handleDrop = async (e: React.DragEvent, targetImage: ProductImage) => {
     e.preventDefault();
+    setDragOverImage(null);
+    
     if (!draggedImage || !editing || draggedImage.id === targetImage.id) return;
 
     try {
@@ -330,6 +340,11 @@ export const ProductManager = () => {
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedImage(null);
+    setDragOverImage(null);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -395,15 +410,24 @@ export const ProductManager = () => {
                     .sort((a, b) => a.display_order - b.display_order)
                     .map((image) => {
                       const isDefault = image.image_path === formData.image_path;
+                      const isDragging = draggedImage?.id === image.id;
+                      const isDropTarget = dragOverImage?.id === image.id;
+                      
                       return (
                         <div
                           key={image.id}
                           draggable
                           onDragStart={() => handleDragStart(image)}
-                          onDragOver={handleDragOver}
+                          onDragOver={(e) => handleDragOver(e, image)}
+                          onDragLeave={handleDragLeave}
                           onDrop={(e) => handleDrop(e, image)}
-                          className={`relative border rounded-lg p-2 cursor-move hover:border-primary transition-colors ${
+                          onDragEnd={handleDragEnd}
+                          className={`relative border rounded-lg p-2 cursor-move transition-all duration-200 ${
                             isDefault ? 'border-primary ring-2 ring-primary' : ''
+                          } ${
+                            isDragging ? 'opacity-40 scale-95' : ''
+                          } ${
+                            isDropTarget ? 'scale-105 border-primary shadow-lg ring-2 ring-primary bg-primary/5' : 'hover:border-primary'
                           }`}
                         >
                           <div className="absolute top-1 left-1 z-10">
@@ -413,6 +437,9 @@ export const ProductManager = () => {
                             <div className="absolute top-1 right-1 z-10 bg-primary text-primary-foreground rounded-full p-1">
                               <Star className="h-4 w-4 fill-current" />
                             </div>
+                          )}
+                          {isDropTarget && (
+                            <div className="absolute inset-0 border-2 border-dashed border-primary rounded-lg animate-pulse pointer-events-none" />
                           )}
                           <img
                             src={image.image_path}
