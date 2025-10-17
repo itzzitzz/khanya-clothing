@@ -125,7 +125,7 @@ serve(async (req) => {
       generatedImages.push(publicUrl);
     }
 
-    // Delete existing images and add new ones to database
+    // Add new images to database (keep existing ones)
     const mysql = await import('https://deno.land/x/mysql@v2.12.1/mod.ts');
     const client = await new mysql.Client().connect({
       hostname: Deno.env.get('MYSQL_HOST')!,
@@ -135,22 +135,34 @@ serve(async (req) => {
       port: 3306,
     });
 
-    // Delete existing images for this product
-    await client.execute('DELETE FROM product_images WHERE product_id = ?', [product_id]);
+    // Get the highest display_order for this product
+    const result = await client.query(
+      'SELECT MAX(display_order) as max_order FROM product_images WHERE product_id = ?',
+      [product_id]
+    );
+    const maxOrder = result[0]?.max_order !== null ? result[0].max_order : -1;
 
-    // Insert new images
+    // Insert new images starting from the next display_order
     for (let i = 0; i < generatedImages.length; i++) {
+      const newDisplayOrder = maxOrder + 1 + i;
       await client.execute(
         'INSERT INTO product_images (product_id, image_path, is_primary, display_order) VALUES (?, ?, ?, ?)',
-        [product_id, generatedImages[i], i === 0 ? 1 : 0, i]
+        [product_id, generatedImages[i], 0, newDisplayOrder]
       );
     }
 
-    // Update product's main image
-    await client.execute(
-      'UPDATE products SET image_path = ? WHERE id = ?',
-      [generatedImages[0], product_id]
+    // Update product's main image only if it doesn't have one
+    const productResult = await client.query(
+      'SELECT image_path FROM products WHERE id = ?',
+      [product_id]
     );
+    
+    if (!productResult[0]?.image_path || productResult[0].image_path === '') {
+      await client.execute(
+        'UPDATE products SET image_path = ? WHERE id = ?',
+        [generatedImages[0], product_id]
+      );
+    }
 
     await client.close();
 

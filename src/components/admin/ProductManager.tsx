@@ -345,7 +345,7 @@ export const ProductManager = () => {
   const handleGenerateImages = async () => {
     if (!editing) return;
     
-    if (!confirm(`Generate 5 new portrait images for "${editing.name}"? This will replace all existing images.`)) {
+    if (!confirm(`Generate 5 new portrait images for "${editing.name}"? These will be added to your existing images.`)) {
       return;
     }
 
