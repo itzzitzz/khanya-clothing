@@ -112,7 +112,7 @@ const Index = () => {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button variant="hero" size="xl" asChild>
-                  <a href="/contact">Get a Quote</a>
+                  <a href="/view-order-bales">Get a Quote</a>
                 </Button>
                 <Button variant="sun" size="xl" asChild>
                   <a href="#business">See the numbers</a>
