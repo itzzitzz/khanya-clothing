@@ -60,14 +60,14 @@ serve(async (req) => {
     });
 
     const body = await req.json();
-    const { action, product_id, id, image_path, image_alt_text, is_primary, display_order } = body;
+    const { action, product_id, id, image_path, is_primary, display_order } = body;
 
     if (action === 'list') {
       // List images for a product
       if (!product_id) throw new Error('Product ID required');
       
       const result = await client.query(
-        `SELECT id, product_id, image_path, image_alt_text, is_primary, display_order
+        `SELECT id, product_id, image_path, is_primary, display_order
          FROM product_images
          WHERE product_id = ?
          ORDER BY is_primary DESC, display_order`,
@@ -87,9 +87,9 @@ serve(async (req) => {
       // Add new image
 
       await client.execute(
-        `INSERT INTO product_images (product_id, image_path, image_alt_text, is_primary, display_order)
-         VALUES (?, ?, ?, ?, ?)`,
-        [product_id, image_path, image_alt_text, is_primary ? 1 : 0, display_order || 0]
+        `INSERT INTO product_images (product_id, image_path, is_primary, display_order)
+         VALUES (?, ?, ?, ?)`,
+        [product_id, image_path, is_primary ? 1 : 0, display_order || 0]
       );
 
       await client.close();
@@ -106,9 +106,9 @@ serve(async (req) => {
 
       await client.execute(
         `UPDATE product_images 
-         SET image_alt_text = ?, is_primary = ?, display_order = ?
+         SET is_primary = ?, display_order = ?
          WHERE id = ?`,
-        [image_alt_text, is_primary ? 1 : 0, display_order, id]
+        [is_primary ? 1 : 0, display_order, id]
       );
 
       await client.close();

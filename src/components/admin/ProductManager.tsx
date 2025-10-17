@@ -17,7 +17,6 @@ interface Product {
   name: string;
   description: string;
   image_path: string;
-  image_alt_text: string;
   quantity_per_10kg: number;
   price_per_10kg: number;
   price_per_piece: number;
@@ -35,7 +34,6 @@ interface ProductImage {
   id: number;
   product_id: number;
   image_path: string;
-  image_alt_text: string;
   is_primary: number;
   display_order: number;
 }
@@ -55,7 +53,6 @@ export const ProductManager = () => {
     name: '',
     description: '',
     image_path: '',
-    image_alt_text: '',
     quantity_per_10kg: 0,
     price_per_10kg: 0,
     price_per_piece: 0,
@@ -134,7 +131,6 @@ export const ProductManager = () => {
             action: 'create',
             product_id: editing.id,
             image_path: publicUrl,
-            image_alt_text: formData.image_alt_text || 'Product image',
             is_primary: isFirst ? true : false,
             display_order: productImages.length
           },
@@ -215,7 +211,6 @@ export const ProductManager = () => {
       name: product.name,
       description: product.description,
       image_path: product.image_path,
-      image_alt_text: product.image_alt_text,
       quantity_per_10kg: product.quantity_per_10kg,
       price_per_10kg: product.price_per_10kg,
       price_per_piece: product.price_per_piece,
@@ -234,7 +229,6 @@ export const ProductManager = () => {
       name: '',
       description: '',
       image_path: '',
-      image_alt_text: '',
       quantity_per_10kg: 0,
       price_per_10kg: 0,
       price_per_piece: 0,
@@ -371,6 +365,7 @@ export const ProductManager = () => {
             <Label>Name</Label>
             <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
           </div>
+
           <div>
             <Label>Description</Label>
             <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required />
@@ -443,7 +438,7 @@ export const ProductManager = () => {
                           )}
                           <img
                             src={image.image_path}
-                            alt={image.image_alt_text}
+                            alt="Product image"
                             className="w-full h-32 object-cover rounded mb-2"
                           />
                           <div className="flex gap-1">
@@ -485,11 +480,7 @@ export const ProductManager = () => {
               </div>
             )}
           </div>
-
-          <div>
-            <Label>Image Alt Text</Label>
-            <Input value={formData.image_alt_text} onChange={(e) => setFormData({ ...formData, image_alt_text: e.target.value })} required />
-          </div>
+          
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label>Qty per 10kg</Label>
