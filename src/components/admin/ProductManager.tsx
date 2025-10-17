@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pencil, Trash2, Image } from "lucide-react";
+import { Pencil, Trash2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 
@@ -31,11 +31,21 @@ interface Category {
   name: string;
 }
 
+interface ProductImage {
+  id: number;
+  product_id: number;
+  image_path: string;
+  display_order: number;
+}
+
 export const ProductManager = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [productImages, setProductImages] = useState<ProductImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     category_id: 0,
     name: '',
@@ -72,6 +82,68 @@ export const ProductManager = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadProductImages = async (productId: number) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await supabase.functions.invoke('manage-product-images', {
+        body: { action: 'list', product_id: productId },
+        headers: { Authorization: `Bearer ${session?.access_token}` }
+      });
+
+      if (response.data?.success) {
+        setProductImages(response.data.images || []);
+      }
+    } catch (error: any) {
+      console.error('Error loading product images:', error);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      // If editing a product, add to product_images table
+      if (editing) {
+        await supabase.functions.invoke('manage-product-images', {
+          body: {
+            action: 'create',
+            product_id: editing.id,
+            image_path: publicUrl,
+            display_order: productImages.length
+          },
+          headers: { Authorization: `Bearer ${session?.access_token}` }
+        });
+        await loadProductImages(editing.id);
+      }
+
+      // Update form with new image path
+      setFormData({ ...formData, image_path: publicUrl });
+      toast({ title: "Success", description: "Image uploaded successfully" });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -138,10 +210,12 @@ export const ProductManager = () => {
       display_order: product.display_order,
       is_active: product.is_active === 1
     });
+    loadProductImages(product.id);
   };
 
   const resetForm = () => {
     setEditing(null);
+    setProductImages([]);
     setFormData({
       category_id: 0,
       name: '',
@@ -185,15 +259,64 @@ export const ProductManager = () => {
             <Label>Description</Label>
             <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Image Path</Label>
-              <Input value={formData.image_path} onChange={(e) => setFormData({ ...formData, image_path: e.target.value })} required />
+          
+          <div className="space-y-4">
+            <Label>Product Image</Label>
+            
+            {/* Current image preview */}
+            {formData.image_path && (
+              <div className="border rounded-lg p-4">
+                <img 
+                  src={formData.image_path} 
+                  alt="Current product" 
+                  className="w-32 h-32 object-cover rounded"
+                />
+              </div>
+            )}
+
+            {/* Select from existing images */}
+            {editing && productImages.length > 0 && (
+              <div>
+                <Label className="text-sm text-muted-foreground">Select from existing images</Label>
+                <Select value={formData.image_path} onValueChange={(v) => setFormData({ ...formData, image_path: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose an image" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {productImages.map((img) => (
+                      <SelectItem key={img.id} value={img.image_path}>
+                        Image {img.display_order + 1}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Upload new image */}
+            <div className="flex gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {uploading ? 'Uploading...' : 'Upload New Image'}
+              </Button>
             </div>
-            <div>
-              <Label>Image Alt Text</Label>
-              <Input value={formData.image_alt_text} onChange={(e) => setFormData({ ...formData, image_alt_text: e.target.value })} required />
-            </div>
+          </div>
+
+          <div>
+            <Label>Image Alt Text</Label>
+            <Input value={formData.image_alt_text} onChange={(e) => setFormData({ ...formData, image_alt_text: e.target.value })} required />
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
