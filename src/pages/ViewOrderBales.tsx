@@ -72,6 +72,11 @@ const ViewOrderBales = () => {
   }, []);
 
   const getImageForProduct = (imagePath: string) => {
+    // If the path starts with 'public/', convert it to a direct URL path
+    if (imagePath.startsWith('public/')) {
+      return '/' + imagePath.substring('public/'.length);
+    }
+    
     // Extract filename from path
     const filename = imagePath.split('/').pop() || imagePath;
     

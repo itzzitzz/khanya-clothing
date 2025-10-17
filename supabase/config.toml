@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.get-bale-products]
 verify_jwt = false
+
+[functions.add-product-images]
+verify_jwt = false
