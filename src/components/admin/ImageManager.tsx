@@ -28,9 +28,7 @@ export const ImageManager = () => {
   const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
   const [images, setImages] = useState<ProductImage[]>([]);
   const [formData, setFormData] = useState({
-    image_path: '',
     image_alt_text: '',
-    is_primary: false,
     display_order: 0
   });
   const { toast } = useToast();
@@ -94,7 +92,7 @@ export const ImageManager = () => {
 
       if (response.data?.success) {
         toast({ title: "Success", description: "Image added" });
-        setFormData({ image_path: '', image_alt_text: '', is_primary: false, display_order: 0 });
+        setFormData({ image_alt_text: '', display_order: 0 });
         loadImages(selectedProduct);
       }
     } catch (error: any) {
@@ -143,15 +141,6 @@ export const ImageManager = () => {
             <h3 className="text-lg font-semibold mb-4">Add Image</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>Image Path</Label>
-                <Input
-                  value={formData.image_path}
-                  onChange={(e) => setFormData({ ...formData, image_path: e.target.value })}
-                  placeholder="public/product-images/..."
-                  required
-                />
-              </div>
-              <div>
                 <Label>Alt Text</Label>
                 <Input
                   value={formData.image_alt_text}
@@ -167,13 +156,6 @@ export const ImageManager = () => {
                   onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) })}
                   required
                 />
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.is_primary}
-                  onCheckedChange={(v) => setFormData({ ...formData, is_primary: v })}
-                />
-                <Label>Primary Image</Label>
               </div>
               <Button type="submit">Add Image</Button>
             </form>
