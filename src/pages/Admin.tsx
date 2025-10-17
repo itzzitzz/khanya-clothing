@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogOut, Package, FolderOpen, Image } from "lucide-react";
+import { CategoryManager } from "@/components/admin/CategoryManager";
+import { ProductManager } from "@/components/admin/ProductManager";
+import { ImageManager } from "@/components/admin/ImageManager";
 import Header from "@/components/Header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
@@ -130,30 +133,15 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="products" className="mt-6">
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Manage Products</h2>
-              <p className="text-muted-foreground">
-                Product management coming soon. This will allow you to add, edit, and delete products from your MySQL database.
-              </p>
-            </div>
+            <ProductManager />
           </TabsContent>
 
           <TabsContent value="categories" className="mt-6">
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Manage Categories</h2>
-              <p className="text-muted-foreground">
-                Category management coming soon. This will allow you to add, edit, and delete categories.
-              </p>
-            </div>
+            <CategoryManager />
           </TabsContent>
 
           <TabsContent value="images" className="mt-6">
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Manage Product Images</h2>
-              <p className="text-muted-foreground">
-                Image management coming soon. This will allow you to upload, view, and delete product images.
-              </p>
-            </div>
+            <ImageManager />
           </TabsContent>
         </Tabs>
       </main>

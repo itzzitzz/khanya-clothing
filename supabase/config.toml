@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.add-product-images]
 verify_jwt = false
+
+[functions.manage-categories]
+verify_jwt = false
+
+[functions.manage-products]
+verify_jwt = false
+
+[functions.manage-product-images]
+verify_jwt = false
