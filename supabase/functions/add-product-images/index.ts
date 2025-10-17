@@ -41,9 +41,14 @@ serve(async (req) => {
 
     const products = Array.isArray(productsResult) ? productsResult : (productsResult.rows || []);
 
-    // Define new images to add for each product
+    // Log all product names for debugging
+    console.log('Available products in database:');
+    products.forEach((p: any) => console.log(`- ID ${p.id}: "${p.name}"`));
+
+    // Define new images to add for each product - using keywords for matching
     const newImages: Array<{
-      productName: string;
+      keywords: string[];
+      displayName: string;
       images: Array<{
         path: string;
         altText: string;
@@ -51,7 +56,8 @@ serve(async (req) => {
       }>;
     }> = [
       {
-        productName: "Men's Ripped Jeans",
+        keywords: ['ripped', 'jeans', 'men'],
+        displayName: "Men's Ripped Jeans",
         images: [
           { path: 'public/product-images/mens-ripped-jeans-2.jpg', altText: 'Men\'s ripped denim jeans in various shades arranged on wooden surface', displayOrder: 2 },
           { path: 'public/product-images/mens-ripped-jeans-3.jpg', altText: 'Stack of men\'s distressed jeans showing different washes', displayOrder: 3 },
@@ -60,7 +66,8 @@ serve(async (req) => {
         ]
       },
       {
-        productName: "Men's T-Shirts",
+        keywords: ['tshirt', 't-shirt', 'men'],
+        displayName: "Men's T-Shirts",
         images: [
           { path: 'public/product-images/mens-tshirts-2.jpg', altText: 'Men\'s casual t-shirts in various colors neatly folded and stacked', displayOrder: 2 },
           { path: 'public/product-images/mens-tshirts-3.jpg', altText: 'Collection of men\'s printed t-shirts with various graphic designs', displayOrder: 3 },
@@ -69,7 +76,8 @@ serve(async (req) => {
         ]
       },
       {
-        productName: "Women's T-Shirts",
+        keywords: ['tshirt', 't-shirt', 'women', 'ladies'],
+        displayName: "Women's T-Shirts",
         images: [
           { path: 'public/product-images/womens-tshirts-2.jpg', altText: 'Women\'s casual t-shirts in pastel and bright colors variety of styles', displayOrder: 2 },
           { path: 'public/product-images/womens-tshirts-3.jpg', altText: 'Collection of women\'s graphic print t-shirts with floral patterns', displayOrder: 3 },
@@ -78,7 +86,8 @@ serve(async (req) => {
         ]
       },
       {
-        productName: "Women's Zipper Jackets",
+        keywords: ['jacket', 'zipper', 'women', 'ladies'],
+        displayName: "Women's Zipper Jackets",
         images: [
           { path: 'public/product-images/womens-zipper-jackets-2.jpg', altText: 'Women\'s zipper jackets in various styles hoodies track jackets', displayOrder: 2 },
           { path: 'public/product-images/womens-zipper-jackets-3.jpg', altText: 'Collection of women\'s zip-up hoodies and athletic jackets colorful', displayOrder: 3 },
@@ -87,7 +96,8 @@ serve(async (req) => {
         ]
       },
       {
-        productName: "Children's Summer Wear",
+        keywords: ['children', 'kids', 'summer'],
+        displayName: "Children's Summer Wear",
         images: [
           { path: 'public/product-images/childrens-summer-wear-2.jpg', altText: 'Children\'s summer clothing colorful shorts tank tops sundresses', displayOrder: 2 },
           { path: 'public/product-images/childrens-summer-wear-3.jpg', altText: 'Collection of children\'s summer outfits boys and girls clothing', displayOrder: 3 },
@@ -102,15 +112,21 @@ serve(async (req) => {
 
     // Insert images for each product
     for (const productImages of newImages) {
-      // Find the product ID by name
-      const product = products.find((p: any) => 
-        p.name.toLowerCase().includes(productImages.productName.toLowerCase().split("'")[0])
-      );
+      // Find the product by checking if any keywords match the product name
+      const productNameLower = (p: any) => p.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      
+      const product = products.find((p: any) => {
+        const normalizedName = productNameLower(p);
+        return productImages.keywords.some(keyword => 
+          normalizedName.includes(keyword.toLowerCase().replace(/[^a-z0-9]/g, ''))
+        );
+      });
 
       if (!product) {
-        console.log(`Product not found: ${productImages.productName}`);
+        console.log(`Product not found for: ${productImages.displayName}`);
+        console.log(`Searched keywords: ${productImages.keywords.join(', ')}`);
         insertResults.push({
-          productName: productImages.productName,
+          productName: productImages.displayName,
           status: 'skipped',
           reason: 'Product not found in database'
         });
