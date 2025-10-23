@@ -86,6 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     console.log("Email sent successfully:", emailResponse);
+    console.log("PIN sent to email:", email);
 
     console.log("PIN sent successfully to:", email);
 

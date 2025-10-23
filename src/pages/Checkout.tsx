@@ -63,7 +63,14 @@ const Checkout = () => {
         body: { email: formData.customer_email },
       });
 
-      if (error) throw error;
+      // Check for error in response body (handles non-2xx responses)
+      if (error) {
+        throw new Error(error.message || 'Failed to send PIN');
+      }
+      
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
       setPinSent(true);
       toast({
@@ -100,7 +107,14 @@ const Checkout = () => {
         },
       });
 
-      if (error) throw error;
+      // Check for error in response body (handles non-2xx responses)
+      if (error) {
+        throw new Error(error.message || 'Failed to verify PIN');
+      }
+      
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
       if (!data?.verified) {
         throw new Error('Invalid PIN');
