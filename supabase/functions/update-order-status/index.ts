@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
-import PDFDocument from "https://esm.sh/pdfkit@0.13.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,99 +19,110 @@ const STATUS_LABELS: Record<string, string> = {
   delivered: "Delivered",
 };
 
-async function generateInvoicePDF(order: any): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 50 });
-    const chunks: Uint8Array[] = [];
-
-    doc.on('data', (chunk) => chunks.push(chunk));
-    doc.on('end', () => resolve(Buffer.concat(chunks)));
-    doc.on('error', reject);
-
-    // Header
-    doc.fontSize(24).font('Helvetica-Bold').text('INVOICE', { align: 'center' });
-    doc.moveDown();
-
-    // Company details
-    doc.fontSize(12).font('Helvetica-Bold').text('Khanya', { align: 'left' });
-    doc.fontSize(10).font('Helvetica').text('sales@khanya.store');
-    doc.text('www.khanya.store');
-    doc.moveDown();
-
-    // Invoice details
-    doc.fontSize(10).font('Helvetica-Bold');
-    doc.text(`Invoice Number: ${order.order_number}`, { align: 'right' });
-    doc.font('Helvetica');
-    doc.text(`Date: ${new Date(order.created_at).toLocaleDateString('en-ZA')}`, { align: 'right' });
-    doc.text(`Payment Status: ${order.payment_status.toUpperCase()}`, { align: 'right' });
-    doc.moveDown(2);
-
-    // Bill to
-    doc.fontSize(10).font('Helvetica-Bold').text('BILL TO:');
-    doc.font('Helvetica');
-    doc.text(order.customer_name);
-    doc.text(order.customer_email);
-    doc.text(order.customer_phone);
-    doc.moveDown();
-
-    // Delivery address
-    doc.font('Helvetica-Bold').text('DELIVERY ADDRESS:');
-    doc.font('Helvetica');
-    doc.text(order.delivery_address);
-    doc.text(`${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}`);
-    doc.moveDown(2);
-
-    // Table header
-    const tableTop = doc.y;
-    const itemX = 50;
-    const quantityX = 300;
-    const priceX = 380;
-    const totalX = 480;
-
-    doc.font('Helvetica-Bold').fontSize(10);
-    doc.text('Item', itemX, tableTop);
-    doc.text('Qty', quantityX, tableTop);
-    doc.text('Price', priceX, tableTop);
-    doc.text('Total', totalX, tableTop);
-    
-    // Line under header
-    doc.moveTo(itemX, tableTop + 15)
-       .lineTo(550, tableTop + 15)
-       .stroke();
-
-    // Table items
-    let y = tableTop + 25;
-    doc.font('Helvetica').fontSize(9);
-    
-    order.order_items.forEach((item: any) => {
-      doc.text(item.product_name, itemX, y, { width: 240 });
-      doc.text(item.quantity.toString(), quantityX, y);
-      doc.text(`R${Number(item.price_per_unit).toFixed(2)}`, priceX, y);
-      doc.text(`R${Number(item.subtotal).toFixed(2)}`, totalX, y);
-      y += 25;
-    });
-
-    // Line before total
-    doc.moveTo(itemX, y)
-       .lineTo(550, y)
-       .stroke();
-    y += 10;
-
-    // Total
-    doc.font('Helvetica-Bold').fontSize(12);
-    doc.text('TOTAL:', priceX, y);
-    doc.text(`R${Number(order.total_amount).toFixed(2)}`, totalX, y);
-    
-    doc.moveDown(3);
-    
-    // Footer notes
-    doc.fontSize(9).font('Helvetica');
-    doc.text('This invoice does not include VAT. Khanya is not VAT registered.', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(8).text('Thank you for your business!', { align: 'center' });
-
-    doc.end();
+function generateInvoiceHTML(order: any): string {
+  const orderDate = new Date(order.created_at).toLocaleDateString('en-ZA', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
   });
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; margin: 0; padding: 40px; color: #333; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 36px; margin: 0; color: #2563eb; }
+        .company { margin-bottom: 30px; }
+        .company h2 { font-size: 20px; margin: 0 0 5px 0; }
+        .company p { margin: 2px 0; font-size: 12px; color: #666; }
+        .invoice-details { float: right; text-align: right; margin-bottom: 30px; }
+        .invoice-details p { margin: 3px 0; font-size: 12px; }
+        .invoice-details strong { font-weight: bold; }
+        .bill-to { margin-bottom: 30px; clear: both; padding-top: 20px; }
+        .bill-to h3 { font-size: 14px; margin: 0 0 10px 0; font-weight: bold; }
+        .bill-to p { margin: 3px 0; font-size: 12px; }
+        .delivery { margin-bottom: 40px; }
+        .delivery h3 { font-size: 14px; margin: 0 0 10px 0; font-weight: bold; }
+        .delivery p { margin: 3px 0; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin: 30px 0; }
+        thead { background: #f3f4f6; }
+        th { padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #e5e7eb; }
+        td { padding: 12px; font-size: 12px; border-bottom: 1px solid #e5e7eb; }
+        .total-row { background: #f9fafb; font-weight: bold; font-size: 14px; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; font-size: 11px; color: #666; }
+        .footer p { margin: 5px 0; }
+        .no-vat { background: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px; font-size: 11px; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>INVOICE</h1>
+      </div>
+
+      <div class="company">
+        <h2>Khanya</h2>
+        <p>sales@khanya.store</p>
+        <p>www.khanya.store</p>
+      </div>
+
+      <div class="invoice-details">
+        <p><strong>Invoice Number:</strong> ${order.order_number}</p>
+        <p><strong>Date:</strong> ${orderDate}</p>
+        <p><strong>Payment Status:</strong> ${order.payment_status.toUpperCase()}</p>
+      </div>
+
+      <div class="bill-to">
+        <h3>BILL TO:</h3>
+        <p>${order.customer_name}</p>
+        <p>${order.customer_email}</p>
+        <p>${order.customer_phone}</p>
+      </div>
+
+      <div class="delivery">
+        <h3>DELIVERY ADDRESS:</h3>
+        <p>${order.delivery_address}</p>
+        <p>${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th style="text-align: right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${order.order_items.map((item: any) => `
+            <tr>
+              <td>${item.product_name}</td>
+              <td>${item.quantity}</td>
+              <td>R${Number(item.price_per_unit).toFixed(2)}</td>
+              <td style="text-align: right;">R${Number(item.subtotal).toFixed(2)}</td>
+            </tr>
+          `).join('')}
+          <tr class="total-row">
+            <td colspan="3">TOTAL</td>
+            <td style="text-align: right;">R${Number(order.total_amount).toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="no-vat">
+        <p>This invoice does not include VAT. Khanya is not VAT registered.</p>
+      </div>
+
+      <div class="footer">
+        <p>Thank you for your business!</p>
+        <p>© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
+      </div>
+    </body>
+    </html>
+  `;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -242,7 +252,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <strong>What's happening now?</strong>
                   <p style="margin: 10px 0 0 0;">Our team is carefully preparing your bales for shipment. You'll receive another update once your order has been dispatched.</p>
                 </div>
-                <p><strong>Invoice Attached:</strong> Please find your invoice attached as a PDF for your records.</p>
+                <p><strong>Invoice Attached:</strong> Your invoice is attached as an HTML file that you can open in any browser and print or save as PDF.</p>
                 <p><strong>Estimated Delivery:</strong> 3-5 business days after shipment</p>
               </div>
               <div class="footer">
@@ -306,13 +316,18 @@ const handler = async (req: Request): Promise<Response> => {
           `;
         }
         
-        // Generate PDF invoice for packing status
+        // Generate HTML invoice for packing status and attach as HTML
         let attachments = [];
         if (new_status === 'packing' && order.order_items) {
-          const pdfBuffer = await generateInvoicePDF(order);
+          const invoiceHTML = generateInvoiceHTML(order);
+          // Encode HTML as base64 for attachment
+          const encoder = new TextEncoder();
+          const htmlBuffer = encoder.encode(invoiceHTML);
+          const base64HTML = btoa(String.fromCharCode(...htmlBuffer));
+          
           attachments.push({
-            filename: `Invoice-${order.order_number}.pdf`,
-            content: pdfBuffer.toString('base64'),
+            filename: `Invoice-${order.order_number}.html`,
+            content: base64HTML,
           });
         }
 
@@ -335,6 +350,8 @@ const handler = async (req: Request): Promise<Response> => {
           },
           body: JSON.stringify(emailPayload),
         });
+        
+        console.log(`Status update email sent successfully to ${order.customer_email} for status: ${new_status}`);
       } catch (emailError) {
         console.error("Failed to send status update email:", emailError);
         // Don't fail the status update if email fails
