@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { Helmet } from "react-helmet-async";
+import { supabase } from "@/integrations/supabase/client";
 
 
 const Contact = () => {
@@ -33,45 +34,28 @@ const Contact = () => {
         description: "Please wait while we process your request.",
       });
 
-      const response = await fetch('/send-contact-email.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: {
           name,
           phone,
           email,
           bales,
           method: fulfilment,
           address: fulfilment === "delivery" ? address : undefined,
-        }),
+        },
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-
-      // Check if response is ok
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // Check for error in response body (handles non-2xx responses)
+      if (error) {
+        throw new Error(error.message || 'Failed to send email');
+      }
+      
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
-      // Get response text first to debug parsing issues
-      const responseText = await response.text();
-      console.log('Response text:', responseText);
-
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        throw new Error('Invalid response format from server');
-      }
-
-      console.log('Parsed result:', result);
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to send email');
+      if (!data?.success) {
+        throw new Error('Failed to send email');
       }
 
       toast({
