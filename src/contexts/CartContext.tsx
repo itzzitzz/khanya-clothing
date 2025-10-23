@@ -48,7 +48,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             : i
         );
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [...prev, { ...item, price_per_unit: Number(item.price_per_unit), quantity: 1 }];
     });
   };
 
@@ -73,7 +73,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const cartTotal = cart.reduce(
-    (sum, item) => sum + item.price_per_unit * item.quantity,
+    (sum, item) => sum + Number(item.price_per_unit) * item.quantity,
     0
   );
 
