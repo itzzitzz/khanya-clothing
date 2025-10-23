@@ -237,6 +237,10 @@ const handler = async (req: Request): Promise<Response> => {
           `;
         } else if (new_status === 'packing') {
           subject = `Payment Confirmed - We're Packing Your Order! ${order.order_number}`;
+          
+          // Generate invoice HTML to embed in email
+          const invoiceHTML = generateInvoiceHTML(order);
+          
           htmlBody = `
             ${baseStyles}
             <div class="container">
@@ -252,7 +256,6 @@ const handler = async (req: Request): Promise<Response> => {
                   <strong>What's happening now?</strong>
                   <p style="margin: 10px 0 0 0;">Our team is carefully preparing your bales for shipment. You'll receive another update once your order has been dispatched.</p>
                 </div>
-                <p><strong>Invoice Attached:</strong> Your invoice is attached as an HTML file that you can open in any browser and print or save as PDF.</p>
                 <p><strong>Estimated Delivery:</strong> 3-5 business days after shipment</p>
               </div>
               <div class="footer">
@@ -260,6 +263,10 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
               </div>
             </div>
+            
+            <hr style="margin: 40px 0; border: none; border-top: 2px solid #e5e7eb;">
+            
+            ${invoiceHTML.replace('<!DOCTYPE html>', '').replace('<html>', '').replace('</html>', '').replace(/<head>.*?<\/head>/s, '')}
           `;
         } else if (new_status === 'shipped') {
           subject = `Your Order is On Its Way! ${order.order_number}`;
@@ -316,31 +323,13 @@ const handler = async (req: Request): Promise<Response> => {
           `;
         }
         
-        // Generate HTML invoice for packing status and attach as HTML
-        let attachments = [];
-        if (new_status === 'packing' && order.order_items) {
-          const invoiceHTML = generateInvoiceHTML(order);
-          // Encode HTML as base64 for attachment
-          const encoder = new TextEncoder();
-          const htmlBuffer = encoder.encode(invoiceHTML);
-          const base64HTML = btoa(String.fromCharCode(...htmlBuffer));
-          
-          attachments.push({
-            filename: `Invoice-${order.order_number}.html`,
-            content: base64HTML,
-          });
-        }
-
+        // No attachments needed - invoice is embedded in email body for packing status
         const emailPayload: any = {
           from: "Khanya <noreply@mail.khanya.store>",
           to: [order.customer_email],
           subject: subject,
           html: htmlBody,
         };
-
-        if (attachments.length > 0) {
-          emailPayload.attachments = attachments;
-        }
 
         await fetch("https://api.resend.com/emails", {
           method: "POST",
