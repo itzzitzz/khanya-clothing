@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
+// Using SMTP relay instead of Resend direct
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,36 +53,64 @@ const handler = async (req: Request): Promise<Response> => {
       throw dbError;
     }
 
-    // Send email using Resend
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    if (!resendApiKey) {
-      throw new Error("RESEND_API_KEY not configured");
+    // Send email using SMTP relay
+    const relayUrl = Deno.env.get("RELAY_URL");
+    const relayToken = Deno.env.get("RELAY_TOKEN");
+    if (!relayUrl || !relayToken) {
+      throw new Error("Missing RELAY_URL or RELAY_TOKEN secret");
     }
 
-    const emailResponse = await fetch("https://api.resend.com/emails", {
+    const subject = "Your Verification PIN - Khanya";
+    
+    const textBody = `
+Your verification PIN is: ${pinCode}
+
+This PIN will expire in 10 minutes.
+
+If you didn't request this, please ignore this email.
+
+---
+Khanya - Quality secondhand clothing bales
+    `.trim();
+
+    const htmlBody = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #222;">
+        <h2 style="margin: 0 0 16px;">Email Verification</h2>
+        <p>Your verification PIN is:</p>
+        <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+          <h1 style="font-size: 32px; letter-spacing: 8px; color: #000; margin: 0;">${pinCode}</h1>
+        </div>
+        <p>This PIN will expire in 10 minutes.</p>
+        <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;" />
+        <p style="font-size: 13px; color: #888;">Khanya - Quality secondhand clothing bales</p>
+      </div>
+    `;
+
+    const fromAddress = "Khanya <sales@khanya.store>";
+    
+    const relayPayload = {
+      from: fromAddress,
+      to: [email],
+      subject,
+      text: textBody,
+      html: htmlBody,
+    };
+
+    const emailResponse = await fetch(relayUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${resendApiKey}`,
+        Authorization: `Bearer ${relayToken}`,
       },
-      body: JSON.stringify({
-        from: Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev",
-        to: [email],
-        subject: "Your Verification PIN",
-        html: `
-          <h2>Email Verification</h2>
-          <p>Your verification PIN is:</p>
-          <h1 style="font-size: 32px; letter-spacing: 5px; color: #000;">${pinCode}</h1>
-          <p>This PIN will expire in 10 minutes.</p>
-          <p>If you didn't request this, please ignore this email.</p>
-        `,
-      }),
+      body: JSON.stringify(relayPayload),
     });
 
+    const responseText = await emailResponse.text();
+    console.log("SMTP relay response:", emailResponse.status, responseText);
+
     if (!emailResponse.ok) {
-      const errorText = await emailResponse.text();
-      console.error("Resend error:", errorText);
-      throw new Error(`Failed to send email: ${errorText}`);
+      throw new Error(`Relay error ${emailResponse.status}: ${responseText}`);
     }
 
     console.log("PIN sent successfully to:", email);
