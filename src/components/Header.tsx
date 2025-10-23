@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/contexts/CartContext";
+import { useNavigate } from "react-router-dom";
 
 export type ActiveKey = "business" | "gallery" | "contact" | "location" | "brand" | "bales" | undefined;
 
 const Header = ({ active }: { active?: ActiveKey }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { cartCount } = useCart();
+  const navigate = useNavigate();
 
   const navItems = [
     { key: "business" as const, label: "Home", href: "/" },
@@ -45,16 +49,43 @@ const Header = ({ active }: { active?: ActiveKey }) => {
           {navItems.map((item) => (
             <LinkItem key={item.key} href={item.href} label={item.label} isActive={active === item.key} />
           ))}
+          <Button
+            variant="outline"
+            size="sm"
+            className="relative"
+            onClick={() => navigate("/cart")}
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          className="md:hidden"
-          aria-label="Toggle menu"
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          <Menu />
-        </Button>
+        <div className="flex items-center gap-2 md:hidden">
+          <Button
+            variant="outline"
+            size="icon"
+            className="relative"
+            onClick={() => navigate("/cart")}
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Toggle menu"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <Menu />
+          </Button>
+        </div>
       </nav>
       {menuOpen && (
         <div className="md:hidden border-t bg-background">

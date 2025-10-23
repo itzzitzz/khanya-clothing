@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Package, Shirt, Users } from "lucide-react";
+import { CheckCircle2, Package, Shirt, Users, ShoppingCart, Plus } from "lucide-react";
 import Header from "@/components/Header";
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import mensRippedJeans from "@/assets/mens-ripped-jeans.jpg";
 import mensTshirts from "@/assets/mens-tshirts.jpg";
 import womensTshirts from "@/assets/womens-tshirts.jpg";
@@ -47,6 +50,9 @@ const ViewOrderBales = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -103,6 +109,20 @@ const ViewOrderBales = () => {
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setModalOpen(true);
+  };
+
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation();
+    addToCart({
+      product_id: product.id,
+      product_name: product.name,
+      product_image: getImageForProduct(getPrimaryImage(product)),
+      price_per_unit: product.price_per_10kg,
+    });
+    toast({
+      title: "Added to cart",
+      description: `${product.name} added to your cart`,
+    });
   };
   return (
     <div>
@@ -166,14 +186,20 @@ const ViewOrderBales = () => {
                       {category.icon_name === 'Shirt' && <Shirt className="h-8 w-8 text-primary" />}
                       <h2 className="text-3xl font-bold">{category.name}</h2>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                       {categoryProducts.map((product) => (
                         <div 
                           key={product.id} 
-                          className="bg-card border rounded-2xl overflow-hidden hover:shadow-lg transition-all cursor-pointer group"
-                          onClick={() => handleProductClick(product)}
+                          className="bg-card border rounded-lg overflow-hidden hover:shadow-md transition-all group"
                         >
-                          <div className="aspect-[3/4] overflow-hidden relative">
+                          <h3 className="text-base font-bold px-3 pt-3 pb-2">
+                            {product.name}
+                            {product.age_range && <span className="text-xs font-normal text-muted-foreground ml-1">({product.age_range})</span>}
+                          </h3>
+                          <div 
+                            className="aspect-[3/4] overflow-hidden relative cursor-pointer"
+                            onClick={() => handleProductClick(product)}
+                          >
                             <img 
                               src={getImageForProduct(getPrimaryImage(product))} 
                               alt={product.image_alt_text || `${product.name} - ${product.description.substring(0, 50)}`}
@@ -181,32 +207,26 @@ const ViewOrderBales = () => {
                             />
                             {product.images && product.images.length > 1 && (
                               <div className="absolute bottom-2 right-2 bg-background/90 px-2 py-1 rounded-full text-xs font-medium">
-                                +{product.images.length - 1} more
+                                +{product.images.length - 1}
                               </div>
                             )}
                           </div>
-                          <div className="p-6">
-                            <h3 className="text-xl font-bold mb-2">
-                              {product.name}
-                              {product.age_range && <span className="text-sm font-normal text-muted-foreground ml-2">({product.age_range})</span>}
-                            </h3>
-                            <p className="text-muted-foreground mb-4 leading-relaxed">
+                          <div className="p-3">
+                            <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                               {product.description}
                             </p>
-                            <div className="bg-primary/5 rounded-lg p-4 space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-muted-foreground">Per 10kg bale:</span>
-                                <span className="font-semibold">~{product.quantity_per_10kg} pieces</span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-muted-foreground">Bale price:</span>
-                                <span className="text-2xl font-bold text-primary">R{product.price_per_10kg.toLocaleString()}</span>
-                              </div>
-                              <div className="flex justify-between items-center pt-2 border-t border-border/50">
-                                <span className="text-xs text-muted-foreground">Cost per piece:</span>
-                                <span className="text-sm font-medium">~R{product.price_per_piece}</span>
-                              </div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-lg font-bold text-primary">R{product.price_per_10kg.toLocaleString()}</span>
+                              <span className="text-xs text-muted-foreground">~{product.quantity_per_10kg} pcs</span>
                             </div>
+                            <Button 
+                              size="sm" 
+                              className="w-full"
+                              onClick={(e) => handleAddToCart(e, product)}
+                            >
+                              <ShoppingCart className="h-3 w-3 mr-1" />
+                              Add to Cart
+                            </Button>
                           </div>
                         </div>
                       ))}
@@ -247,16 +267,17 @@ const ViewOrderBales = () => {
 
         <section className="bg-primary/5 py-16">
           <div className="container mx-auto text-center">
-            <h2 className="text-3xl font-extrabold mb-4">Ready to see what's in your bale?</h2>
+            <h2 className="text-3xl font-extrabold mb-4">Ready to order?</h2>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Start with your first 10kg mixed bale and discover the variety that will help grow your clothing business.
+              Add bales to your cart and checkout with free delivery anywhere in South Africa.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              <Button variant="hero" size="lg" asChild>
-                <a href="/contact">Order Your First Bale</a>
+              <Button size="lg" onClick={() => navigate('/cart')}>
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                View Cart
               </Button>
-              <Button variant="sun" size="lg" asChild>
-                <a href="/">See Pricing</a>
+              <Button variant="outline" size="lg" onClick={() => navigate('/track-order')}>
+                Track My Order
               </Button>
             </div>
           </div>
