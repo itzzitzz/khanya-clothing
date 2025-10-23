@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
+import PDFDocument from "https://esm.sh/pdfkit@0.13.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,6 +19,101 @@ const STATUS_LABELS: Record<string, string> = {
   shipped: "Shipped",
   delivered: "Delivered",
 };
+
+async function generateInvoicePDF(order: any): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50 });
+    const chunks: Uint8Array[] = [];
+
+    doc.on('data', (chunk) => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
+
+    // Header
+    doc.fontSize(24).font('Helvetica-Bold').text('INVOICE', { align: 'center' });
+    doc.moveDown();
+
+    // Company details
+    doc.fontSize(12).font('Helvetica-Bold').text('Khanya', { align: 'left' });
+    doc.fontSize(10).font('Helvetica').text('sales@khanya.store');
+    doc.text('www.khanya.store');
+    doc.moveDown();
+
+    // Invoice details
+    doc.fontSize(10).font('Helvetica-Bold');
+    doc.text(`Invoice Number: ${order.order_number}`, { align: 'right' });
+    doc.font('Helvetica');
+    doc.text(`Date: ${new Date(order.created_at).toLocaleDateString('en-ZA')}`, { align: 'right' });
+    doc.text(`Payment Status: ${order.payment_status.toUpperCase()}`, { align: 'right' });
+    doc.moveDown(2);
+
+    // Bill to
+    doc.fontSize(10).font('Helvetica-Bold').text('BILL TO:');
+    doc.font('Helvetica');
+    doc.text(order.customer_name);
+    doc.text(order.customer_email);
+    doc.text(order.customer_phone);
+    doc.moveDown();
+
+    // Delivery address
+    doc.font('Helvetica-Bold').text('DELIVERY ADDRESS:');
+    doc.font('Helvetica');
+    doc.text(order.delivery_address);
+    doc.text(`${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}`);
+    doc.moveDown(2);
+
+    // Table header
+    const tableTop = doc.y;
+    const itemX = 50;
+    const quantityX = 300;
+    const priceX = 380;
+    const totalX = 480;
+
+    doc.font('Helvetica-Bold').fontSize(10);
+    doc.text('Item', itemX, tableTop);
+    doc.text('Qty', quantityX, tableTop);
+    doc.text('Price', priceX, tableTop);
+    doc.text('Total', totalX, tableTop);
+    
+    // Line under header
+    doc.moveTo(itemX, tableTop + 15)
+       .lineTo(550, tableTop + 15)
+       .stroke();
+
+    // Table items
+    let y = tableTop + 25;
+    doc.font('Helvetica').fontSize(9);
+    
+    order.order_items.forEach((item: any) => {
+      doc.text(item.product_name, itemX, y, { width: 240 });
+      doc.text(item.quantity.toString(), quantityX, y);
+      doc.text(`R${Number(item.price_per_unit).toFixed(2)}`, priceX, y);
+      doc.text(`R${Number(item.subtotal).toFixed(2)}`, totalX, y);
+      y += 25;
+    });
+
+    // Line before total
+    doc.moveTo(itemX, y)
+       .lineTo(550, y)
+       .stroke();
+    y += 10;
+
+    // Total
+    doc.font('Helvetica-Bold').fontSize(12);
+    doc.text('TOTAL:', priceX, y);
+    doc.text(`R${Number(order.total_amount).toFixed(2)}`, totalX, y);
+    
+    doc.moveDown(3);
+    
+    // Footer notes
+    doc.fontSize(9).font('Helvetica');
+    doc.text('This invoice does not include VAT. Khanya is not VAT registered.', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(8).text('Thank you for your business!', { align: 'center' });
+
+    doc.end();
+  });
+}
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -38,10 +134,19 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get order details first
+    // Get order details with items
     const { data: order, error: fetchError } = await supabase
       .from("orders")
-      .select("*")
+      .select(`
+        *,
+        order_items (
+          id,
+          product_name,
+          quantity,
+          price_per_unit,
+          subtotal
+        )
+      `)
       .eq("id", order_id)
       .single();
 
@@ -137,6 +242,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <strong>What's happening now?</strong>
                   <p style="margin: 10px 0 0 0;">Our team is carefully preparing your bales for shipment. You'll receive another update once your order has been dispatched.</p>
                 </div>
+                <p><strong>Invoice Attached:</strong> Please find your invoice attached as a PDF for your records.</p>
                 <p><strong>Estimated Delivery:</strong> 3-5 business days after shipment</p>
               </div>
               <div class="footer">
@@ -200,18 +306,34 @@ const handler = async (req: Request): Promise<Response> => {
           `;
         }
         
+        // Generate PDF invoice for packing status
+        let attachments = [];
+        if (new_status === 'packing' && order.order_items) {
+          const pdfBuffer = await generateInvoicePDF(order);
+          attachments.push({
+            filename: `Invoice-${order.order_number}.pdf`,
+            content: pdfBuffer.toString('base64'),
+          });
+        }
+
+        const emailPayload: any = {
+          from: "Khanya <noreply@mail.khanya.store>",
+          to: [order.customer_email],
+          subject: subject,
+          html: htmlBody,
+        };
+
+        if (attachments.length > 0) {
+          emailPayload.attachments = attachments;
+        }
+
         await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${resendApiKey}`,
           },
-          body: JSON.stringify({
-            from: "Khanya <noreply@mail.khanya.store>",
-            to: [order.customer_email],
-            subject: subject,
-            html: htmlBody,
-          }),
+          body: JSON.stringify(emailPayload),
         });
       } catch (emailError) {
         console.error("Failed to send status update email:", emailError);
