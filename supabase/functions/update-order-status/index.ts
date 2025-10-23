@@ -238,8 +238,11 @@ const handler = async (req: Request): Promise<Response> => {
         } else if (new_status === 'packing') {
           subject = `Payment Confirmed - We're Packing Your Order! ${order.order_number}`;
           
-          // Generate invoice HTML to embed in email
-          const invoiceHTML = generateInvoiceHTML(order);
+          const orderDate = new Date(order.created_at).toLocaleDateString('en-ZA', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
           
           htmlBody = `
             ${baseStyles}
@@ -264,9 +267,70 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
             </div>
             
-            <hr style="margin: 40px 0; border: none; border-top: 2px solid #e5e7eb;">
-            
-            ${invoiceHTML.replace('<!DOCTYPE html>', '').replace('<html>', '').replace('</html>', '').replace(/<head>.*?<\/head>/s, '')}
+            <div style="max-width: 600px; margin: 40px auto; padding: 40px; background: white; border: 2px solid #e5e7eb; font-family: Arial, sans-serif;">
+              <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="font-size: 36px; margin: 0; color: #2563eb;">INVOICE</h1>
+              </div>
+              
+              <div style="margin-bottom: 20px;">
+                <h2 style="font-size: 18px; margin: 0 0 5px 0;">Khanya</h2>
+                <p style="margin: 2px 0; font-size: 12px; color: #666;">sales@khanya.store</p>
+                <p style="margin: 2px 0; font-size: 12px; color: #666;">www.khanya.store</p>
+              </div>
+              
+              <div style="text-align: right; margin-bottom: 20px;">
+                <p style="margin: 3px 0; font-size: 12px;"><strong>Invoice Number:</strong> ${order.order_number}</p>
+                <p style="margin: 3px 0; font-size: 12px;"><strong>Date:</strong> ${orderDate}</p>
+                <p style="margin: 3px 0; font-size: 12px;"><strong>Payment Status:</strong> PAID</p>
+              </div>
+              
+              <div style="margin-bottom: 20px; clear: both;">
+                <h3 style="font-size: 14px; margin: 0 0 10px 0; font-weight: bold;">BILL TO:</h3>
+                <p style="margin: 3px 0; font-size: 12px;">${order.customer_name}</p>
+                <p style="margin: 3px 0; font-size: 12px;">${order.customer_email}</p>
+                <p style="margin: 3px 0; font-size: 12px;">${order.customer_phone}</p>
+              </div>
+              
+              <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 14px; margin: 0 0 10px 0; font-weight: bold;">DELIVERY ADDRESS:</h3>
+                <p style="margin: 3px 0; font-size: 12px;">${order.delivery_address}</p>
+                <p style="margin: 3px 0; font-size: 12px;">${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}</p>
+              </div>
+              
+              <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead style="background: #f3f4f6;">
+                  <tr>
+                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #e5e7eb;">Item</th>
+                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #e5e7eb;">Qty</th>
+                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #e5e7eb;">Price</th>
+                    <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: bold; border-bottom: 2px solid #e5e7eb;">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${order.order_items.map((item: any) => `
+                    <tr>
+                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #e5e7eb;">${item.product_name}</td>
+                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #e5e7eb;">${item.quantity}</td>
+                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #e5e7eb;">R${Number(item.price_per_unit).toFixed(2)}</td>
+                      <td style="padding: 12px; font-size: 12px; text-align: right; border-bottom: 1px solid #e5e7eb;">R${Number(item.subtotal).toFixed(2)}</td>
+                    </tr>
+                  `).join('')}
+                  <tr style="background: #f9fafb; font-weight: bold;">
+                    <td colspan="3" style="padding: 12px; font-size: 14px; border-bottom: 2px solid #e5e7eb;">TOTAL</td>
+                    <td style="padding: 12px; font-size: 14px; text-align: right; border-bottom: 2px solid #e5e7eb;">R${Number(order.total_amount).toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+              
+              <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px; text-align: center;">
+                <p style="margin: 0; font-size: 11px;">This invoice does not include VAT. Khanya is not VAT registered.</p>
+              </div>
+              
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center;">
+                <p style="margin: 5px 0; font-size: 11px; color: #666;">Thank you for your business!</p>
+                <p style="margin: 5px 0; font-size: 11px; color: #666;">© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
+              </div>
+            </div>
           `;
         } else if (new_status === 'shipped') {
           subject = `Your Order is On Its Way! ${order.order_number}`;
