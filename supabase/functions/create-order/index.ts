@@ -98,10 +98,162 @@ const handler = async (req: Request): Promise<Response> => {
       throw itemsError;
     }
 
-    // Send confirmation email
+    // Send confirmation emails
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (resendApiKey) {
       try {
+        const baseStyles = `
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #ffffff; padding: 30px 20px; border: 1px solid #e5e7eb; border-top: none; }
+            .order-number { font-size: 18px; font-weight: bold; color: #2563eb; margin: 10px 0; }
+            .info-box { background: #f9fafb; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0; border-radius: 4px; }
+            .payment-details { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px; }
+            .footer { text-align: center; color: #6b7280; font-size: 12px; margin-top: 30px; padding: 20px; border-top: 1px solid #e5e7eb; }
+            table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+            th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+            th { background: #f9fafb; font-weight: bold; }
+          </style>
+        `;
+
+        // Customer confirmation email
+        const customerHtml = `
+          ${baseStyles}
+          <div class="container">
+            <div class="header">
+              <h1 style="margin: 0; font-size: 28px;">Order Confirmed!</h1>
+            </div>
+            <div class="content">
+              <p>Hello ${orderData.customer_name},</p>
+              <p>Thank you for your order! We've received your order and will begin processing it once payment is confirmed.</p>
+              <div class="order-number">Order Number: ${orderNumber}</div>
+              
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${orderData.items.map(item => `
+                    <tr>
+                      <td>${item.product_name}</td>
+                      <td>${item.quantity}</td>
+                      <td>R${item.price_per_unit.toFixed(2)}</td>
+                      <td>R${(item.price_per_unit * item.quantity).toFixed(2)}</td>
+                    </tr>
+                  `).join('')}
+                  <tr style="font-weight: bold; background: #f9fafb;">
+                    <td colspan="3">Total Amount:</td>
+                    <td>R${totalAmount.toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+              
+              ${orderData.payment_method === 'eft' ? `
+                <div class="payment-details">
+                  <h3 style="margin-top: 0;">EFT Payment Details</h3>
+                  <p>Please transfer <strong>R${totalAmount.toFixed(2)}</strong> to:</p>
+                  <p><strong>Bank:</strong> First National Bank<br>
+                  <strong>Account Name:</strong> Your Business Name<br>
+                  <strong>Account Number:</strong> 1234567890<br>
+                  <strong>Branch Code:</strong> 250655<br>
+                  <strong>Reference:</strong> ${orderNumber}</p>
+                  <p><em>Important: Please use your order number as the payment reference.</em></p>
+                </div>
+              ` : ''}
+              
+              ${orderData.payment_method === 'fnb_ewallet' ? `
+                <div class="payment-details">
+                  <h3 style="margin-top: 0;">FNB e-Wallet Payment Details</h3>
+                  <p>Please send <strong>R${totalAmount.toFixed(2)}</strong> via FNB e-Wallet to:</p>
+                  <p><strong>Cell Number:</strong> 0821234567<br>
+                  <strong>Reference:</strong> ${orderNumber}</p>
+                  <p><em>Important: Please use your order number as the payment reference.</em></p>
+                </div>
+              ` : ''}
+              
+              <div class="info-box">
+                <strong>What happens next?</strong>
+                <p style="margin: 10px 0 0 0;">Once we confirm your payment, we'll start preparing your bales for shipment. You'll receive email updates at each step of the process.</p>
+              </div>
+              
+              <p><strong>Delivery Address:</strong><br>
+              ${orderData.delivery_address}<br>
+              ${orderData.delivery_city}, ${orderData.delivery_province} ${orderData.delivery_postal_code}</p>
+              
+              <p style="color: #059669; font-weight: bold;">✓ FREE delivery to anywhere in South Africa!</p>
+            </div>
+            <div class="footer">
+              <p>Questions? Contact us at <a href="mailto:sales@khanya.store">sales@khanya.store</a></p>
+              <p>© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
+            </div>
+          </div>
+        `;
+
+        // Sales notification email
+        const salesHtml = `
+          ${baseStyles}
+          <div class="container">
+            <div class="header">
+              <h1 style="margin: 0; font-size: 28px;">New Order Received!</h1>
+            </div>
+            <div class="content">
+              <div class="order-number">Order Number: ${orderNumber}</div>
+              
+              <h3>Customer Information</h3>
+              <p><strong>Name:</strong> ${orderData.customer_name}<br>
+              <strong>Email:</strong> ${orderData.customer_email}<br>
+              <strong>Phone:</strong> ${orderData.customer_phone}</p>
+              
+              <h3>Order Details</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${orderData.items.map(item => `
+                    <tr>
+                      <td>${item.product_name}</td>
+                      <td>${item.quantity}</td>
+                      <td>R${item.price_per_unit.toFixed(2)}</td>
+                      <td>R${(item.price_per_unit * item.quantity).toFixed(2)}</td>
+                    </tr>
+                  `).join('')}
+                  <tr style="font-weight: bold; background: #f9fafb;">
+                    <td colspan="3">Total Amount:</td>
+                    <td>R${totalAmount.toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+              
+              <div class="info-box">
+                <strong>Payment Method:</strong> ${orderData.payment_method.replace(/_/g, " ").toUpperCase()}<br>
+                <strong>Payment Status:</strong> Pending
+              </div>
+              
+              <h3>Delivery Address</h3>
+              <p>${orderData.delivery_address}<br>
+              ${orderData.delivery_city}, ${orderData.delivery_province} ${orderData.delivery_postal_code}</p>
+            </div>
+            <div class="footer">
+              <p>View order details in the admin panel</p>
+              <p>© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
+            </div>
+          </div>
+        `;
+
+        // Send customer confirmation email
         await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -109,46 +261,31 @@ const handler = async (req: Request): Promise<Response> => {
             Authorization: `Bearer ${resendApiKey}`,
           },
           body: JSON.stringify({
-            from: Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev",
+            from: "Khanya <noreply@mail.khanya.store>",
             to: [orderData.customer_email],
             subject: `Order Confirmation - ${orderNumber}`,
-            html: `
-              <h2>Order Confirmation</h2>
-              <p>Thank you for your order, ${orderData.customer_name}!</p>
-              <p><strong>Order Number:</strong> ${orderNumber}</p>
-              <p><strong>Total Amount:</strong> R${totalAmount.toFixed(2)}</p>
-              <p><strong>Payment Method:</strong> ${orderData.payment_method.replace(/_/g, " ").toUpperCase()}</p>
-              
-              ${orderData.payment_method === 'eft' ? `
-                <h3>EFT Payment Details</h3>
-                <p>Please transfer R${totalAmount.toFixed(2)} to:</p>
-                <p><strong>Bank:</strong> First National Bank<br>
-                <strong>Account Name:</strong> Your Business Name<br>
-                <strong>Account Number:</strong> 1234567890<br>
-                <strong>Branch Code:</strong> 250655<br>
-                <strong>Reference:</strong> ${orderNumber}</p>
-                <p>You will receive an email once payment has been confirmed.</p>
-              ` : ''}
-              
-              ${orderData.payment_method === 'fnb_ewallet' ? `
-                <h3>FNB e-Wallet Payment Details</h3>
-                <p>Please send R${totalAmount.toFixed(2)} via FNB e-Wallet to:</p>
-                <p><strong>Cell Number:</strong> 0821234567<br>
-                <strong>Reference:</strong> ${orderNumber}</p>
-                <p>You will receive an email once payment has been confirmed.</p>
-              ` : ''}
-              
-              <h3>Delivery Address</h3>
-              <p>${orderData.delivery_address}<br>
-              ${orderData.delivery_city}, ${orderData.delivery_province}<br>
-              ${orderData.delivery_postal_code}</p>
-              
-              <p>FREE delivery to anywhere in South Africa!</p>
-            `,
+            html: customerHtml,
           }),
         });
+
+        // Send sales notification email
+        await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${resendApiKey}`,
+          },
+          body: JSON.stringify({
+            from: "Khanya <noreply@mail.khanya.store>",
+            to: ["sales@khanya.store"],
+            subject: `New Order - ${orderNumber}`,
+            html: salesHtml,
+          }),
+        });
+
+        console.log("Order confirmation emails sent successfully");
       } catch (emailError) {
-        console.error("Failed to send confirmation email:", emailError);
+        console.error("Failed to send confirmation emails:", emailError);
         // Don't fail the order creation if email fails
       }
     }
