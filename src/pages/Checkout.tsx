@@ -59,11 +59,23 @@ const Checkout = () => {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('send-verification-pin', {
-        body: { email: formData.customer_email },
+      const response = await fetch('/send-verification-pin.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.customer_email }),
       });
 
-      if (error) throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send PIN');
+      }
+
+      // Store the PIN for verification (in real app, this would be server-side only)
+      sessionStorage.setItem('verification_pin', data.pin_code);
+      sessionStorage.setItem('verification_email', data.email);
 
       setPinSent(true);
       toast({
@@ -93,19 +105,30 @@ const Checkout = () => {
 
     setVerifyingPin(true);
     try {
-      const { data, error } = await supabase.functions.invoke('verify-pin', {
-        body: { email: formData.customer_email, pin },
-      });
+      const storedPin = sessionStorage.getItem('verification_pin');
+      const storedEmail = sessionStorage.getItem('verification_email');
 
-      if (error) throw error;
-
-      if (data.verified) {
-        setPinVerified(true);
-        toast({
-          title: 'Email Verified',
-          description: 'You can now complete your order',
-        });
+      if (!storedPin || !storedEmail) {
+        throw new Error('No verification session found');
       }
+
+      if (storedEmail !== formData.customer_email) {
+        throw new Error('Email mismatch');
+      }
+
+      if (pin !== storedPin) {
+        throw new Error('Invalid PIN');
+      }
+
+      // Clear the stored PIN after successful verification
+      sessionStorage.removeItem('verification_pin');
+      sessionStorage.removeItem('verification_email');
+
+      setPinVerified(true);
+      toast({
+        title: 'Email Verified',
+        description: 'You can now complete your order',
+      });
     } catch (error: any) {
       toast({
         title: 'Error',
