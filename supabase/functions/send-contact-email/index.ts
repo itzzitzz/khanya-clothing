@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-// Resend removed: using HTTPS SMTP relay instead
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,13 +24,12 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, phone, email, bales, method, address }: ContactFormData = await req.json();
 
-    const relayUrl = Deno.env.get("RELAY_URL");
-    const relayToken = Deno.env.get("RELAY_TOKEN");
-    if (!relayUrl || !relayToken) {
-      throw new Error("Missing RELAY_URL or RELAY_TOKEN secret");
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      throw new Error("Missing RESEND_API_KEY");
     }
 
-
+    const resend = new Resend(resendApiKey);
     const subject = "New Khanya website enquiry";
 
     const textBody = `
@@ -59,35 +58,18 @@ This enquiry was submitted via the Khanya website contact form.
       </div>
     `;
 
-    const fromAddress = "Khanya <sales@khanya.store>"; // Requires verified domain on Resend
-    const toAddress = ["sales@khanya.store"]; // Destination inbox
+    const fromAddress = "Khanya <onboarding@resend.dev>";
+    const toAddress = ["sales@khanya.store"];
 
-    
-    const relayPayload = {
+    const emailResponse = await resend.emails.send({
       from: fromAddress,
       to: toAddress,
       subject,
-      text: textBody,
       html: htmlBody,
-      reply_to: email ? [email] : undefined,
-      metadata: { name, phone, email, bales, method, address },
-    };
-
-    const relayRes = await fetch(relayUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${relayToken}`,
-      },
-      body: JSON.stringify(relayPayload),
+      reply_to: email,
     });
 
-    const relayText = await relayRes.text();
-    console.log("SMTP relay response:", relayRes.status, relayText);
-
-    if (!relayRes.ok) {
-      throw new Error(`Relay error ${relayRes.status}: ${relayText}`);
-    }
+    console.log("Email sent successfully:", emailResponse);
 
     return new Response(
       JSON.stringify({ success: true, message: "Email sent successfully" }),

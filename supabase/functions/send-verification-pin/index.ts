@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
+import { Resend } from "npm:resend@2.0.0";
 // Using SMTP relay instead of Resend direct
 
 const corsHeaders = {
@@ -53,17 +54,13 @@ const handler = async (req: Request): Promise<Response> => {
       throw dbError;
     }
 
-    // Get SMTP credentials
-    const smtpHost = Deno.env.get("SMTP_HOST");
-    const smtpPort = Deno.env.get("SMTP_PORT");
-    const smtpUsername = Deno.env.get("SMTP_USERNAME");
-    const smtpPassword = Deno.env.get("SMTP_PASSWORD");
-    const fromEmail = Deno.env.get("FROM_EMAIL");
-
-    if (!smtpHost || !smtpPort || !smtpUsername || !smtpPassword || !fromEmail) {
-      throw new Error("Missing SMTP configuration");
+    // Get Resend API key
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      throw new Error("Missing RESEND_API_KEY");
     }
 
+    const resend = new Resend(resendApiKey);
     const subject = "Your Verification PIN - Khanya";
     
     const htmlBody = `
@@ -80,55 +77,15 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Create SMTP connection
-    const conn = await Deno.connect({
-      hostname: smtpHost,
-      port: parseInt(smtpPort),
+    // Send email via Resend
+    const emailResponse = await resend.emails.send({
+      from: "Khanya <onboarding@resend.dev>",
+      to: [email],
+      subject,
+      html: htmlBody,
     });
 
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-
-    async function readLine(): Promise<string> {
-      const buffer = new Uint8Array(1024);
-      const n = await conn.read(buffer);
-      return decoder.decode(buffer.subarray(0, n || 0));
-    }
-
-    async function sendCommand(command: string): Promise<string> {
-      await conn.write(encoder.encode(command + "\r\n"));
-      return await readLine();
-    }
-
-    try {
-      // SMTP handshake
-      await readLine(); // Read greeting
-      await sendCommand(`EHLO ${smtpHost}`);
-      await sendCommand("AUTH LOGIN");
-      await sendCommand(btoa(smtpUsername));
-      await sendCommand(btoa(smtpPassword));
-      await sendCommand(`MAIL FROM:<${fromEmail}>`);
-      await sendCommand(`RCPT TO:<${email}>`);
-      await sendCommand("DATA");
-
-      // Send email content
-      const emailContent = [
-        `From: Khanya <${fromEmail}>`,
-        `To: ${email}`,
-        `Subject: ${subject}`,
-        `MIME-Version: 1.0`,
-        `Content-Type: text/html; charset=UTF-8`,
-        "",
-        htmlBody,
-        ".",
-      ].join("\r\n");
-
-      await conn.write(encoder.encode(emailContent + "\r\n"));
-      await readLine();
-      await sendCommand("QUIT");
-    } finally {
-      conn.close();
-    }
+    console.log("Email sent successfully:", emailResponse);
 
     console.log("PIN sent successfully to:", email);
 
