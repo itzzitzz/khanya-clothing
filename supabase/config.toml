@@ -21,3 +21,18 @@ verify_jwt = false
 [functions.generate-product-images]
 verify_jwt = false
 
+[functions.send-verification-pin]
+verify_jwt = false
+
+[functions.verify-pin]
+verify_jwt = false
+
+[functions.create-order]
+verify_jwt = false
+
+[functions.track-order]
+verify_jwt = false
+
+[functions.update-order-status]
+verify_jwt = false
+

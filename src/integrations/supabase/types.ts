@@ -14,6 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
+      email_verifications: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          pin_code: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          pin_code: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          pin_code?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          price_per_unit: number
+          product_id: number
+          product_image: string | null
+          product_name: string
+          quantity: number
+          subtotal: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          price_per_unit: number
+          product_id: number
+          product_image?: string | null
+          product_name: string
+          quantity: number
+          subtotal: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          price_per_unit?: number
+          product_id?: number
+          product_image?: string | null
+          product_name?: string
+          quantity?: number
+          subtotal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          delivery_address: string
+          delivery_city: string
+          delivery_postal_code: string
+          delivery_province: string
+          id: string
+          order_number: string
+          order_status: string
+          payment_method: string
+          payment_status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          delivery_address: string
+          delivery_city: string
+          delivery_postal_code: string
+          delivery_province: string
+          id?: string
+          order_number: string
+          order_status?: string
+          payment_method: string
+          payment_status?: string
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          delivery_address?: string
+          delivery_city?: string
+          delivery_postal_code?: string
+          delivery_province?: string
+          id?: string
+          order_number?: string
+          order_status?: string
+          payment_method?: string
+          payment_status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -58,6 +183,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_order_number: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
