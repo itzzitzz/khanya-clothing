@@ -58,7 +58,7 @@ This enquiry was submitted via the Khanya website contact form.
       </div>
     `;
 
-    const fromAddress = "Khanya <onboarding@resend.dev>";
+    const fromAddress = "Khanya <noreply@updates.khanya.store>";
     const toAddress = ["sales@khanya.store"];
 
     const emailResponse = await resend.emails.send({
