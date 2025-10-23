@@ -31,7 +31,16 @@ export const useCart = () => {
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem('shopping-cart');
-    return saved ? JSON.parse(saved) : [];
+    if (saved) {
+      const parsedCart = JSON.parse(saved);
+      // Ensure all prices are numbers to prevent toFixed errors
+      return parsedCart.map((item: any) => ({
+        ...item,
+        price_per_unit: Number(item.price_per_unit),
+        quantity: Number(item.quantity)
+      }));
+    }
+    return [];
   });
 
   useEffect(() => {
