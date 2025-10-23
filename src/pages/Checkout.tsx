@@ -96,13 +96,13 @@ const Checkout = () => {
       const { data, error } = await supabase.functions.invoke('verify-pin', {
         body: { 
           email: formData.customer_email,
-          pin_code: pin 
+          pin: pin 
         },
       });
 
       if (error) throw error;
 
-      if (!data.valid) {
+      if (!data?.verified) {
         throw new Error('Invalid PIN');
       }
 

@@ -53,26 +53,19 @@ const handler = async (req: Request): Promise<Response> => {
       throw dbError;
     }
 
-    // Send email using SMTP relay
-    const relayUrl = Deno.env.get("RELAY_URL");
-    const relayToken = Deno.env.get("RELAY_TOKEN");
-    if (!relayUrl || !relayToken) {
-      throw new Error("Missing RELAY_URL or RELAY_TOKEN secret");
+    // Get SMTP credentials
+    const smtpHost = Deno.env.get("SMTP_HOST");
+    const smtpPort = Deno.env.get("SMTP_PORT");
+    const smtpUsername = Deno.env.get("SMTP_USERNAME");
+    const smtpPassword = Deno.env.get("SMTP_PASSWORD");
+    const fromEmail = Deno.env.get("FROM_EMAIL");
+
+    if (!smtpHost || !smtpPort || !smtpUsername || !smtpPassword || !fromEmail) {
+      throw new Error("Missing SMTP configuration");
     }
 
     const subject = "Your Verification PIN - Khanya";
     
-    const textBody = `
-Your verification PIN is: ${pinCode}
-
-This PIN will expire in 10 minutes.
-
-If you didn't request this, please ignore this email.
-
----
-Khanya - Quality secondhand clothing bales
-    `.trim();
-
     const htmlBody = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #222;">
         <h2 style="margin: 0 0 16px;">Email Verification</h2>
@@ -87,30 +80,54 @@ Khanya - Quality secondhand clothing bales
       </div>
     `;
 
-    const fromAddress = "Khanya <sales@khanya.store>";
-    
-    const relayPayload = {
-      from: fromAddress,
-      to: [email],
-      subject,
-      text: textBody,
-      html: htmlBody,
-    };
-
-    const emailResponse = await fetch(relayUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${relayToken}`,
-      },
-      body: JSON.stringify(relayPayload),
+    // Create SMTP connection
+    const conn = await Deno.connect({
+      hostname: smtpHost,
+      port: parseInt(smtpPort),
     });
 
-    const responseText = await emailResponse.text();
-    console.log("SMTP relay response:", emailResponse.status, responseText);
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
 
-    if (!emailResponse.ok) {
-      throw new Error(`Relay error ${emailResponse.status}: ${responseText}`);
+    async function readLine(): Promise<string> {
+      const buffer = new Uint8Array(1024);
+      const n = await conn.read(buffer);
+      return decoder.decode(buffer.subarray(0, n || 0));
+    }
+
+    async function sendCommand(command: string): Promise<string> {
+      await conn.write(encoder.encode(command + "\r\n"));
+      return await readLine();
+    }
+
+    try {
+      // SMTP handshake
+      await readLine(); // Read greeting
+      await sendCommand(`EHLO ${smtpHost}`);
+      await sendCommand("AUTH LOGIN");
+      await sendCommand(btoa(smtpUsername));
+      await sendCommand(btoa(smtpPassword));
+      await sendCommand(`MAIL FROM:<${fromEmail}>`);
+      await sendCommand(`RCPT TO:<${email}>`);
+      await sendCommand("DATA");
+
+      // Send email content
+      const emailContent = [
+        `From: Khanya <${fromEmail}>`,
+        `To: ${email}`,
+        `Subject: ${subject}`,
+        `MIME-Version: 1.0`,
+        `Content-Type: text/html; charset=UTF-8`,
+        "",
+        htmlBody,
+        ".",
+      ].join("\r\n");
+
+      await conn.write(encoder.encode(emailContent + "\r\n"));
+      await readLine();
+      await sendCommand("QUIT");
+    } finally {
+      conn.close();
     }
 
     console.log("PIN sent successfully to:", email);
