@@ -43,7 +43,7 @@ const Cart = () => {
   return (
     <>
       <Helmet>
-        <title>Shopping Cart ({cartCount}) | Your Business Name</title>
+        <title>{`Shopping Cart (${cartCount}) | Your Business Name`}</title>
       </Helmet>
       <Header />
       <div className="min-h-screen bg-background py-8">
