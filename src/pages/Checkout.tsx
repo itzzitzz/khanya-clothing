@@ -59,23 +59,11 @@ const Checkout = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('/send-verification-pin.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: formData.customer_email }),
+      const { data, error } = await supabase.functions.invoke('send-verification-pin', {
+        body: { email: formData.customer_email },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send PIN');
-      }
-
-      // Store the PIN for verification (in real app, this would be server-side only)
-      sessionStorage.setItem('verification_pin', data.pin_code);
-      sessionStorage.setItem('verification_email', data.email);
+      if (error) throw error;
 
       setPinSent(true);
       toast({
@@ -85,7 +73,7 @@ const Checkout = () => {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message,
+        description: error.message || 'Failed to send PIN',
         variant: 'destructive',
       });
     } finally {
@@ -105,24 +93,18 @@ const Checkout = () => {
 
     setVerifyingPin(true);
     try {
-      const storedPin = sessionStorage.getItem('verification_pin');
-      const storedEmail = sessionStorage.getItem('verification_email');
+      const { data, error } = await supabase.functions.invoke('verify-pin', {
+        body: { 
+          email: formData.customer_email,
+          pin_code: pin 
+        },
+      });
 
-      if (!storedPin || !storedEmail) {
-        throw new Error('No verification session found');
-      }
+      if (error) throw error;
 
-      if (storedEmail !== formData.customer_email) {
-        throw new Error('Email mismatch');
-      }
-
-      if (pin !== storedPin) {
+      if (!data.valid) {
         throw new Error('Invalid PIN');
       }
-
-      // Clear the stored PIN after successful verification
-      sessionStorage.removeItem('verification_pin');
-      sessionStorage.removeItem('verification_email');
 
       setPinVerified(true);
       toast({
@@ -132,7 +114,7 @@ const Checkout = () => {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'Invalid or expired PIN',
+        description: error.message || 'Invalid or expired PIN',
         variant: 'destructive',
       });
     } finally {
