@@ -242,6 +242,42 @@ const handler = async (req: Request): Promise<Response> => {
       throw updateError;
     }
 
+    // If payment status is being set to 'paid', deduct bale quantities from stock
+    if (payment_status === 'paid') {
+      console.log("Payment confirmed - deducting bale quantities from stock");
+      
+      for (const item of order.order_items) {
+        const baleId = item.product_id;
+        const quantityOrdered = item.quantity;
+        
+        // Get current stock
+        const { data: currentBale, error: baleError } = await supabase
+          .from('bales')
+          .select('quantity_in_stock')
+          .eq('id', baleId)
+          .single();
+        
+        if (baleError) {
+          console.error(`Error fetching bale ${baleId}:`, baleError);
+          continue;
+        }
+        
+        const newStock = Math.max(0, currentBale.quantity_in_stock - quantityOrdered);
+        
+        // Update bale stock
+        const { error: stockUpdateError } = await supabase
+          .from('bales')
+          .update({ quantity_in_stock: newStock })
+          .eq('id', baleId);
+        
+        if (stockUpdateError) {
+          console.error(`Error updating stock for bale ${baleId}:`, stockUpdateError);
+        } else {
+          console.log(`Updated bale ${baleId}: ${currentBale.quantity_in_stock} -> ${newStock}`);
+        }
+      }
+    }
+
     // Send status update email
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (resendApiKey) {
