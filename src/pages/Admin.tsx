@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Package, FolderOpen, ShoppingCart, Box } from "lucide-react";
+import { LogOut, Package, FolderOpen, ShoppingCart, Box, Tags } from "lucide-react";
 import { CategoryManager } from "@/components/admin/CategoryManager";
 import { StockItemManager } from "@/components/admin/StockItemManager";
 import { BaleManager } from "@/components/admin/BaleManager";
+import { ProductCategoryManager } from "@/components/admin/ProductCategoryManager";
 import OrderManager from "@/components/admin/OrderManager";
 import { GenerateStockImages } from "@/components/admin/GenerateStockImages";
 import Header from "@/components/Header";
@@ -119,7 +120,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="stock-categories" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="stock-categories">
               <FolderOpen className="h-4 w-4 mr-2" />
               Stock Categories
@@ -127,6 +128,10 @@ const Admin = () => {
             <TabsTrigger value="stock-items">
               <Package className="h-4 w-4 mr-2" />
               Stock Items
+            </TabsTrigger>
+            <TabsTrigger value="product-categories">
+              <Tags className="h-4 w-4 mr-2" />
+              Product Categories
             </TabsTrigger>
             <TabsTrigger value="build-bales">
               <Box className="h-4 w-4 mr-2" />
@@ -145,6 +150,10 @@ const Admin = () => {
           <TabsContent value="stock-items" className="mt-6 space-y-6">
             <GenerateStockImages />
             <StockItemManager />
+          </TabsContent>
+
+          <TabsContent value="product-categories" className="mt-6">
+            <ProductCategoryManager />
           </TabsContent>
 
           <TabsContent value="build-bales" className="mt-6">
