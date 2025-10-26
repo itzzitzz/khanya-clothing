@@ -39,6 +39,7 @@ interface Bale {
     id: number;
     name: string;
     description: string;
+    display_order: number;
   };
   bale_items: BaleItem[];
 }
@@ -76,7 +77,8 @@ Deno.serve(async (req) => {
         product_categories (
           id,
           name,
-          description
+          description,
+          display_order
         )
       `)
       .eq('active', true)

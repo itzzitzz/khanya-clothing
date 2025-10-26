@@ -37,6 +37,7 @@ interface ProductCategory {
   id: number;
   name: string;
   description: string;
+  display_order: number;
 }
 
 interface Bale {
@@ -120,7 +121,7 @@ const ViewOrderBales = () => {
 
   const uniqueCategories = Array.from(
     new Map(bales.map(b => [b.product_category.id, b.product_category])).values()
-  );
+  ).sort((a, b) => a.display_order - b.display_order);
   return (
     <div>
       <Helmet>
