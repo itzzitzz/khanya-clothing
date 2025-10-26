@@ -1,0 +1,21 @@
+
+-- Insert stock items with calculated cost prices (50% margin)
+INSERT INTO public.stock_items (stock_category_id, name, description, age_range, cost_price, selling_price, margin_percentage, stock_on_hand, display_order, active) VALUES
+(3, 'Girls summer tops', 'Bright, breezy summer tops for girls, featuring playful patterns and soft fabrics. Perfect for sunny playdates or school, these stylish tees and blouses keep her cool and confident!', '3 to 8 years', 10.00, 15.00, 50.00, 95, 1, true),
+(3, 'Girls dresses and pyjamas', 'Charming dresses for daytime twirls and cozy full-length pyjamas for sweet dreams. With fun designs and soft materials, these pieces bring comfort and style to every moment.', '3 to 8 years', 18.67, 28.00, 50.00, 69, 2, true),
+(3, 'Girls bottoms', 'Versatile bottoms like leggings, shorts, and jeans, designed for active girls. Comfy, durable, and trendy, they''re ideal for school, play, or any adventure.', '3 to 8 years', 16.67, 25.00, 50.00, 150, 3, true),
+(3, 'Girls jackets', 'Stylish jackets to keep her warm and chic! From lightweight layers to cozy coats, these feature fun colors and practical designs for chilly days.', '3 to 8 years', 30.00, 45.00, 50.00, 79, 4, true),
+(3, 'Girls mixed', 'A vibrant mix of tops, bottoms, and more for pre-teens. These trendy, comfy pieces let her mix and match to express her unique style.', '8 to 12 years', 13.33, 20.00, 50.00, 142, 5, true),
+(2, 'Boys winter shirts', 'Cozy long-sleeve shirts for boys, blending warmth and style. With cool designs and soft fabrics, they''re perfect for school or winter adventures.', '3 to 8 years', 14.67, 22.00, 50.00, 76, 1, true),
+(2, 'Boys jackets', 'Rugged yet stylish jackets for boys, offering warmth and durability. With hoods and pockets, they''re great for outdoor play or chilly days.', '3 to 8 years', 30.00, 45.00, 50.00, 61, 2, true),
+(2, 'Boys t-shirts', 'Bold and comfy t-shirts for boys, featuring fun graphics and durable fabrics. Ideal for school, sports, or casual hangouts with friends.', '3 to 8 years', 10.00, 15.00, 50.00, 118, 3, true),
+(2, 'Boys long pants', 'Durable jeans, joggers, and chinos for active boys. Designed for comfort and style, these pants are perfect for school or playtime.', '3 to 8 years', 20.00, 30.00, 50.00, 139, 4, true),
+(2, 'Boys shorts', 'Cool and comfy shorts for boys, from cargos to athletic styles. Built for summer fun, they offer flexibility and practical pockets.', '3 to 8 years', 13.33, 20.00, 50.00, 109, 5, true),
+(2, 'Boys mixed', 'A fun assortment of tees, pants, and shorts for pre-teen boys. These durable, stylish pieces are perfect for creating cool, everyday looks.', '8-12 years', 13.33, 20.00, 50.00, 87, 6, true),
+(4, 'Babies underwear', 'Soft, hypoallergenic underwear like onesies and vests for babies. Gentle on delicate skin, these essentials ensure all-day comfort and cuteness.', '0 to 2 years', 2.00, 3.00, 50.00, 40, 1, true),
+(4, 'Babies assorted', 'Adorable mix of onesies, tops, and pants for babies. Crafted with soft fabrics and playful designs, they''re perfect for your little one''s early adventures.', '0 to 2 years', 6.67, 10.00, 50.00, 301, 2, true),
+(4, 'Babies winter wear', 'Cozy snowsuits, sweaters, and hats to keep babies warm. Soft, snuggly, and cute, these pieces are ideal for chilly days.', '0 to 2 years', 13.33, 20.00, 50.00, 98, 3, true),
+(1, 'Mens t-shirts', 'Stylish, comfy t-shirts for teens and men, featuring bold graphics and classic fits. Perfect for casual days, workouts, or layering with ease.', '13 to adult', 16.67, 25.00, 50.00, 157, 1, true),
+(1, 'Ladies t-shirts', 'Chic and versatile t-shirts for teens and women, from fitted to flowy styles. Soft and trendy, they''re ideal for any casual or stylish look.', '13 to adult', 16.67, 25.00, 50.00, 257, 2, true),
+(1, 'Adults and teens jackets', 'Sleek, durable jackets for teens and adults, from bombers to parkas. Warm, stylish, and practical, they''re perfect for any season or occasion.', '13 to adult', 36.67, 55.00, 50.00, 84, 3, true),
+(1, 'Mixed jeans', 'Timeless jeans and ripped jeans in various fits and washes for kids, teens, and adults. Durable and versatile, they''re a must-have for effortless, everyday style.', '8 to adult', 40.00, 60.00, 50.00, 79, 4, true);
