@@ -70,7 +70,7 @@ export const BaleManager = () => {
     description: '',
     actual_selling_price: 0,
     display_order: 0,
-    quantity_in_stock: 0
+    quantity_in_stock: 1
   });
   const { toast } = useToast();
 
@@ -266,7 +266,7 @@ export const BaleManager = () => {
         description: '',
         actual_selling_price: 0,
         display_order: 0,
-        quantity_in_stock: 0
+        quantity_in_stock: 1
       });
       setEditingBaleId(null);
       await loadData();
@@ -306,7 +306,7 @@ export const BaleManager = () => {
       description: '',
       actual_selling_price: 0,
       display_order: 0,
-      quantity_in_stock: 0
+      quantity_in_stock: 1
     });
   };
 
