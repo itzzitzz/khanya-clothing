@@ -61,7 +61,7 @@ export type Database = {
           active: boolean
           actual_selling_price: number
           bale_margin_percentage: number
-          bale_number: string
+          bale_number: string | null
           bale_profit: number
           created_at: string | null
           description: string
@@ -76,7 +76,7 @@ export type Database = {
           active?: boolean
           actual_selling_price?: number
           bale_margin_percentage?: number
-          bale_number: string
+          bale_number?: string | null
           bale_profit?: number
           created_at?: string | null
           description: string
@@ -91,7 +91,7 @@ export type Database = {
           active?: boolean
           actual_selling_price?: number
           bale_margin_percentage?: number
-          bale_number?: string
+          bale_number?: string | null
           bale_profit?: number
           created_at?: string | null
           description?: string

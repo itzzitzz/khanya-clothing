@@ -43,7 +43,6 @@ interface Bale {
   display_order: number;
   active: boolean;
   quantity_in_stock: number;
-  bale_number: string;
   product_categories?: ProductCategory;
   bale_items?: Array<{
     id: number;
@@ -65,6 +64,7 @@ export const BaleManager = () => {
   const [editingBaleId, setEditingBaleId] = useState<number | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [baleToDelete, setBaleToDelete] = useState<number | null>(null);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<number>(0);
   const [formData, setFormData] = useState({
     product_category_id: 0,
     description: '',
@@ -218,10 +218,6 @@ export const BaleManager = () => {
 
         toast({ title: "Success", description: "Bale updated successfully" });
       } else {
-        // Generate bale number
-        const { data: baleNumber, error: baleNumberError } = await supabase.rpc('generate_bale_number');
-        if (baleNumberError) throw baleNumberError;
-
         // Create new bale
         const { data: bale, error: baleError } = await supabase
           .from('bales')
@@ -234,8 +230,7 @@ export const BaleManager = () => {
             bale_margin_percentage: totals.baleMargin,
             actual_selling_price: totals.actualSelling,
             display_order: formData.display_order,
-            quantity_in_stock: formData.quantity_in_stock,
-            bale_number: baleNumber
+            quantity_in_stock: formData.quantity_in_stock
           }])
           .select()
           .single();
@@ -534,12 +529,30 @@ export const BaleManager = () => {
 
       {/* Existing Bales Grid */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Existing Bales</h3>
-        {bales.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">No bales created yet</p>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Existing Bales</h3>
+          <div className="w-64">
+            <Select 
+              value={selectedCategoryFilter.toString()} 
+              onValueChange={(v) => setSelectedCategoryFilter(parseInt(v))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">All Categories</SelectItem>
+                {productCategories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        {bales.filter(b => selectedCategoryFilter === 0 || b.product_category_id === selectedCategoryFilter).length === 0 ? (
+          <p className="text-muted-foreground text-center py-8">No bales found</p>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {bales.map((bale) => (
+            {bales.filter(b => selectedCategoryFilter === 0 || b.product_category_id === selectedCategoryFilter).map((bale) => (
               <Card key={bale.id} className="p-4 space-y-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -556,10 +569,6 @@ export const BaleManager = () => {
                 </div>
 
                 <div className="space-y-1 text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Bale #:</span>
-                    <span className="font-mono text-xs">{bale.bale_number}</span>
-                  </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Items:</span>
                     <span className="font-medium">
