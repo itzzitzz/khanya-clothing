@@ -345,6 +345,7 @@ export type Database = {
           display_order: number
           id: number
           margin_percentage: number
+          name: string
           selling_price: number
           stock_category_id: number | null
           stock_on_hand: number
@@ -358,6 +359,7 @@ export type Database = {
           display_order?: number
           id?: number
           margin_percentage?: number
+          name: string
           selling_price?: number
           stock_category_id?: number | null
           stock_on_hand?: number
@@ -371,6 +373,7 @@ export type Database = {
           display_order?: number
           id?: number
           margin_percentage?: number
+          name?: string
           selling_price?: number
           stock_category_id?: number | null
           stock_on_hand?: number

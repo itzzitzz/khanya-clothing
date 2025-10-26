@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 interface StockItem {
   id: number;
   stock_category_id: number;
+  name: string;
   description: string;
   age_range: string | null;
   cost_price: number;
@@ -46,6 +47,7 @@ export const StockItemManager = () => {
   const [editing, setEditing] = useState<StockItem | null>(null);
   const [formData, setFormData] = useState({
     stock_category_id: 0,
+    name: '',
     description: '',
     age_range: '',
     cost_price: 0,
@@ -147,6 +149,7 @@ export const StockItemManager = () => {
     setEditing(item);
     setFormData({
       stock_category_id: item.stock_category_id,
+      name: item.name,
       description: item.description,
       age_range: item.age_range || '',
       cost_price: item.cost_price,
@@ -164,6 +167,7 @@ export const StockItemManager = () => {
     setImages([]);
     setFormData({
       stock_category_id: 0,
+      name: '',
       description: '',
       age_range: '',
       cost_price: 0,
@@ -254,6 +258,15 @@ export const StockItemManager = () => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label>Name</Label>
+            <Input 
+              value={formData.name} 
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+              required 
+            />
           </div>
 
           <div>
@@ -426,6 +439,7 @@ export const StockItemManager = () => {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Age Range</TableHead>
@@ -442,6 +456,7 @@ export const StockItemManager = () => {
               const category = categories.find(c => c.id === item.stock_category_id);
               return (
                 <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell className="max-w-xs truncate">{item.description}</TableCell>
                   <TableCell>{category?.name}</TableCell>
                   <TableCell>{item.age_range || '-'}</TableCell>

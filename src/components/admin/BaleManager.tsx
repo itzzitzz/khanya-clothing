@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface StockItem {
   id: number;
+  name: string;
   description: string;
   cost_price: number;
   selling_price: number;
@@ -47,7 +48,7 @@ export const BaleManager = () => {
   const loadData = async () => {
     try {
       const [itemsRes, categoriesRes] = await Promise.all([
-        supabase.from('stock_items').select('id, description, cost_price, selling_price').eq('active', true),
+        supabase.from('stock_items').select('id, name, description, cost_price, selling_price').eq('active', true),
         supabase.from('product_categories').select('*').eq('active', true).order('display_order')
       ]);
 
@@ -237,7 +238,7 @@ export const BaleManager = () => {
                   <SelectContent>
                     {stockItems.map((item) => (
                       <SelectItem key={item.id} value={item.id.toString()}>
-                        {item.description} (R{item.selling_price.toFixed(2)})
+                        {item.name} (R{item.selling_price.toFixed(2)})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -275,7 +276,14 @@ export const BaleManager = () => {
                 <TableBody>
                   {baleItems.map((item) => (
                     <TableRow key={item.stock_item_id}>
-                      <TableCell>{item.stock_item?.description}</TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{item.stock_item?.name}</div>
+                          <div className="text-sm text-muted-foreground truncate max-w-xs">
+                            {item.stock_item?.description}
+                          </div>
+                        </div>
+                      </TableCell>
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>R{item.stock_item?.selling_price.toFixed(2)}</TableCell>
                       <TableCell>R{((item.stock_item?.selling_price || 0) * item.quantity).toFixed(2)}</TableCell>
