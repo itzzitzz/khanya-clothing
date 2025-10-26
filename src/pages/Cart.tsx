@@ -65,7 +65,7 @@ const Cart = () => {
                   <div className="flex-1">
                     <h3 className="font-semibold mb-2">{item.product_name}</h3>
                     <p className="text-lg font-bold mb-2">
-                      R{Number(item.price_per_unit).toFixed(2)} per 10kg
+                      R{Number(item.price_per_unit).toFixed(2)}
                     </p>
                     <div className="flex items-center gap-2">
                       <Button

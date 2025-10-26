@@ -36,7 +36,7 @@ const Checkout = () => {
     delivery_city: '',
     delivery_province: '',
     delivery_postal_code: '',
-    payment_method: 'card',
+    payment_method: 'eft',
   });
   
   const [pin, setPin] = useState('');
@@ -203,17 +203,22 @@ const Checkout = () => {
           
           {formData.payment_method === 'eft' && (
             <div className="space-y-4">
-              <h3 className="font-semibold">EFT Payment Details</h3>
-              <p>Please transfer <strong>R{orderDetails.total_amount.toFixed(2)}</strong> to:</p>
+              <h3 className="font-semibold text-lg">Bank Transfer Details</h3>
+              <p className="text-sm">Please deposit <strong>R{orderDetails.total_amount.toFixed(2)}</strong> into the following account and send proof of payment to <strong>sales@khanya.store</strong>:</p>
               <div className="bg-muted p-4 rounded space-y-2">
-                <p><strong>Bank:</strong> First National Bank</p>
-                <p><strong>Account Name:</strong> Your Business Name</p>
-                <p><strong>Account Number:</strong> 1234567890</p>
+                <p><strong>Bank:</strong> First National Bank (FNB)</p>
                 <p><strong>Branch Code:</strong> 250655</p>
-                <p><strong>Reference:</strong> {orderDetails.order_number}</p>
+                <p><strong>Account Number:</strong> 63173001256</p>
+                <p className="mt-3 pt-3 border-t"><strong>Reference:</strong> {orderDetails.order_number}</p>
               </div>
+              <p className="text-sm font-medium">
+                Please use order number <strong>{orderDetails.order_number}</strong> as your payment reference.
+              </p>
               <p className="text-sm text-muted-foreground">
-                You will receive an email once payment has been confirmed.
+                Your order will be packed and couriered as soon as payment has reflected.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                You will be kept up to date on the status of your order by email.
               </p>
             </div>
           )}
@@ -443,24 +448,8 @@ const Checkout = () => {
                     }
                   >
                     <div className="flex items-center space-x-2 p-3 border rounded">
-                      <RadioGroupItem value="card" id="card" />
-                      <Label htmlFor="card">Credit/Debit Card (Visa, Mastercard)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-3 border rounded">
-                      <RadioGroupItem value="apple_pay" id="apple_pay" />
-                      <Label htmlFor="apple_pay">Apple Pay</Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-3 border rounded">
-                      <RadioGroupItem value="google_pay" id="google_pay" />
-                      <Label htmlFor="google_pay">Google Pay</Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-3 border rounded">
                       <RadioGroupItem value="eft" id="eft" />
                       <Label htmlFor="eft">EFT (Electronic Funds Transfer)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-3 border rounded">
-                      <RadioGroupItem value="fnb_ewallet" id="fnb_ewallet" />
-                      <Label htmlFor="fnb_ewallet">FNB e-Wallet</Label>
                     </div>
                   </RadioGroup>
                 </div>
