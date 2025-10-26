@@ -31,6 +31,7 @@ interface Bale {
   id: number;
   description: string;
   actual_selling_price: number;
+  quantity_in_stock: number;
   bale_items: BaleItem[];
 }
 
@@ -271,9 +272,16 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
               }}
               className="w-full"
               size="lg"
+              disabled={bale.quantity_in_stock === 0}
             >
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Add to Basket
+              {bale.quantity_in_stock === 0 ? (
+                "Out of Stock"
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Add to Basket
+                </>
+              )}
             </Button>
           </div>
         </ScrollArea>

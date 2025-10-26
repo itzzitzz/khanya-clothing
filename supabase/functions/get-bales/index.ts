@@ -34,6 +34,7 @@ interface Bale {
   bale_margin_percentage: number;
   display_order: number;
   product_category_id: number;
+  quantity_in_stock: number;
   product_category: {
     id: number;
     name: string;
@@ -58,7 +59,7 @@ Deno.serve(async (req) => {
       }
     );
 
-    // Fetch active bales with their product categories (only those with stock)
+    // Fetch active bales with their product categories
     const { data: bales, error: balesError } = await supabaseClient
       .from('bales')
       .select(`
@@ -79,7 +80,6 @@ Deno.serve(async (req) => {
         )
       `)
       .eq('active', true)
-      .gt('quantity_in_stock', 0)
       .order('display_order', { ascending: true });
 
     if (balesError) throw balesError;
@@ -154,6 +154,7 @@ Deno.serve(async (req) => {
       bale_margin_percentage: bale.bale_margin_percentage,
       display_order: bale.display_order,
       product_category_id: bale.product_category_id,
+      quantity_in_stock: bale.quantity_in_stock,
       product_category: (bale.product_categories as any) || {},
       bale_items: itemsByBale[bale.id] || []
     })) || [];

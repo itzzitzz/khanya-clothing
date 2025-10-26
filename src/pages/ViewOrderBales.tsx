@@ -49,6 +49,7 @@ interface Bale {
   bale_margin_percentage: number;
   display_order: number;
   product_category_id: number;
+  quantity_in_stock: number;
   product_category: ProductCategory;
   bale_items: BaleItem[];
 }
@@ -215,9 +216,16 @@ const ViewOrderBales = () => {
                                 e.stopPropagation();
                                 handleAddToCart(bale);
                               }}
+                              disabled={bale.quantity_in_stock === 0}
                             >
-                              <ShoppingCart className="h-2.5 w-2.5 mr-1" />
-                              Add to Cart
+                              {bale.quantity_in_stock === 0 ? (
+                                "Out of Stock"
+                              ) : (
+                                <>
+                                  <ShoppingCart className="h-2.5 w-2.5 mr-1" />
+                                  Add to Cart
+                                </>
+                              )}
                             </Button>
                           </div>
                         </div>
