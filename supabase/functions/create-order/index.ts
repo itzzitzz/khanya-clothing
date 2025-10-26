@@ -98,6 +98,18 @@ const handler = async (req: Request): Promise<Response> => {
       throw itemsError;
     }
 
+    // Fetch bale numbers for the ordered items
+    const baleIds = orderData.items.map(item => item.product_id);
+    const { data: balesData } = await supabase
+      .from("bales")
+      .select("id, bale_number, description")
+      .in("id", baleIds);
+
+    const baleNumbersMap = balesData?.reduce((acc, bale) => {
+      acc[bale.id] = bale.bale_number;
+      return acc;
+    }, {} as Record<number, string>) || {};
+
     // Send confirmation emails
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (resendApiKey) {
@@ -216,6 +228,7 @@ const handler = async (req: Request): Promise<Response> => {
               <table>
                 <thead>
                   <tr>
+                    <th>Bale #</th>
                     <th>Item</th>
                     <th>Qty</th>
                     <th>Price</th>
@@ -225,6 +238,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <tbody>
                   ${orderData.items.map(item => `
                     <tr>
+                      <td style="font-family: monospace; font-size: 11px;">${baleNumbersMap[item.product_id] || 'N/A'}</td>
                       <td>${item.product_name}</td>
                       <td>${item.quantity}</td>
                       <td>R${item.price_per_unit.toFixed(2)}</td>
@@ -232,7 +246,7 @@ const handler = async (req: Request): Promise<Response> => {
                     </tr>
                   `).join('')}
                   <tr style="font-weight: bold; background: #f9fafb;">
-                    <td colspan="3">Total Amount:</td>
+                    <td colspan="4">Total Amount:</td>
                     <td>R${totalAmount.toFixed(2)}</td>
                   </tr>
                 </tbody>

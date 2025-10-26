@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
       }
     );
 
-    // Fetch active bales with their product categories
+    // Fetch active bales with their product categories (only those with stock)
     const { data: bales, error: balesError } = await supabaseClient
       .from('bales')
       .select(`
@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
         bale_margin_percentage,
         display_order,
         product_category_id,
+        quantity_in_stock,
         product_categories (
           id,
           name,
@@ -78,6 +79,7 @@ Deno.serve(async (req) => {
         )
       `)
       .eq('active', true)
+      .gt('quantity_in_stock', 0)
       .order('display_order', { ascending: true });
 
     if (balesError) throw balesError;

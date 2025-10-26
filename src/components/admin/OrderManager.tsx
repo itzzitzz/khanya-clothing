@@ -37,11 +37,12 @@ const OrderManager = () => {
         (data || []).map(async (order) => {
           const itemsWithBaleDetails = await Promise.all(
             (order.order_items || []).map(async (item: any) => {
-              // Fetch bale with its stock items
+              // Fetch bale with its stock items and bale number
               const { data: baleData } = await supabase
                 .from('bales')
                 .select(`
                   id,
+                  bale_number,
                   bale_items (
                     id,
                     quantity,
@@ -235,7 +236,14 @@ const OrderManager = () => {
                           className="w-16 h-20 object-contain rounded border"
                         />
                         <div className="flex-1">
-                          <p className="font-medium">{item.product_name}</p>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium">{item.product_name}</p>
+                            {item.bale_details?.bale_number && (
+                              <span className="text-xs font-mono bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                {item.bale_details.bale_number}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground">
                             {item.quantity} bale{item.quantity > 1 ? 's' : ''} × R{item.price_per_unit.toFixed(2)} = R{item.subtotal.toFixed(2)}
                           </p>

@@ -61,12 +61,14 @@ export type Database = {
           active: boolean
           actual_selling_price: number
           bale_margin_percentage: number
+          bale_number: string
           bale_profit: number
           created_at: string | null
           description: string
           display_order: number
           id: number
           product_category_id: number | null
+          quantity_in_stock: number
           recommended_sale_price: number
           total_cost_price: number
         }
@@ -74,12 +76,14 @@ export type Database = {
           active?: boolean
           actual_selling_price?: number
           bale_margin_percentage?: number
+          bale_number: string
           bale_profit?: number
           created_at?: string | null
           description: string
           display_order?: number
           id?: number
           product_category_id?: number | null
+          quantity_in_stock?: number
           recommended_sale_price?: number
           total_cost_price?: number
         }
@@ -87,12 +91,14 @@ export type Database = {
           active?: boolean
           actual_selling_price?: number
           bale_margin_percentage?: number
+          bale_number?: string
           bale_profit?: number
           created_at?: string | null
           description?: string
           display_order?: number
           id?: number
           product_category_id?: number | null
+          quantity_in_stock?: number
           recommended_sale_price?: number
           total_cost_price?: number
         }
@@ -414,6 +420,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_bale_number: { Args: never; Returns: string }
       generate_order_number: { Args: never; Returns: string }
       has_role: {
         Args: {

@@ -42,6 +42,8 @@ interface Bale {
   actual_selling_price: number;
   display_order: number;
   active: boolean;
+  quantity_in_stock: number;
+  bale_number: string;
   product_categories?: ProductCategory;
   bale_items?: Array<{
     id: number;
@@ -66,7 +68,8 @@ export const BaleManager = () => {
     product_category_id: 0,
     description: '',
     actual_selling_price: 0,
-    display_order: 0
+    display_order: 0,
+    quantity_in_stock: 0
   });
   const { toast } = useToast();
 
@@ -180,7 +183,8 @@ export const BaleManager = () => {
             bale_profit: totals.baleProfit,
             bale_margin_percentage: totals.baleMargin,
             actual_selling_price: totals.actualSelling,
-            display_order: formData.display_order
+            display_order: formData.display_order,
+            quantity_in_stock: formData.quantity_in_stock
           })
           .eq('id', editingBaleId);
 
@@ -210,6 +214,10 @@ export const BaleManager = () => {
 
         toast({ title: "Success", description: "Bale updated successfully" });
       } else {
+        // Generate bale number
+        const { data: baleNumber, error: baleNumberError } = await supabase.rpc('generate_bale_number');
+        if (baleNumberError) throw baleNumberError;
+
         // Create new bale
         const { data: bale, error: baleError } = await supabase
           .from('bales')
@@ -221,7 +229,9 @@ export const BaleManager = () => {
             bale_profit: totals.baleProfit,
             bale_margin_percentage: totals.baleMargin,
             actual_selling_price: totals.actualSelling,
-            display_order: formData.display_order
+            display_order: formData.display_order,
+            quantity_in_stock: formData.quantity_in_stock,
+            bale_number: baleNumber
           }])
           .select()
           .single();
@@ -251,7 +261,8 @@ export const BaleManager = () => {
         product_category_id: 0,
         description: '',
         actual_selling_price: 0,
-        display_order: 0
+        display_order: 0,
+        quantity_in_stock: 0
       });
       setEditingBaleId(null);
       await loadData();
@@ -266,7 +277,8 @@ export const BaleManager = () => {
       product_category_id: bale.product_category_id,
       description: bale.description,
       actual_selling_price: bale.actual_selling_price,
-      display_order: bale.display_order
+      display_order: bale.display_order,
+      quantity_in_stock: bale.quantity_in_stock
     });
     
     // Load bale items
@@ -287,7 +299,8 @@ export const BaleManager = () => {
       product_category_id: 0,
       description: '',
       actual_selling_price: 0,
-      display_order: 0
+      display_order: 0,
+      quantity_in_stock: 0
     });
   };
 
@@ -365,14 +378,26 @@ export const BaleManager = () => {
             />
           </div>
 
-          <div>
-            <Label>Display Order</Label>
-            <Input 
-              type="number"
-              value={formData.display_order} 
-              onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) })} 
-              required 
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Display Order</Label>
+              <Input 
+                type="number"
+                value={formData.display_order} 
+                onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) })} 
+                required 
+              />
+            </div>
+            <div>
+              <Label>Quantity in Stock</Label>
+              <Input 
+                type="number"
+                min="0"
+                value={formData.quantity_in_stock} 
+                onChange={(e) => setFormData({ ...formData, quantity_in_stock: parseInt(e.target.value) || 0 })} 
+                required 
+              />
+            </div>
           </div>
 
           <Card className="p-4 bg-muted">
@@ -518,11 +543,41 @@ export const BaleManager = () => {
                 </div>
 
                 <div className="space-y-1 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Bale #:</span>
+                    <span className="font-mono text-xs">{bale.bale_number}</span>
+                  </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Items:</span>
                     <span className="font-medium">
                       {bale.bale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0}
                     </span>
+                  </div>
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-muted-foreground">Qty in Stock:</span>
+                    <Input 
+                      type="number"
+                      min="0"
+                      value={bale.quantity_in_stock}
+                      onChange={async (e) => {
+                        const newQty = parseInt(e.target.value) || 0;
+                        try {
+                          const { error } = await supabase
+                            .from('bales')
+                            .update({ quantity_in_stock: newQty })
+                            .eq('id', bale.id);
+                          
+                          if (error) throw error;
+                          
+                          await loadData();
+                          toast({ title: "Success", description: "Quantity updated" });
+                        } catch (error: any) {
+                          toast({ title: "Error", description: error.message, variant: "destructive" });
+                        }
+                      }}
+                      className="w-20 h-7 text-sm"
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Cost Price:</span>
