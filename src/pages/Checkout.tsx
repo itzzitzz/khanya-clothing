@@ -174,9 +174,13 @@ const Checkout = () => {
 
       if (error) throw error;
 
-      setOrderDetails(data);
-      setShowPaymentDialog(true);
       clearCart();
+      // Navigate to order confirmation page
+      navigate('/order-confirmation', { 
+        state: { 
+          orderDetails: data 
+        } 
+      });
     } catch (error: any) {
       toast({
         title: 'Error',
