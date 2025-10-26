@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Loader2, RefreshCw, Printer } from 'lucide-react';
 
 const OrderManager = () => {
   const { toast } = useToast();
@@ -142,6 +142,10 @@ const OrderManager = () => {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
+  const handlePrintPackingList = (orderId: string) => {
+    window.open(`/packing-list?orderId=${orderId}`, '_blank');
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -170,7 +174,17 @@ const OrderManager = () => {
             <div key={order.id} className="border rounded-lg p-6 bg-card">
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <h3 className="text-xl font-bold mb-2">{order.order_number}</h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-xl font-bold">{order.order_number}</h3>
+                    <Button
+                      onClick={() => handlePrintPackingList(order.id)}
+                      variant="outline"
+                      size="sm"
+                      title="Print Packing List"
+                    >
+                      <Printer className="h-4 w-4" />
+                    </Button>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     {new Date(order.created_at).toLocaleString()}
                   </p>

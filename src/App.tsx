@@ -15,6 +15,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import TrackOrder from "./pages/TrackOrder";
 import OrderConfirmation from "./pages/OrderConfirmation";
+import PackingList from "./pages/PackingList";
 import { HelmetProvider } from "react-helmet-async";
 import { CartProvider } from "./contexts/CartContext";
 
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/track-order" element={<TrackOrder />} />
               <Route path="/order-confirmation" element={<OrderConfirmation />} />
+              <Route path="/packing-list" element={<PackingList />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
