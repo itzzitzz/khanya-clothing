@@ -128,7 +128,7 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
           {allImages.length > 0 && (
             <div className="mb-6">
               <div 
-                className="relative w-full max-w-56 mx-auto aspect-[3/4] bg-muted rounded-lg overflow-hidden"
+                className="relative w-full max-w-[21rem] mx-auto aspect-[3/4] bg-muted rounded-lg overflow-hidden"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -200,7 +200,7 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
                         setCurrentImageIndex(idx);
                         resetZoom();
                       }}
-                      className={`flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 bg-gray-50 ${
+                      className={`flex-shrink-0 w-24 h-36 rounded-lg overflow-hidden border-2 bg-gray-50 ${
                         idx === currentImageIndex ? 'border-primary ring-2 ring-primary/50' : 'border-transparent hover:border-primary/50'
                       }`}
                     >
