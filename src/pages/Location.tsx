@@ -23,32 +23,24 @@ const ensureCanonical = (href: string) => {
 
 const Location = () => {
   useEffect(() => {
-    document.title = "Khanya Location & Payment Details | Midrand";
+    document.title = "Payment Details & Free Delivery | Khanya";
     setMeta(
       "description",
-      "Find Khanya’s Midrand collection point, payment methods (EFT, FNB eWallet, cash), and delivery options. Arrange a pickup or request a delivery quote."
+      "Khanya payment details and free delivery information. EFT payment accepted with free shipping to anywhere in South Africa on all orders."
     );
     ensureCanonical(window.location.href);
   }, []);
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
+    "@type": "Organization",
     name: "Khanya",
     description:
       "Affordable bulk secondhand clothing bales for resellers in South Africa.",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Adam International Kyalami Storage Units, River Rd, Kyalami Heights, Midrand, 1684",
-      addressLocality: "Midrand",
-      addressRegion: "Johannesburg",
-      addressCountry: "ZA",
-    },
     areaServed: "South Africa",
     telephone: "+27 82 852 1112",
-    paymentAccepted: ["Cash", "BankTransfer", "EWallet"],
-    hasMap:
-      "https://maps.app.goo.gl/uUm3ij6EpubuKaqX6",
+    email: "sales@khanya.store",
+    paymentAccepted: ["BankTransfer"],
     url: typeof window !== "undefined" ? window.location.origin + "/location" : "https://khanya.example/location",
   };
 
@@ -58,66 +50,70 @@ const Location = () => {
 
       <main>
         <section className="container mx-auto py-10">
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-3">Location & Payment Details</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold mb-3">Payment Details & Delivery</h1>
           <p className="text-muted-foreground max-w-2xl">
-            We’re available for collection by prior arrangement from our storage unit in Midrand. We also offer delivery—ask us for a quote for your area.
+            Simple payment process with free delivery to anywhere in South Africa.
           </p>
         </section>
 
-        <section className="container mx-auto grid lg:grid-cols-2 gap-10 items-start pb-16">
-          <article className="space-y-4">
-            <h2 className="text-2xl font-bold">Collection location (by appointment)</h2>
-            <p>
-              Adam International Kyalami Storage Units
-              <br />River Rd, Khayalami Heights, Midrand, 1684
-            </p>
-            <div className="aspect-video w-full overflow-hidden rounded-xl border bg-card">
-              <iframe
-                title="Map to Adam International Kyalami Storage Units - Khanya Collection Point"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="w-full h-full"
-                src="https://www.google.com/maps?q=Adam%20International%20Kyalami%20Storage%20Units%2C%20River%20Rd%2C%20Khayalami%20Heights%2C%20Midrand%2C%201684&output=embed"
-              />
-            </div>
-            <div className="flex gap-3">
-              <Button variant="hero" asChild>
-                <a href="https://wa.me/27828521112" target="_blank" rel="noreferrer">Arrange collection</a>
-              </Button>
-              <Button variant="outline" asChild>
-                <a href="mailto:sales@khanya.co.za?subject=Arrange%20Collection%20%E2%80%93%20Khanya">Email us</a>
-              </Button>
+        <section className="container mx-auto grid lg:grid-cols-2 gap-8 pb-16 max-w-5xl">
+          <article className="bg-card border rounded-xl p-8">
+            <h2 className="text-2xl font-bold mb-4">Payment Method</h2>
+            <div className="space-y-4">
+              <p className="text-muted-foreground">
+                We accept payment via <strong>EFT (Electronic Funds Transfer)</strong> only.
+              </p>
+              
+              <div className="bg-accent/10 border border-accent/30 rounded-lg p-4">
+                <h3 className="font-bold mb-3">Banking Details</h3>
+                <div className="space-y-1 text-sm">
+                  <p><strong>Bank:</strong> First National Bank (FNB)</p>
+                  <p><strong>Branch Code:</strong> 250655</p>
+                  <p><strong>Account Number:</strong> 63173001256</p>
+                  <p><strong>Account Name:</strong> Khanya</p>
+                </div>
+              </div>
+
+              <div className="bg-primary/5 border rounded-lg p-4">
+                <p className="text-sm">
+                  <strong>Important:</strong> Please use your order number as the payment reference. After payment, send proof of payment to <a href="mailto:sales@khanya.store" className="text-primary hover:underline">sales@khanya.store</a>
+                </p>
+              </div>
             </div>
           </article>
 
-          <aside className="space-y-10">
-            <section id="payments" className="bg-card border rounded-xl p-6">
-              <h2 className="text-xl font-bold mb-2">Payment methods</h2>
-              <ul className="list-disc pl-6 space-y-1">
-                <li><strong>EFT</strong> (bank transfer)</li>
-                <li><strong>FNB eWallet</strong></li>
-                <li><strong>Cash</strong> is accepted on collect only. Deliveries need to be paid for in advance.</li>
-              </ul>
-              <p className="text-muted-foreground mt-3">
-                Banking details are provided on invoice or on request.
+          <article className="bg-card border rounded-xl p-8">
+            <h2 className="text-2xl font-bold mb-4">Free Delivery</h2>
+            <div className="space-y-4">
+              <p className="text-lg text-accent font-semibold">
+                ✓ Free delivery to anywhere in South Africa
               </p>
-            </section>
+              
+              <p className="text-muted-foreground">
+                All orders include free shipping, whether you're in Johannesburg, Cape Town, Durban, or any small township across South Africa. No hidden costs.
+              </p>
 
-            <section id="delivery" className="bg-card border rounded-xl p-6">
-              <h2 className="text-xl font-bold mb-2">Delivery</h2>
-              <p>
-                We can deliver. Pricing depends on your location. Send us your suburb and quantity, and we’ll provide a delivery quote.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                <Button variant="sun" asChild>
-                  <a href="https://wa.me/27828521112?text=Hi%20Khanya%2C%20please%20quote%20delivery%20to%20[YOUR%20AREA]%20for%20[bales]%20bale(s)." target="_blank" rel="noreferrer">Get delivery quote</a>
+              <div className="bg-accent/10 border border-accent/30 rounded-lg p-4">
+                <h3 className="font-bold mb-2">What happens after payment?</h3>
+                <ol className="space-y-2 text-sm list-decimal list-inside text-muted-foreground">
+                  <li>Send proof of payment to sales@khanya.store</li>
+                  <li>We confirm your payment (usually within 24 hours)</li>
+                  <li>Your bales are packed and shipped</li>
+                  <li>You receive tracking information</li>
+                  <li>Delivery typically takes 2-5 business days</li>
+                </ol>
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Button variant="hero" asChild>
+                  <a href="/view-order-bales">Order Now</a>
                 </Button>
                 <Button variant="outline" asChild>
-                  <a href="mailto:sales@khanya.co.za?subject=Delivery%20Quote%20Request%20%E2%80%93%20Khanya">Email for quote</a>
+                  <a href="https://wa.me/27828521112" target="_blank" rel="noreferrer">WhatsApp Us</a>
                 </Button>
               </div>
-            </section>
-          </aside>
+            </div>
+          </article>
         </section>
       </main>
 
