@@ -7,8 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from "@/components/ui/table";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Edit, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface StockItem {
   id: number;
@@ -30,13 +31,37 @@ interface BaleItem {
   stock_item?: StockItem;
 }
 
+interface Bale {
+  id: number;
+  product_category_id: number;
+  description: string;
+  recommended_sale_price: number;
+  total_cost_price: number;
+  bale_profit: number;
+  bale_margin_percentage: number;
+  actual_selling_price: number;
+  display_order: number;
+  active: boolean;
+  product_categories?: ProductCategory;
+  bale_items?: Array<{
+    id: number;
+    quantity: number;
+    line_item_price: number;
+    stock_items?: StockItem;
+  }>;
+}
+
 export const BaleManager = () => {
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
   const [baleItems, setBaleItems] = useState<BaleItem[]>([]);
+  const [bales, setBales] = useState<Bale[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStockItem, setSelectedStockItem] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(1);
+  const [editingBaleId, setEditingBaleId] = useState<number | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [baleToDelete, setBaleToDelete] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     product_category_id: 0,
     description: '',
@@ -47,13 +72,24 @@ export const BaleManager = () => {
 
   const loadData = async () => {
     try {
-      const [itemsRes, categoriesRes] = await Promise.all([
+      const [itemsRes, categoriesRes, balesRes] = await Promise.all([
         supabase.from('stock_items').select('id, name, description, cost_price, selling_price').eq('active', true),
-        supabase.from('product_categories').select('*').eq('active', true).order('display_order')
+        supabase.from('product_categories').select('*').eq('active', true).order('display_order'),
+        supabase.from('bales').select(`
+          *,
+          product_categories(id, name, description),
+          bale_items(
+            id,
+            quantity,
+            line_item_price,
+            stock_items(id, name, description, cost_price, selling_price)
+          )
+        `).order('display_order')
       ]);
 
       if (itemsRes.data) setStockItems(itemsRes.data);
       if (categoriesRes.data) setProductCategories(categoriesRes.data);
+      if (balesRes.data) setBales(balesRes.data as Bale[]);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
@@ -132,41 +168,84 @@ export const BaleManager = () => {
     try {
       const totals = calculateTotals();
 
-      // Create the bale
-      const { data: bale, error: baleError } = await supabase
-        .from('bales')
-        .insert([{
-          product_category_id: formData.product_category_id,
-          description: formData.description,
-          recommended_sale_price: totals.recommendedSalePrice,
-          total_cost_price: totals.totalCostPrice,
-          bale_profit: totals.baleProfit,
-          bale_margin_percentage: totals.baleMargin,
-          actual_selling_price: totals.actualSelling,
-          display_order: formData.display_order
-        }])
-        .select()
-        .single();
+      if (editingBaleId) {
+        // Update existing bale
+        const { error: baleError } = await supabase
+          .from('bales')
+          .update({
+            product_category_id: formData.product_category_id,
+            description: formData.description,
+            recommended_sale_price: totals.recommendedSalePrice,
+            total_cost_price: totals.totalCostPrice,
+            bale_profit: totals.baleProfit,
+            bale_margin_percentage: totals.baleMargin,
+            actual_selling_price: totals.actualSelling,
+            display_order: formData.display_order
+          })
+          .eq('id', editingBaleId);
 
-      if (baleError) throw baleError;
+        if (baleError) throw baleError;
 
-      // Create bale items
-      const baleItemsData = baleItems.map(item => ({
-        bale_id: bale.id,
-        stock_item_id: item.stock_item_id,
-        quantity: item.quantity,
-        line_item_price: (item.stock_item?.selling_price || 0) * item.quantity
-      }));
+        // Delete existing bale items
+        const { error: deleteError } = await supabase
+          .from('bale_items')
+          .delete()
+          .eq('bale_id', editingBaleId);
 
-      const { error: itemsError } = await supabase
-        .from('bale_items')
-        .insert(baleItemsData);
+        if (deleteError) throw deleteError;
 
-      if (itemsError) throw itemsError;
+        // Create new bale items
+        const baleItemsData = baleItems.map(item => ({
+          bale_id: editingBaleId,
+          stock_item_id: item.stock_item_id,
+          quantity: item.quantity,
+          line_item_price: (item.stock_item?.selling_price || 0) * item.quantity
+        }));
 
-      toast({ title: "Success", description: "Bale created successfully" });
+        const { error: itemsError } = await supabase
+          .from('bale_items')
+          .insert(baleItemsData);
+
+        if (itemsError) throw itemsError;
+
+        toast({ title: "Success", description: "Bale updated successfully" });
+      } else {
+        // Create new bale
+        const { data: bale, error: baleError } = await supabase
+          .from('bales')
+          .insert([{
+            product_category_id: formData.product_category_id,
+            description: formData.description,
+            recommended_sale_price: totals.recommendedSalePrice,
+            total_cost_price: totals.totalCostPrice,
+            bale_profit: totals.baleProfit,
+            bale_margin_percentage: totals.baleMargin,
+            actual_selling_price: totals.actualSelling,
+            display_order: formData.display_order
+          }])
+          .select()
+          .single();
+
+        if (baleError) throw baleError;
+
+        // Create bale items
+        const baleItemsData = baleItems.map(item => ({
+          bale_id: bale.id,
+          stock_item_id: item.stock_item_id,
+          quantity: item.quantity,
+          line_item_price: (item.stock_item?.selling_price || 0) * item.quantity
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('bale_items')
+          .insert(baleItemsData);
+
+        if (itemsError) throw itemsError;
+
+        toast({ title: "Success", description: "Bale created successfully" });
+      }
       
-      // Reset form
+      // Reset form and reload data
       setBaleItems([]);
       setFormData({
         product_category_id: 0,
@@ -174,8 +253,71 @@ export const BaleManager = () => {
         actual_selling_price: 0,
         display_order: 0
       });
+      setEditingBaleId(null);
+      await loadData();
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleEditBale = (bale: Bale) => {
+    setEditingBaleId(bale.id);
+    setFormData({
+      product_category_id: bale.product_category_id,
+      description: bale.description,
+      actual_selling_price: bale.actual_selling_price,
+      display_order: bale.display_order
+    });
+    
+    // Load bale items
+    const items: BaleItem[] = bale.bale_items?.map(item => ({
+      stock_item_id: item.stock_items?.id || 0,
+      quantity: item.quantity,
+      stock_item: item.stock_items
+    })) || [];
+    
+    setBaleItems(items);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingBaleId(null);
+    setBaleItems([]);
+    setFormData({
+      product_category_id: 0,
+      description: '',
+      actual_selling_price: 0,
+      display_order: 0
+    });
+  };
+
+  const handleDeleteBale = async () => {
+    if (!baleToDelete) return;
+
+    try {
+      // Delete bale items first
+      const { error: itemsError } = await supabase
+        .from('bale_items')
+        .delete()
+        .eq('bale_id', baleToDelete);
+
+      if (itemsError) throw itemsError;
+
+      // Delete bale
+      const { error: baleError } = await supabase
+        .from('bales')
+        .delete()
+        .eq('id', baleToDelete);
+
+      if (baleError) throw baleError;
+
+      toast({ title: "Success", description: "Bale deleted successfully" });
+      await loadData();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setDeleteDialogOpen(false);
+      setBaleToDelete(null);
     }
   };
 
@@ -186,7 +328,16 @@ export const BaleManager = () => {
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Build New Bale</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">
+            {editingBaleId ? 'Edit Bale' : 'Build New Bale'}
+          </h3>
+          {editingBaleId && (
+            <Button type="button" variant="outline" onClick={handleCancelEdit}>
+              Cancel Edit
+            </Button>
+          )}
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label>Product Category</Label>
@@ -338,10 +489,101 @@ export const BaleManager = () => {
           )}
 
           <Button type="submit" disabled={baleItems.length === 0}>
-            Create Bale
+            {editingBaleId ? 'Update Bale' : 'Create Bale'}
           </Button>
         </form>
       </Card>
+
+      {/* Existing Bales Grid */}
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4">Existing Bales</h3>
+        {bales.length === 0 ? (
+          <p className="text-muted-foreground text-center py-8">No bales created yet</p>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {bales.map((bale) => (
+              <Card key={bale.id} className="p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold">{bale.description}</h4>
+                      {!bale.active && (
+                        <span className="text-xs bg-muted px-2 py-0.5 rounded">Inactive</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {bale.product_categories?.name}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Items:</span>
+                    <span className="font-medium">
+                      {bale.bale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Cost Price:</span>
+                    <span>R{bale.total_cost_price.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Selling Price:</span>
+                    <span className="font-semibold">R{bale.actual_selling_price.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Profit:</span>
+                    <span className={bale.bale_profit >= 0 ? 'text-green-600' : 'text-red-600'}>
+                      R{bale.bale_profit.toFixed(2)} ({bale.bale_margin_percentage.toFixed(1)}%)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => handleEditBale(bale)}
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive" 
+                    onClick={() => {
+                      setBaleToDelete(bale.id);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this bale and all its items. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteBale} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
