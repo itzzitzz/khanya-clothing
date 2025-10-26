@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from "@/components/ui/table";
-import { Trash2, Plus, Edit, Eye } from "lucide-react";
+import { Trash2, Plus, Edit, Eye, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -59,6 +59,7 @@ export const BaleManager = () => {
   const [baleItems, setBaleItems] = useState<BaleItem[]>([]);
   const [bales, setBales] = useState<Bale[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [selectedStockItem, setSelectedStockItem] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(1);
   const [editingBaleId, setEditingBaleId] = useState<number | null>(null);
@@ -163,11 +164,14 @@ export const BaleManager = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (submitting) return; // Prevent double submission
+
     if (baleItems.length === 0) {
       toast({ title: "Error", description: "Please add at least one item to the bale", variant: "destructive" });
       return;
     }
 
+    setSubmitting(true);
     try {
       const totals = calculateTotals();
 
@@ -268,6 +272,8 @@ export const BaleManager = () => {
       await loadData();
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -513,8 +519,15 @@ export const BaleManager = () => {
             </Card>
           )}
 
-          <Button type="submit" disabled={baleItems.length === 0}>
-            {editingBaleId ? 'Update Bale' : 'Create Bale'}
+          <Button type="submit" disabled={baleItems.length === 0 || submitting}>
+            {submitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {editingBaleId ? 'Updating...' : 'Creating...'}
+              </>
+            ) : (
+              editingBaleId ? 'Update Bale' : 'Create Bale'
+            )}
           </Button>
         </form>
       </Card>
