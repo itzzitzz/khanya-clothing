@@ -413,7 +413,7 @@ export const BaleManager = () => {
                     <SelectValue placeholder="Select stock item" />
                   </SelectTrigger>
                   <SelectContent>
-                    {stockItems.map((item) => (
+                    {[...stockItems].sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
                       <SelectItem key={item.id} value={item.id.toString()}>
                         {item.name} (R{item.selling_price.toFixed(2)})
                       </SelectItem>
