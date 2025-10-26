@@ -14,6 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
+      bale_items: {
+        Row: {
+          bale_id: number | null
+          created_at: string | null
+          id: number
+          line_item_price: number
+          quantity: number
+          stock_item_id: number | null
+        }
+        Insert: {
+          bale_id?: number | null
+          created_at?: string | null
+          id?: number
+          line_item_price?: number
+          quantity: number
+          stock_item_id?: number | null
+        }
+        Update: {
+          bale_id?: number | null
+          created_at?: string | null
+          id?: number
+          line_item_price?: number
+          quantity?: number
+          stock_item_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bale_items_bale_id_fkey"
+            columns: ["bale_id"]
+            isOneToOne: false
+            referencedRelation: "bales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bale_items_stock_item_id_fkey"
+            columns: ["stock_item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bales: {
+        Row: {
+          active: boolean
+          actual_selling_price: number
+          bale_margin_percentage: number
+          bale_profit: number
+          created_at: string | null
+          description: string
+          display_order: number
+          id: number
+          product_category_id: number | null
+          recommended_sale_price: number
+          total_cost_price: number
+        }
+        Insert: {
+          active?: boolean
+          actual_selling_price?: number
+          bale_margin_percentage?: number
+          bale_profit?: number
+          created_at?: string | null
+          description: string
+          display_order?: number
+          id?: number
+          product_category_id?: number | null
+          recommended_sale_price?: number
+          total_cost_price?: number
+        }
+        Update: {
+          active?: boolean
+          actual_selling_price?: number
+          bale_margin_percentage?: number
+          bale_profit?: number
+          created_at?: string | null
+          description?: string
+          display_order?: number
+          id?: number
+          product_category_id?: number | null
+          recommended_sale_price?: number
+          total_cost_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bales_product_category_id_fkey"
+            columns: ["product_category_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_verifications: {
         Row: {
           created_at: string
@@ -139,6 +231,33 @@ export type Database = {
         }
         Relationships: []
       }
+      product_categories: {
+        Row: {
+          active: boolean
+          created_at: string | null
+          description: string | null
+          display_order: number
+          id: number
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: number
+          name: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -156,6 +275,115 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      stock_categories: {
+        Row: {
+          created_at: string | null
+          display_order: number
+          icon_name: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number
+          icon_name?: string | null
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number
+          icon_name?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      stock_item_images: {
+        Row: {
+          created_at: string | null
+          display_order: number
+          id: number
+          image_url: string
+          is_primary: boolean
+          stock_item_id: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number
+          id?: number
+          image_url: string
+          is_primary?: boolean
+          stock_item_id?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number
+          id?: number
+          image_url?: string
+          is_primary?: boolean
+          stock_item_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_item_images_stock_item_id_fkey"
+            columns: ["stock_item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_items: {
+        Row: {
+          active: boolean
+          age_range: string | null
+          cost_price: number
+          created_at: string | null
+          description: string
+          display_order: number
+          id: number
+          margin_percentage: number
+          selling_price: number
+          stock_category_id: number | null
+          stock_on_hand: number
+        }
+        Insert: {
+          active?: boolean
+          age_range?: string | null
+          cost_price?: number
+          created_at?: string | null
+          description: string
+          display_order?: number
+          id?: number
+          margin_percentage?: number
+          selling_price?: number
+          stock_category_id?: number | null
+          stock_on_hand?: number
+        }
+        Update: {
+          active?: boolean
+          age_range?: string | null
+          cost_price?: number
+          created_at?: string | null
+          description?: string
+          display_order?: number
+          id?: number
+          margin_percentage?: number
+          selling_price?: number
+          stock_category_id?: number | null
+          stock_on_hand?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_items_stock_category_id_fkey"
+            columns: ["stock_category_id"]
+            isOneToOne: false
+            referencedRelation: "stock_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
