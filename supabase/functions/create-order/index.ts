@@ -98,7 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw itemsError;
     }
 
-    // Fetch bale numbers for the ordered items
+    // Fetch bale numbers and stock item details for the ordered items
     const baleIds = orderData.items.map(item => item.product_id);
     const { data: balesData } = await supabase
       .from("bales")
@@ -109,6 +109,35 @@ const handler = async (req: Request): Promise<Response> => {
       acc[bale.id] = bale.bale_number;
       return acc;
     }, {} as Record<number, string>) || {};
+
+    // Fetch bale items with stock item details for fulfillment
+    const { data: baleItemsData } = await supabase
+      .from("bale_items")
+      .select(`
+        bale_id,
+        quantity,
+        stock_items (
+          name,
+          description,
+          age_range
+        )
+      `)
+      .in("bale_id", baleIds);
+
+    // Organize stock items by bale
+    const stockItemsByBale = baleItemsData?.reduce((acc, baleItem) => {
+      if (!acc[baleItem.bale_id]) {
+        acc[baleItem.bale_id] = [];
+      }
+      const stockItem = baleItem.stock_items as any;
+      acc[baleItem.bale_id].push({
+        name: stockItem.name,
+        description: stockItem.description,
+        age_range: stockItem.age_range,
+        quantity: baleItem.quantity
+      });
+      return acc;
+    }, {} as Record<number, any[]>) || {};
 
     // Send confirmation emails
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
@@ -212,6 +241,14 @@ const handler = async (req: Request): Promise<Response> => {
         // Sales notification email
         const salesHtml = `
           ${baseStyles}
+          <style>
+            .stock-breakdown { background: #f0f9ff; border: 2px solid #3b82f6; padding: 15px; margin: 15px 0; border-radius: 6px; }
+            .stock-breakdown h4 { margin: 0 0 10px 0; color: #1e40af; font-size: 16px; }
+            .stock-item { padding: 8px; margin: 5px 0; background: white; border-left: 3px solid #60a5fa; border-radius: 3px; }
+            .stock-item-name { font-weight: bold; color: #1e3a8a; }
+            .stock-item-qty { display: inline-block; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 3px; font-weight: bold; margin-left: 8px; }
+            .packing-header { background: #fef3c7; border: 2px solid #f59e0b; padding: 12px; margin: 20px 0; border-radius: 6px; text-align: center; }
+          </style>
           <div class="container">
             <div class="header">
               <h1 style="margin: 0; font-size: 28px;">New Order Received!</h1>
@@ -224,7 +261,34 @@ const handler = async (req: Request): Promise<Response> => {
               <strong>Email:</strong> ${orderData.customer_email}<br>
               <strong>Phone:</strong> ${orderData.customer_phone}</p>
               
-              <h3>Order Details</h3>
+              <div class="packing-header">
+                <strong style="color: #92400e; font-size: 16px;">⚠️ PACKING LIST - STOCK ITEMS TO INCLUDE IN EACH BALE</strong>
+              </div>
+              
+              ${orderData.items.map(item => {
+                const stockItems = stockItemsByBale[item.product_id] || [];
+                return `
+                  <div class="stock-breakdown">
+                    <h4>📦 ${baleNumbersMap[item.product_id] || 'N/A'} - ${item.product_name}</h4>
+                    <p style="margin: 5px 0 10px 0; font-size: 13px; color: #64748b;">Quantity ordered: ${item.quantity}</p>
+                    ${stockItems.length > 0 ? `
+                      <div style="margin-top: 10px;">
+                        <strong style="color: #1e40af;">Stock items to pack:</strong>
+                        ${stockItems.map(stockItem => `
+                          <div class="stock-item">
+                            <span class="stock-item-name">${stockItem.name}</span>
+                            <span class="stock-item-qty">${stockItem.quantity}x</span>
+                            ${stockItem.age_range ? `<span style="font-size: 12px; color: #64748b; margin-left: 8px;">(${stockItem.age_range})</span>` : ''}
+                            ${stockItem.description ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px;">${stockItem.description}</div>` : ''}
+                          </div>
+                        `).join('')}
+                      </div>
+                    ` : '<p style="color: #ef4444;">⚠️ No stock items found for this bale!</p>'}
+                  </div>
+                `;
+              }).join('')}
+              
+              <h3>Order Summary</h3>
               <table>
                 <thead>
                   <tr>
