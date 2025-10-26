@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, ZoomIn, ZoomOut, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 interface StockItemImage {
@@ -43,6 +43,10 @@ interface BaleDetailModalProps {
 
 export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleDetailModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [zoom, setZoom] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   if (!bale) return null;
 
@@ -62,14 +66,57 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
 
   const handlePrevious = () => {
     setCurrentImageIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
+    resetZoom();
   };
 
   const handleNext = () => {
     setCurrentImageIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
+    resetZoom();
+  };
+
+  const handleZoomIn = () => {
+    setZoom((prev) => Math.min(prev + 0.5, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom((prev) => Math.max(prev - 0.5, 1));
+  };
+
+  const resetZoom = () => {
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoom > 1) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      resetZoom();
+      setCurrentImageIndex(0);
+    }
+    onOpenChange(newOpen);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{bale.description}</DialogTitle>
@@ -79,31 +126,67 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
           {/* Image Gallery */}
           {allImages.length > 0 && (
             <div className="mb-6">
-              <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+              <div 
+                className="relative aspect-[3/4] bg-muted rounded-lg overflow-hidden"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+              >
                 <img
                   src={allImages[currentImageIndex].image_url}
                   alt={`Bale item ${currentImageIndex + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain transition-transform select-none"
+                  style={{
+                    transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+                  }}
+                  draggable={false}
                 />
                 {allImages.length > 1 && (
                   <>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={handlePrevious}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background p-2 rounded-full"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
                     >
-                      ←
-                    </button>
-                    <button
+                      <ChevronLeft className="h-6 w-6" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={handleNext}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background p-2 rounded-full"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
                     >
-                      →
-                    </button>
+                      <ChevronRight className="h-6 w-6" />
+                    </Button>
                     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-background/80 px-3 py-1 rounded-full text-sm">
                       {currentImageIndex + 1} / {allImages.length}
                     </div>
                   </>
                 )}
+                {/* Zoom controls */}
+                <div className="absolute top-2 right-2 flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-background/80 hover:bg-background"
+                    onClick={handleZoomOut}
+                    disabled={zoom <= 1}
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-background/80 hover:bg-background"
+                    onClick={handleZoomIn}
+                    disabled={zoom >= 3}
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               
               {/* Thumbnails */}
@@ -112,15 +195,18 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
                   {allImages.map((image, idx) => (
                     <button
                       key={image.id}
-                      onClick={() => setCurrentImageIndex(idx)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                        idx === currentImageIndex ? 'border-primary' : 'border-transparent'
+                      onClick={() => {
+                        setCurrentImageIndex(idx);
+                        resetZoom();
+                      }}
+                      className={`flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 bg-gray-50 ${
+                        idx === currentImageIndex ? 'border-primary ring-2 ring-primary/50' : 'border-transparent hover:border-primary/50'
                       }`}
                     >
                       <img
                         src={image.image_url}
                         alt={`Thumbnail ${idx + 1}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
                     </button>
                   ))}

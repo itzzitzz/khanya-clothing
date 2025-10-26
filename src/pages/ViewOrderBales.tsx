@@ -191,11 +191,11 @@ const ViewOrderBales = () => {
                           className="bg-card border rounded-lg overflow-hidden hover:shadow-md transition-all group cursor-pointer"
                           onClick={() => handleBaleClick(bale)}
                         >
-                          <div className="aspect-[3/4] overflow-hidden relative">
+                          <div className="aspect-[2/3] overflow-hidden relative bg-gray-50">
                             <img 
                               src={getRandomBaleImage(bale)} 
                               alt={bale.description}
-                              className="w-full h-full object-cover bg-gray-50 group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                             />
                             <div className="absolute top-2 right-2 bg-background/90 px-2 py-1 rounded-full text-xs font-medium">
                               {bale.bale_items.reduce((sum, item) => sum + item.quantity, 0)} items
