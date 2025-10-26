@@ -104,17 +104,18 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         const baseStyles = `
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #ffffff; padding: 30px 20px; border: 1px solid #e5e7eb; border-top: none; }
-            .order-number { font-size: 18px; font-weight: bold; color: #2563eb; margin: 10px 0; }
-            .info-box { background: #f9fafb; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0; border-radius: 4px; }
-            .payment-details { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px; }
-            .footer { text-align: center; color: #6b7280; font-size: 12px; margin-top: 30px; padding: 20px; border-top: 1px solid #e5e7eb; }
+            body { font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1f2e27; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #faf9f6; }
+            .header { background: linear-gradient(135deg, #2E4D38 0%, #234130 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #ffffff; padding: 30px 20px; border: 1px solid #d9ded6; border-top: none; }
+            .order-number { font-size: 18px; font-weight: bold; color: #D6A220; margin: 10px 0; }
+            .info-box { background: #f4f7f5; border-left: 4px solid #2E4D38; padding: 15px; margin: 20px 0; border-radius: 4px; }
+            .payment-details { background: #fef9e7; border-left: 4px solid #D6A220; padding: 15px; margin: 20px 0; border-radius: 4px; }
+            .footer { text-align: center; color: #6b7b73; font-size: 12px; margin-top: 30px; padding: 20px; border-top: 1px solid #d9ded6; }
             table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-            th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }
-            th { background: #f9fafb; font-weight: bold; }
+            th, td { padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; }
+            th { background: #f4f7f5; font-weight: bold; color: #2E4D38; }
+            .button { display: inline-block; background: #D6A220; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0; font-weight: 600; }
           </style>
         `;
 
@@ -157,14 +158,14 @@ const handler = async (req: Request): Promise<Response> => {
               
               ${orderData.payment_method === 'eft' ? `
                 <div class="payment-details">
-                  <h3 style="margin-top: 0;">EFT Payment Details</h3>
-                  <p>Please transfer <strong>R${totalAmount.toFixed(2)}</strong> to:</p>
-                  <p><strong>Bank:</strong> First National Bank<br>
-                  <strong>Account Name:</strong> Your Business Name<br>
-                  <strong>Account Number:</strong> 1234567890<br>
+                  <h3 style="margin-top: 0; color: #2E4D38;">EFT Payment Details</h3>
+                  <p>Please deposit <strong>R${totalAmount.toFixed(2)}</strong> into the following account and send proof of payment to <strong>sales@khanya.store</strong>:</p>
+                  <p><strong>Bank:</strong> First National Bank (FNB)<br>
                   <strong>Branch Code:</strong> 250655<br>
+                  <strong>Account Number:</strong> 63173001256<br>
                   <strong>Reference:</strong> ${orderNumber}</p>
-                  <p><em>Important: Please use your order number as the payment reference.</em></p>
+                  <p><em>Important: Please use your order number ${orderNumber} as the payment reference.</em></p>
+                  <p style="margin-top: 10px; font-size: 13px;">Your order will be packed and couriered as soon as payment has reflected. You will be kept up to date on the status of your order by email.</p>
                 </div>
               ` : ''}
               

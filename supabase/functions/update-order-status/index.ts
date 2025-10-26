@@ -32,29 +32,29 @@ function generateInvoiceHTML(order: any): string {
     <head>
       <meta charset="utf-8">
       <style>
-        body { font-family: 'Helvetica', 'Arial', sans-serif; margin: 0; padding: 40px; color: #333; }
+        body { font-family: Inter, 'Helvetica', 'Arial', sans-serif; margin: 0; padding: 40px; color: #1f2e27; background: #faf9f6; }
         .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { font-size: 36px; margin: 0; color: #2563eb; }
+        .header h1 { font-size: 36px; margin: 0; color: #2E4D38; }
         .company { margin-bottom: 30px; }
-        .company h2 { font-size: 20px; margin: 0 0 5px 0; }
-        .company p { margin: 2px 0; font-size: 12px; color: #666; }
+        .company h2 { font-size: 20px; margin: 0 0 5px 0; color: #2E4D38; }
+        .company p { margin: 2px 0; font-size: 12px; color: #6b7b73; }
         .invoice-details { float: right; text-align: right; margin-bottom: 30px; }
         .invoice-details p { margin: 3px 0; font-size: 12px; }
-        .invoice-details strong { font-weight: bold; }
+        .invoice-details strong { font-weight: bold; color: #2E4D38; }
         .bill-to { margin-bottom: 30px; clear: both; padding-top: 20px; }
-        .bill-to h3 { font-size: 14px; margin: 0 0 10px 0; font-weight: bold; }
+        .bill-to h3 { font-size: 14px; margin: 0 0 10px 0; font-weight: bold; color: #2E4D38; }
         .bill-to p { margin: 3px 0; font-size: 12px; }
         .delivery { margin-bottom: 40px; }
-        .delivery h3 { font-size: 14px; margin: 0 0 10px 0; font-weight: bold; }
+        .delivery h3 { font-size: 14px; margin: 0 0 10px 0; font-weight: bold; color: #2E4D38; }
         .delivery p { margin: 3px 0; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; margin: 30px 0; }
-        thead { background: #f3f4f6; }
-        th { padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #e5e7eb; }
-        td { padding: 12px; font-size: 12px; border-bottom: 1px solid #e5e7eb; }
-        .total-row { background: #f9fafb; font-weight: bold; font-size: 14px; }
-        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; font-size: 11px; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin: 30px 0; background: white; }
+        thead { background: #f4f7f5; }
+        th { padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38; }
+        td { padding: 12px; font-size: 12px; border-bottom: 1px solid #d9ded6; }
+        .total-row { background: #f4f7f5; font-weight: bold; font-size: 14px; color: #2E4D38; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #d9ded6; text-align: center; font-size: 11px; color: #6b7b73; }
         .footer p { margin: 5px 0; }
-        .no-vat { background: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px; font-size: 11px; text-align: center; }
+        .no-vat { background: #fef9e7; padding: 15px; border-radius: 6px; margin-top: 20px; font-size: 11px; text-align: center; border-left: 3px solid #D6A220; }
       </style>
     </head>
     <body>
@@ -193,18 +193,18 @@ const handler = async (req: Request): Promise<Response> => {
         
         const baseStyles = `
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #ffffff; padding: 30px 20px; border: 1px solid #e5e7eb; border-top: none; }
-            .order-number { font-size: 18px; font-weight: bold; color: #2563eb; margin: 10px 0; }
+            body { font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1f2e27; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #faf9f6; }
+            .header { background: linear-gradient(135deg, #2E4D38 0%, #234130 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #ffffff; padding: 30px 20px; border: 1px solid #d9ded6; border-top: none; }
+            .order-number { font-size: 18px; font-weight: bold; color: #D6A220; margin: 10px 0; }
             .status-badge { display: inline-block; padding: 8px 16px; border-radius: 6px; font-weight: 600; margin: 15px 0; }
-            .status-packing { background: #fef3c7; color: #92400e; }
-            .status-shipped { background: #dbeafe; color: #1e40af; }
+            .status-packing { background: #fef9e7; color: #8b7217; }
+            .status-shipped { background: #e8f1ed; color: #2E4D38; }
             .status-delivered { background: #d1fae5; color: #065f46; }
-            .info-box { background: #f9fafb; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0; border-radius: 4px; }
-            .footer { text-align: center; color: #6b7280; font-size: 12px; margin-top: 30px; padding: 20px; border-top: 1px solid #e5e7eb; }
-            .button { display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0; }
+            .info-box { background: #f4f7f5; border-left: 4px solid #2E4D38; padding: 15px; margin: 20px 0; border-radius: 4px; }
+            .footer { text-align: center; color: #6b7b73; font-size: 12px; margin-top: 30px; padding: 20px; border-top: 1px solid #d9ded6; }
+            .button { display: inline-block; background: #D6A220; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0; font-weight: 600; }
           </style>
         `;
         
@@ -267,15 +267,15 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
             </div>
             
-            <div style="max-width: 600px; margin: 40px auto; padding: 40px; background: white; border: 2px solid #e5e7eb; font-family: Arial, sans-serif;">
+            <div style="max-width: 600px; margin: 40px auto; padding: 40px; background: white; border: 2px solid #d9ded6; font-family: Inter, Arial, sans-serif;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="font-size: 36px; margin: 0; color: #2563eb;">INVOICE</h1>
+                <h1 style="font-size: 36px; margin: 0; color: #2E4D38;">INVOICE</h1>
               </div>
               
               <div style="margin-bottom: 20px;">
-                <h2 style="font-size: 18px; margin: 0 0 5px 0;">Khanya</h2>
-                <p style="margin: 2px 0; font-size: 12px; color: #666;">sales@khanya.store</p>
-                <p style="margin: 2px 0; font-size: 12px; color: #666;">www.khanya.store</p>
+                <h2 style="font-size: 18px; margin: 0 0 5px 0; color: #2E4D38;">Khanya</h2>
+                <p style="margin: 2px 0; font-size: 12px; color: #6b7b73;">sales@khanya.store</p>
+                <p style="margin: 2px 0; font-size: 12px; color: #6b7b73;">www.khanya.store</p>
               </div>
               
               <div style="text-align: right; margin-bottom: 20px;">
@@ -285,50 +285,50 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
               
               <div style="margin-bottom: 20px; clear: both;">
-                <h3 style="font-size: 14px; margin: 0 0 10px 0; font-weight: bold;">BILL TO:</h3>
+                <h3 style="font-size: 14px; margin: 0 0 10px 0; font-weight: bold; color: #2E4D38;">BILL TO:</h3>
                 <p style="margin: 3px 0; font-size: 12px;">${order.customer_name}</p>
                 <p style="margin: 3px 0; font-size: 12px;">${order.customer_email}</p>
                 <p style="margin: 3px 0; font-size: 12px;">${order.customer_phone}</p>
               </div>
               
               <div style="margin-bottom: 30px;">
-                <h3 style="font-size: 14px; margin: 0 0 10px 0; font-weight: bold;">DELIVERY ADDRESS:</h3>
+                <h3 style="font-size: 14px; margin: 0 0 10px 0; font-weight: bold; color: #2E4D38;">DELIVERY ADDRESS:</h3>
                 <p style="margin: 3px 0; font-size: 12px;">${order.delivery_address}</p>
                 <p style="margin: 3px 0; font-size: 12px;">${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}</p>
               </div>
               
               <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                <thead style="background: #f3f4f6;">
+                <thead style="background: #f4f7f5;">
                   <tr>
-                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #e5e7eb;">Item</th>
-                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #e5e7eb;">Qty</th>
-                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #e5e7eb;">Price</th>
-                    <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: bold; border-bottom: 2px solid #e5e7eb;">Total</th>
+                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Item</th>
+                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Qty</th>
+                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Price</th>
+                    <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${order.order_items.map((item: any) => `
                     <tr>
-                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #e5e7eb;">${item.product_name}</td>
-                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #e5e7eb;">${item.quantity}</td>
-                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #e5e7eb;">R${Number(item.price_per_unit).toFixed(2)}</td>
-                      <td style="padding: 12px; font-size: 12px; text-align: right; border-bottom: 1px solid #e5e7eb;">R${Number(item.subtotal).toFixed(2)}</td>
+                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #d9ded6;">${item.product_name}</td>
+                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #d9ded6;">${item.quantity}</td>
+                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #d9ded6;">R${Number(item.price_per_unit).toFixed(2)}</td>
+                      <td style="padding: 12px; font-size: 12px; text-align: right; border-bottom: 1px solid #d9ded6;">R${Number(item.subtotal).toFixed(2)}</td>
                     </tr>
                   `).join('')}
-                  <tr style="background: #f9fafb; font-weight: bold;">
-                    <td colspan="3" style="padding: 12px; font-size: 14px; border-bottom: 2px solid #e5e7eb;">TOTAL</td>
-                    <td style="padding: 12px; font-size: 14px; text-align: right; border-bottom: 2px solid #e5e7eb;">R${Number(order.total_amount).toFixed(2)}</td>
+                  <tr style="background: #f4f7f5; font-weight: bold;">
+                    <td colspan="3" style="padding: 12px; font-size: 14px; border-bottom: 2px solid #d9ded6; color: #2E4D38;">TOTAL</td>
+                    <td style="padding: 12px; font-size: 14px; text-align: right; border-bottom: 2px solid #d9ded6; color: #2E4D38;">R${Number(order.total_amount).toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
               
-              <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px; text-align: center;">
-                <p style="margin: 0; font-size: 11px;">This invoice does not include VAT. Khanya is not VAT registered.</p>
+              <div style="background: #fef9e7; padding: 15px; border-radius: 6px; margin-top: 20px; text-align: center; border-left: 3px solid #D6A220;">
+                <p style="margin: 0; font-size: 11px; color: #1f2e27;">This invoice does not include VAT. Khanya is not VAT registered.</p>
               </div>
               
-              <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center;">
-                <p style="margin: 5px 0; font-size: 11px; color: #666;">Thank you for your business!</p>
-                <p style="margin: 5px 0; font-size: 11px; color: #666;">© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #d9ded6; text-align: center;">
+                <p style="margin: 5px 0; font-size: 11px; color: #6b7b73;">Thank you for your business!</p>
+                <p style="margin: 5px 0; font-size: 11px; color: #6b7b73;">© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
               </div>
             </div>
           `;

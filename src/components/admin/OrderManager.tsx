@@ -24,12 +24,59 @@ const OrderManager = () => {
         .from('orders')
         .select(`
           *,
-          order_items (*)
+          order_items (
+            *
+          )
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
+
+      // Fetch bale details for each order item
+      const ordersWithBaleDetails = await Promise.all(
+        (data || []).map(async (order) => {
+          const itemsWithBaleDetails = await Promise.all(
+            (order.order_items || []).map(async (item: any) => {
+              // Fetch bale with its stock items
+              const { data: baleData } = await supabase
+                .from('bales')
+                .select(`
+                  id,
+                  bale_items (
+                    id,
+                    quantity,
+                    stock_items (
+                      id,
+                      name,
+                      description,
+                      age_range,
+                      selling_price,
+                      stock_item_images (
+                        image_url,
+                        is_primary,
+                        display_order
+                      )
+                    )
+                  )
+                `)
+                .eq('id', item.product_id)
+                .single();
+
+              return {
+                ...item,
+                bale_details: baleData
+              };
+            })
+          );
+
+          return {
+            ...order,
+            order_items: itemsWithBaleDetails
+          };
+        })
+      );
+
+      setOrders(ordersWithBaleDetails);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -177,21 +224,58 @@ const OrderManager = () => {
               </div>
 
               <div className="border-t pt-4">
-                <h4 className="font-semibold mb-2">Items:</h4>
-                <div className="space-y-2">
+                <h4 className="font-semibold mb-2">Bales to Pack:</h4>
+                <div className="space-y-4">
                   {order.order_items?.map((item: any) => (
-                    <div key={item.id} className="flex gap-3 items-center p-2 bg-muted rounded">
-                      <img
-                        src={item.product_image}
-                        alt={item.product_name}
-                        className="w-12 h-16 object-contain rounded"
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{item.product_name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {item.quantity} × R{item.price_per_unit.toFixed(2)} = R{item.subtotal.toFixed(2)}
-                        </p>
+                    <div key={item.id} className="border rounded-lg p-4 bg-muted/50">
+                      <div className="flex gap-3 items-center mb-3">
+                        <img
+                          src={item.product_image}
+                          alt={item.product_name}
+                          className="w-16 h-20 object-contain rounded border"
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium">{item.product_name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {item.quantity} bale{item.quantity > 1 ? 's' : ''} × R{item.price_per_unit.toFixed(2)} = R{item.subtotal.toFixed(2)}
+                          </p>
+                        </div>
                       </div>
+                      
+                      {item.bale_details?.bale_items && item.bale_details.bale_items.length > 0 && (
+                        <div className="border-t pt-3 mt-3">
+                          <p className="text-xs font-semibold mb-2 text-muted-foreground">Stock Items to Pack per Bale:</p>
+                          <div className="grid grid-cols-1 gap-2">
+                            {item.bale_details.bale_items.map((baleItem: any) => {
+                              const stockItem = baleItem.stock_items;
+                              const primaryImage = stockItem?.stock_item_images?.find((img: any) => img.is_primary) 
+                                || stockItem?.stock_item_images?.[0];
+                              
+                              return (
+                                <div key={baleItem.id} className="flex gap-2 items-center p-2 bg-background rounded text-sm">
+                                  {primaryImage && (
+                                    <img
+                                      src={primaryImage.image_url}
+                                      alt={stockItem?.name || ''}
+                                      className="w-10 h-12 object-contain rounded"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-xs truncate">{stockItem?.name}</p>
+                                    {stockItem?.age_range && (
+                                      <p className="text-xs text-muted-foreground">{stockItem.age_range}</p>
+                                    )}
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <p className="font-semibold text-xs">Qty: {baleItem.quantity}</p>
+                                    <p className="text-xs text-muted-foreground">R{stockItem?.selling_price?.toFixed(2)}</p>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
