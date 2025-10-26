@@ -147,7 +147,7 @@ const ViewOrderBales = () => {
               View & Order Bales
             </h1>
             <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Each 10kg bale contains approximately 40 mixed clothing items across different categories, sizes, and styles. Here's what you can expect to find.
+              Start or grow your clothing business with curated bales of quality second-hand items—with FREE delivery anywhere in South Africa!
             </p>
           </div>
         </section>
