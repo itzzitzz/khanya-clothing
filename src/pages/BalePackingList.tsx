@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import khanyaLogo from '@/assets/khanya-logo.png';
 
 const BalePackingList = () => {
   const [searchParams] = useSearchParams();
@@ -130,22 +131,25 @@ const BalePackingList = () => {
         {/* Header with Branding */}
         <div className="border-b-2 border-gray-800 pb-6 mb-6">
           <div className="flex items-start justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">KHANYA</h1>
-              <p className="text-lg text-gray-600 mb-3">Quality Clothing Bales</p>
-              <div className="space-y-1 text-sm">
-                <p className="flex items-center gap-2">
-                  <span className="font-semibold">🌐 Website:</span>
-                  <span className="text-blue-600">www.khanya.store</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="font-semibold">📧 Email:</span>
-                  <span>sales@khanya.store</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="font-semibold">📱 WhatsApp:</span>
-                  <span>Your WhatsApp Number</span>
-                </p>
+            <div className="flex items-start gap-4">
+              <img src={khanyaLogo} alt="Khanya Logo" className="w-24 h-24 object-contain" />
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900 mb-2">Khanya</h1>
+                <p className="text-lg text-gray-600 mb-3">Quality Clothing Bales</p>
+                <div className="space-y-1 text-sm">
+                  <p className="flex items-center gap-2">
+                    <span className="font-semibold">🌐 Website:</span>
+                    <span className="text-blue-600">www.khanya.store</span>
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span className="font-semibold">📧 Email:</span>
+                    <span>sales@khanya.store</span>
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span className="font-semibold">📱 WhatsApp:</span>
+                    <span>082 852 1112</span>
+                  </p>
+                </div>
               </div>
             </div>
             <div className="text-right">
@@ -233,7 +237,7 @@ const BalePackingList = () => {
             </div>
           </div>
           <div className="bg-gray-800 text-white text-center py-3 -mx-8 -mb-8 rounded-b">
-            <p className="font-bold text-lg">Thank you for choosing KHANYA!</p>
+            <p className="font-bold text-lg">Thank you for choosing Khanya!</p>
             <p className="text-sm">Visit www.khanya.store for more great deals</p>
           </div>
         </div>
