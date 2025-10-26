@@ -8,6 +8,7 @@ import { CategoryManager } from "@/components/admin/CategoryManager";
 import { StockItemManager } from "@/components/admin/StockItemManager";
 import { BaleManager } from "@/components/admin/BaleManager";
 import OrderManager from "@/components/admin/OrderManager";
+import { GenerateStockImages } from "@/components/admin/GenerateStockImages";
 import Header from "@/components/Header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
@@ -141,7 +142,8 @@ const Admin = () => {
             <CategoryManager />
           </TabsContent>
 
-          <TabsContent value="stock-items" className="mt-6">
+          <TabsContent value="stock-items" className="mt-6 space-y-6">
+            <GenerateStockImages />
             <StockItemManager />
           </TabsContent>
 

@@ -21,6 +21,9 @@ verify_jwt = false
 [functions.generate-product-images]
 verify_jwt = false
 
+[functions.generate-stock-item-images]
+verify_jwt = false
+
 [functions.send-verification-pin]
 verify_jwt = false
 
