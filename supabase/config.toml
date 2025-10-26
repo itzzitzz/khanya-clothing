@@ -39,3 +39,6 @@ verify_jwt = false
 [functions.update-order-status]
 verify_jwt = false
 
+[functions.get-bales]
+verify_jwt = false
+

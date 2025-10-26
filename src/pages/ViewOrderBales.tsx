@@ -7,123 +7,119 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import mensRippedJeans from "@/assets/mens-ripped-jeans.jpg";
-import mensTshirts from "@/assets/mens-tshirts.jpg";
-import womensTshirts from "@/assets/womens-tshirts.jpg";
-import womensZipperJackets from "@/assets/womens-zipper-jackets.jpg";
-import childrensSummerWear from "@/assets/childrens-summer-wear.jpg";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { ProductImageModal } from "@/components/ProductImageModal";
-interface ProductImage {
+import { BaleDetailModal } from "@/components/BaleDetailModal";
+
+interface StockItemImage {
   id: number;
-  image_path: string;
-  image_alt_text: string;
+  image_url: string;
   is_primary: boolean;
   display_order: number;
 }
 
-interface Product {
+interface StockItem {
   id: number;
-  category_id: number;
   name: string;
   description: string;
-  image_path: string;
-  image_alt_text: string;
-  quantity_per_10kg: number;
-  price_per_10kg: number;
-  price_per_piece: number;
-  age_range: string | null;
-  images: ProductImage[];
+  age_range: string;
+  selling_price: number;
+  images: StockItemImage[];
 }
 
-interface Category {
+interface BaleItem {
+  id: number;
+  quantity: number;
+  line_item_price: number;
+  stock_item: StockItem;
+}
+
+interface ProductCategory {
   id: number;
   name: string;
-  icon_name: string;
+  description: string;
+}
+
+interface Bale {
+  id: number;
+  description: string;
+  actual_selling_price: number;
+  recommended_sale_price: number;
+  total_cost_price: number;
+  bale_profit: number;
+  bale_margin_percentage: number;
   display_order: number;
+  product_category_id: number;
+  product_category: ProductCategory;
+  bale_items: BaleItem[];
 }
 
 const ViewOrderBales = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [bales, setBales] = useState<Bale[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedBale, setSelectedBale] = useState<Bale | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const { addToCart } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchBales = async () => {
       try {
-        const { data, error } = await supabase.functions.invoke('get-bale-products');
+        const { data, error } = await supabase.functions.invoke('get-bales');
         
         if (error) throw error;
         
         if (data?.success) {
-          setProducts(data.products || []);
-          setCategories(data.categories || []);
+          setBales(data.bales || []);
         }
       } catch (err) {
-        console.error('Error fetching products:', err);
-        const message = err instanceof Error ? err.message : 'Failed to load products';
+        console.error('Error fetching bales:', err);
+        const message = err instanceof Error ? err.message : 'Failed to load bales';
         setError(message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchBales();
   }, []);
 
-  const getImageForProduct = (imagePath: string) => {
-    // If the path starts with 'public/', convert it to a direct URL path
-    if (imagePath.startsWith('public/')) {
-      return '/' + imagePath.substring('public/'.length);
-    }
-    
-    // Extract filename from path
-    const filename = imagePath.split('/').pop() || imagePath;
-    
-    // Map database image filenames to imported assets
-    const imageMap: Record<string, string> = {
-      'mens-ripped-jeans.jpg': mensRippedJeans,
-      'mens-tshirts.jpg': mensTshirts,
-      'womens-tshirts.jpg': womensTshirts,
-      'womens-zipper-jackets.jpg': womensZipperJackets,
-      'childrens-summer-wear.jpg': childrensSummerWear,
-    };
-    return imageMap[filename] || imagePath;
+  const getBalesByCategory = (categoryId: number) => {
+    return bales.filter(b => b.product_category_id === categoryId);
   };
 
-  const getProductsByCategory = (categoryId: number) => {
-    return products.filter(p => p.category_id === categoryId);
+  const getRandomBaleImage = (bale: Bale): string => {
+    const allImages: StockItemImage[] = [];
+    bale.bale_items.forEach(item => {
+      allImages.push(...item.stock_item.images);
+    });
+    if (allImages.length === 0) return '/placeholder.svg';
+    const randomIndex = Math.floor(Math.random() * allImages.length);
+    return allImages[randomIndex].image_url;
   };
 
-  const getPrimaryImage = (product: Product) => {
-    const primaryImage = product.images?.find(img => img.is_primary);
-    return primaryImage ? primaryImage.image_path : product.image_path;
-  };
-
-  const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
+  const handleBaleClick = (bale: Bale) => {
+    setSelectedBale(bale);
     setModalOpen(true);
   };
 
-  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
-    e.stopPropagation();
+  const handleAddToCart = (bale: Bale) => {
     addToCart({
-      product_id: product.id,
-      product_name: product.name,
-      product_image: getImageForProduct(getPrimaryImage(product)),
-      price_per_unit: product.price_per_10kg,
+      product_id: bale.id,
+      product_name: bale.description,
+      product_image: getRandomBaleImage(bale),
+      price_per_unit: bale.actual_selling_price,
     });
     toast({
       title: "Added to cart",
-      description: `${product.name} added to your cart`,
+      description: `${bale.description} added to your cart`,
     });
   };
+
+  const uniqueCategories = Array.from(
+    new Map(bales.map(b => [b.product_category.id, b.product_category])).values()
+  );
   return (
     <div>
       <Helmet>
@@ -155,15 +151,14 @@ const ViewOrderBales = () => {
         </section>
 
         <section className="container mx-auto py-16">
-        <section className="container mx-auto py-16">
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Loading products...</p>
+              <p className="text-muted-foreground">Loading bales...</p>
             </div>
           ) : error ? (
             <div className="max-w-2xl mx-auto py-8">
               <Alert variant="destructive">
-                <AlertTitle>We couldn't load products</AlertTitle>
+                <AlertTitle>We couldn't load bales</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
               <div className="mt-4 flex gap-3 justify-center">
@@ -173,56 +168,53 @@ const ViewOrderBales = () => {
                 </Button>
               </div>
             </div>
+          ) : bales.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No bales available at the moment.</p>
+            </div>
           ) : (
             <>
-              {categories.map((category) => {
-                const categoryProducts = getProductsByCategory(category.id);
-                if (categoryProducts.length === 0) return null;
+              {uniqueCategories.map((category) => {
+                const categoryBales = getBalesByCategory(category.id);
+                if (categoryBales.length === 0) return null;
 
                 return (
                   <div key={category.id} className="mb-16">
                     <div className="flex items-center gap-3 mb-8">
-                      {category.icon_name === 'Users' && <Users className="h-8 w-8 text-primary" />}
-                      {category.icon_name === 'Shirt' && <Shirt className="h-8 w-8 text-primary" />}
+                      <Package className="h-8 w-8 text-primary" />
                       <h2 className="text-3xl font-bold">{category.name}</h2>
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                      {categoryProducts.map((product) => (
+                      {categoryBales.map((bale) => (
                         <div 
-                          key={product.id} 
-                          className="bg-card border rounded-lg overflow-hidden hover:shadow-md transition-all group"
+                          key={bale.id} 
+                          className="bg-card border rounded-lg overflow-hidden hover:shadow-md transition-all group cursor-pointer"
+                          onClick={() => handleBaleClick(bale)}
                         >
-                          <h3 className="text-base font-bold px-3 pt-3 pb-2">
-                            {product.name}
-                            {product.age_range && <span className="text-xs font-normal text-muted-foreground ml-1">({product.age_range})</span>}
-                          </h3>
-                          <div 
-                            className="aspect-[3/4] overflow-hidden relative cursor-pointer"
-                            onClick={() => handleProductClick(product)}
-                          >
+                          <div className="aspect-[3/4] overflow-hidden relative">
                             <img 
-                              src={getImageForProduct(getPrimaryImage(product))} 
-                              alt={product.image_alt_text || `${product.name} - ${product.description.substring(0, 50)}`}
-                              className="w-full h-full object-contain bg-gray-50 group-hover:scale-105 transition-transform duration-300"
+                              src={getRandomBaleImage(bale)} 
+                              alt={bale.description}
+                              className="w-full h-full object-cover bg-gray-50 group-hover:scale-105 transition-transform duration-300"
                             />
-                            {product.images && product.images.length > 1 && (
-                              <div className="absolute bottom-2 right-2 bg-background/90 px-2 py-1 rounded-full text-xs font-medium">
-                                +{product.images.length - 1}
-                              </div>
-                            )}
+                            <div className="absolute top-2 right-2 bg-background/90 px-2 py-1 rounded-full text-xs font-medium">
+                              {bale.bale_items.reduce((sum, item) => sum + item.quantity, 0)} items
+                            </div>
                           </div>
                           <div className="p-3">
-                            <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                              {product.description}
-                            </p>
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-lg font-bold text-primary">R{product.price_per_10kg.toLocaleString()}</span>
-                              <span className="text-xs text-muted-foreground">~{product.quantity_per_10kg} pcs</span>
+                            <h3 className="text-base font-bold mb-2">
+                              {bale.description}
+                            </h3>
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-lg font-bold text-primary">R{bale.actual_selling_price.toFixed(2)}</span>
                             </div>
                             <Button 
                               size="sm" 
                               className="w-full"
-                              onClick={(e) => handleAddToCart(e, product)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToCart(bale);
+                              }}
                             >
                               <ShoppingCart className="h-3 w-3 mr-1" />
                               Add to Cart
@@ -236,9 +228,8 @@ const ViewOrderBales = () => {
               })}
             </>
           )}
-        </section>
 
-          <div className="bg-secondary/30 border rounded-xl p-8">
+          <div className="bg-secondary/30 border rounded-xl p-8 mt-8">
             <h2 className="text-2xl font-bold mb-6">Important to know</h2>
             <div className="grid md:grid-cols-2 gap-6 text-sm leading-relaxed">
               <div>
@@ -284,15 +275,12 @@ const ViewOrderBales = () => {
         </section>
       </main>
 
-      {selectedProduct && (
-        <ProductImageModal
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-          images={selectedProduct.images || []}
-          productName={selectedProduct.name}
-          getImageUrl={getImageForProduct}
-        />
-      )}
+      <BaleDetailModal
+        bale={selectedBale}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        onAddToCart={handleAddToCart}
+      />
 
       <footer className="border-t">
         <div className="container mx-auto py-8 flex items-center justify-between text-sm">
