@@ -49,14 +49,14 @@ const Index = () => {
   return (
     <div>
       <Helmet>
-        <title>Bulk Clothing Bales | Second-hand Wholesale South Africa | Khanya</title>
-        <meta name="description" content="Buy affordable bulk clothing bales (10kg) for resale. Second-hand clothing supplier in South Africa. Mixed men's & women's clothing and children's clothing." />
+        <title>Start Your Clothing Business from R1,000 | Wholesale Bales South Africa | Khanya</title>
+        <meta name="description" content="Start your own clothing business with Khanya. Curated secondhand clothing bales from R1,000. Perfect for informal traders and entrepreneurs. Free delivery nationwide." />
         <meta name="robots" content="index, follow" />
-        <meta name="keywords" content="bulk clothing, clothing bales, second hand clothes, second-hand clothing, wholesale clothing South Africa, used clothes bales, 10kg bales, reseller clothing, children's clothing" />
+        <meta name="keywords" content="start clothing business, clothing bales R1000, second hand clothes, wholesale clothing South Africa, informal trader clothing, entrepreneur clothing business, reseller bales, township business" />
         <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/` : "/"} />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Bulk Clothing Bales | Second-hand Wholesale South Africa | Khanya" />
-        <meta property="og:description" content="Affordable bulk second-hand clothing bales (10kg) for South African resellers. Great ROI, mixed clothing for men, women, and children." />
+        <meta property="og:title" content="Start Your Clothing Business from R1,000 | Khanya" />
+        <meta property="og:description" content="Build your own clothing business with curated bales from R1,000. Free delivery. 2-3× profit margins. Perfect for informal market entrepreneurs." />
         <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -105,10 +105,10 @@ const Index = () => {
                 />
               </div>
               <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
-                Khanya: Affordable bulk new and secondhand clothing in South Africa!
+                Start Your Own Clothing Business Today
               </h1>
               <p className="text-lg text-muted-foreground mb-6 max-w-xl">
-                We supply 10kg bales of mixed men's, women's and children's clothing so entrepreneurs can resell at low prices that ordinary South Africans can afford.
+                Khanya empowers entrepreneurs to build their own clothing businesses with curated bales of quality secondhand clothing. Start for as little as R1,000 and serve your community with affordable fashion.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button variant="hero" size="xl" asChild>
@@ -119,7 +119,7 @@ const Index = () => {
                 </Button>
               </div>
               <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                {["10kg bales (~40 items)", "R1,600 per bale (~R40 per item)", "Resell at ~R80 per item", "2× return on investment"].map((t) => (
+                {["Start from R1,000", "Curated mixed bales", "2-3× profit margins", "Free delivery nationwide"].map((t) => (
                   <li className="flex items-start gap-2" key={t}>
                     <CheckCircle2 className="text-accent" />
                     <span>{t}</span>
@@ -140,18 +140,40 @@ const Index = () => {
 
         <section id="business" className="container mx-auto py-16">
           <header className="mb-8">
-            <h2 className="text-3xl font-extrabold">The business</h2>
+            <h2 className="text-3xl font-extrabold">Build Your Business with Khanya</h2>
+            <p className="text-muted-foreground mt-2">Empowering entrepreneurs in the informal market</p>
           </header>
           <div className="space-y-4 leading-relaxed text-base">
             <p>
-              Khanya provides affordable secondhand clothing in bulk to entrepreneurs who want to earn an income by serving their communities. Most people in South Africa can't pay R250 for a brand-new pair of jeans, but with Khanya bales, you can offer quality clothes at half the price.
+              <strong>Start small, dream big.</strong> Khanya makes it easy to launch your own clothing business for as little as R1,000. We curate ready-to-sell bales of quality secondhand clothing—perfect for entrepreneurs who want to serve their communities with affordable fashion that ordinary South Africans can actually afford.
             </p>
             <p>
-              We sell 10kg bales containing a variety of men's, women's and children's items: jackets, pants, shirts, skirts, dresses, shorts and kidswear. Clothing weights differ—jackets weigh more than T‑shirts, and children's clothes are typically lighter.
+              <strong>Choose your bale, choose your niche.</strong> Our bales contain carefully selected combinations of clothing items: men's jackets and jeans, women's dresses and tops, children's summer wear, and more. Each bale is different, giving you variety to serve different customers. Browse our bales from R1,000 to R1,600—find what works for your market.
             </p>
             <p>
-              Each bale sells for <strong>R1,600</strong>. That's about <strong>R40 per item</strong>. Resellers commonly price pieces at around <strong>R80</strong>, which means you can really double your investment.
+              <strong>Real profit margins.</strong> Buy a bale for R1,000-R1,600 containing 30-45 quality items (depending on the type). Sell individual pieces at R50-R100 each at your market stall, street corner, or to neighbors. Many of our traders are making 2-3× their investment on each bale—that's R2,000-R4,500 from a single R1,000-R1,600 purchase.
             </p>
+            <p>
+              <strong>Free delivery anywhere in South Africa.</strong> We deliver your bales for free to your door, whether you're in Johannesburg, Cape Town, Durban, or a small township. No hidden costs. Just opportunity.
+            </p>
+          </div>
+          
+          <div className="mt-8 bg-accent/10 border-2 border-accent rounded-xl p-6">
+            <h3 className="text-xl font-bold mb-3 text-accent">Your Path to Success</h3>
+            <div className="grid md:grid-cols-3 gap-4 text-sm">
+              <div className="bg-background rounded-lg p-4">
+                <div className="font-bold text-lg mb-2">1. Start Small</div>
+                <p className="text-muted-foreground">Order your first bale for R1,000-R1,600. Test your market and learn what sells best in your area.</p>
+              </div>
+              <div className="bg-background rounded-lg p-4">
+                <div className="font-bold text-lg mb-2">2. Build Momentum</div>
+                <p className="text-muted-foreground">Reinvest your profits. Order weekly. Build relationships with regular customers who trust your quality.</p>
+              </div>
+              <div className="bg-background rounded-lg p-4">
+                <div className="font-bold text-lg mb-2">3. Grow Your Business</div>
+                <p className="text-muted-foreground">Scale up to multiple bales per week. Hire help. Open a permanent stall. Create jobs in your community.</p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -186,7 +208,7 @@ const Index = () => {
             <div className="mb-8">
               <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 max-w-4xl mx-auto">
                 <p className="text-sm md:text-base text-center">
-                  <strong>Goal for informal traders:</strong> Sell about <strong>40 items/week</strong> (one 10kg bale) at an average of <strong>R80</strong> per item to make roughly <strong>R1,600 profit</strong> and <strong>R3,200 sales</strong>.
+                  <strong>Realistic weekly goal:</strong> Sell one bale (30-45 items) per week at an average of <strong>R70-R80</strong> per item. That's <strong>R2,100-R3,600 in sales</strong> and <strong>R1,000-R2,000 profit</strong> every week to support your family.
                 </p>
               </div>
             </div>
