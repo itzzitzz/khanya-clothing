@@ -127,7 +127,7 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
           {allImages.length > 0 && (
             <div className="mb-6">
               <div 
-                className="relative aspect-[3/4] bg-muted rounded-lg overflow-hidden"
+                className="relative w-full max-w-md mx-auto aspect-[3/4] bg-muted rounded-lg overflow-hidden"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}

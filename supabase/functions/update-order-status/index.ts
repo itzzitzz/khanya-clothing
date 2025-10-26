@@ -51,7 +51,12 @@ function generateInvoiceHTML(order: any): string {
         thead { background: #f4f7f5; }
         th { padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38; }
         td { padding: 12px; font-size: 12px; border-bottom: 1px solid #d9ded6; }
-        .total-row { background: #f4f7f5; font-weight: bold; font-size: 14px; color: #2E4D38; }
+        .bale-header { padding: 15px 12px 8px 12px !important; font-size: 13px; font-weight: bold; background: #f9fafb; color: #2E4D38; }
+        .bale-item { padding: 8px 12px 8px 24px !important; font-size: 11px; border-bottom: 1px solid #eee; }
+        .discount-row { background: #fef9e7; }
+        .savings-row { background: #d1fae5; }
+        .bale-total { background: #f4f7f5; font-weight: bold; }
+        .total-row { background: #2E4D38; color: white; font-weight: bold; font-size: 16px; }
         .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #d9ded6; text-align: center; font-size: 11px; color: #6b7b73; }
         .footer p { margin: 5px 0; }
         .no-vat { background: #fef9e7; padding: 15px; border-radius: 6px; margin-top: 20px; font-size: 11px; text-align: center; border-left: 3px solid #D6A220; }
@@ -91,23 +96,49 @@ function generateInvoiceHTML(order: any): string {
         <thead>
           <tr>
             <th>Item</th>
-            <th>Quantity</th>
-            <th>Price</th>
+            <th style="text-align: center;">Qty</th>
+            <th style="text-align: right;">Price</th>
             <th style="text-align: right;">Total</th>
           </tr>
         </thead>
         <tbody>
-          ${order.order_items.map((item: any) => `
+          ${order.order_items.map((item: any) => {
+            const baleItems = item.bale_details?.bale_items || [];
+            const itemsSubtotal = baleItems.reduce((sum: number, bi: any) => 
+              sum + (bi.stock_items?.selling_price || 0) * bi.quantity, 0);
+            const baleDiscount = itemsSubtotal - item.price_per_unit;
+            const hasDiscount = baleDiscount > 0;
+            
+            return `
             <tr>
-              <td>${item.product_name}</td>
-              <td>${item.quantity}</td>
-              <td>R${Number(item.price_per_unit).toFixed(2)}</td>
-              <td style="text-align: right;">R${Number(item.subtotal).toFixed(2)}</td>
+              <td colspan="4" class="bale-header">${item.product_name} (x${item.quantity})</td>
             </tr>
-          `).join('')}
+            ${baleItems.map((baleItem: any) => `
+              <tr>
+                <td class="bale-item">${baleItem.stock_items?.name || 'Item'}</td>
+                <td style="text-align: center; padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #eee;">${baleItem.quantity}</td>
+                <td style="text-align: right; padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #eee;">R${(baleItem.stock_items?.selling_price || 0).toFixed(2)}</td>
+                <td style="text-align: right; padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #eee;">R${((baleItem.stock_items?.selling_price || 0) * baleItem.quantity).toFixed(2)}</td>
+              </tr>
+            `).join('')}
+            ${hasDiscount ? `
+              <tr class="discount-row">
+                <td colspan="3" style="padding: 8px 12px 8px 24px; font-size: 11px; font-style: italic; color: #8b7217;">Individual Items Subtotal:</td>
+                <td style="padding: 8px 12px; font-size: 11px; text-align: right; color: #8b7217;">R${itemsSubtotal.toFixed(2)}</td>
+              </tr>
+              <tr class="savings-row">
+                <td colspan="3" style="padding: 8px 12px 8px 24px; font-size: 11px; font-weight: bold; color: #065f46;">Bale Discount per unit:</td>
+                <td style="padding: 8px 12px; font-size: 11px; text-align: right; font-weight: bold; color: #065f46;">-R${baleDiscount.toFixed(2)}</td>
+              </tr>
+            ` : ''}
+            <tr class="bale-total">
+              <td colspan="3" style="padding: 10px 12px; font-size: 12px;">Bale Price (x${item.quantity}):</td>
+              <td style="padding: 10px 12px; font-size: 12px; text-align: right;">R${Number(item.subtotal).toFixed(2)}</td>
+            </tr>
+          `}).join('')}
           <tr class="total-row">
-            <td colspan="3">TOTAL</td>
-            <td style="text-align: right;">R${Number(order.total_amount).toFixed(2)}</td>
+            <td colspan="3" style="padding: 15px 12px;">TOTAL</td>
+            <td style="padding: 15px 12px; text-align: right;">R${Number(order.total_amount).toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
@@ -144,13 +175,14 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get order details with items
+    // Get order details with items and bale details
     const { data: order, error: fetchError } = await supabase
       .from("orders")
       .select(`
         *,
         order_items (
           id,
+          product_id,
           product_name,
           quantity,
           price_per_unit,
@@ -164,6 +196,35 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Order not found:", fetchError);
       throw new Error("Order not found");
     }
+
+    // Fetch bale details for each order item
+    const baleDetailsPromises = order.order_items.map(async (item: any) => {
+      const { data: baleData } = await supabase
+        .from('bales')
+        .select(`
+          id,
+          actual_selling_price,
+          bale_items (
+            id,
+            quantity,
+            stock_items (
+              id,
+              name,
+              selling_price
+            )
+          )
+        `)
+        .eq('id', item.product_id)
+        .single();
+      
+      return {
+        ...item,
+        bale_details: baleData
+      };
+    });
+
+    const itemsWithBaleDetails = await Promise.all(baleDetailsPromises);
+    order.order_items = itemsWithBaleDetails;
 
     // Update order status
     const updateData: any = { order_status: new_status };
@@ -301,23 +362,49 @@ const handler = async (req: Request): Promise<Response> => {
                 <thead style="background: #f4f7f5;">
                   <tr>
                     <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Item</th>
-                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Qty</th>
-                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Price</th>
+                    <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Qty</th>
+                    <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Price</th>
                     <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Total</th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${order.order_items.map((item: any) => `
+                  ${order.order_items.map((item: any) => {
+                    const baleItems = item.bale_details?.bale_items || [];
+                    const itemsSubtotal = baleItems.reduce((sum: number, bi: any) => 
+                      sum + (bi.stock_items?.selling_price || 0) * bi.quantity, 0);
+                    const baleDiscount = itemsSubtotal - item.price_per_unit;
+                    const hasDiscount = baleDiscount > 0;
+                    
+                    return `
                     <tr>
-                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #d9ded6;">${item.product_name}</td>
-                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #d9ded6;">${item.quantity}</td>
-                      <td style="padding: 12px; font-size: 12px; border-bottom: 1px solid #d9ded6;">R${Number(item.price_per_unit).toFixed(2)}</td>
-                      <td style="padding: 12px; font-size: 12px; text-align: right; border-bottom: 1px solid #d9ded6;">R${Number(item.subtotal).toFixed(2)}</td>
+                      <td colspan="4" style="padding: 15px 12px 8px 12px; font-size: 13px; font-weight: bold; background: #f9fafb; border-bottom: 1px solid #d9ded6; color: #2E4D38;">${item.product_name} (x${item.quantity})</td>
                     </tr>
-                  `).join('')}
-                  <tr style="background: #f4f7f5; font-weight: bold;">
-                    <td colspan="3" style="padding: 12px; font-size: 14px; border-bottom: 2px solid #d9ded6; color: #2E4D38;">TOTAL</td>
-                    <td style="padding: 12px; font-size: 14px; text-align: right; border-bottom: 2px solid #d9ded6; color: #2E4D38;">R${Number(order.total_amount).toFixed(2)}</td>
+                    ${baleItems.map((baleItem: any) => `
+                      <tr>
+                        <td style="padding: 8px 12px 8px 24px; font-size: 11px; border-bottom: 1px solid #eee;">${baleItem.stock_items?.name || 'Item'}</td>
+                        <td style="padding: 8px 12px; font-size: 11px; text-align: center; border-bottom: 1px solid #eee;">${baleItem.quantity}</td>
+                        <td style="padding: 8px 12px; font-size: 11px; text-align: right; border-bottom: 1px solid #eee;">R${(baleItem.stock_items?.selling_price || 0).toFixed(2)}</td>
+                        <td style="padding: 8px 12px; font-size: 11px; text-align: right; border-bottom: 1px solid #eee;">R${((baleItem.stock_items?.selling_price || 0) * baleItem.quantity).toFixed(2)}</td>
+                      </tr>
+                    `).join('')}
+                    ${hasDiscount ? `
+                      <tr style="background: #fef9e7;">
+                        <td colspan="3" style="padding: 8px 12px 8px 24px; font-size: 11px; font-style: italic; color: #8b7217;">Individual Items Subtotal:</td>
+                        <td style="padding: 8px 12px; font-size: 11px; text-align: right; color: #8b7217;">R${itemsSubtotal.toFixed(2)}</td>
+                      </tr>
+                      <tr style="background: #d1fae5;">
+                        <td colspan="3" style="padding: 8px 12px 8px 24px; font-size: 11px; font-weight: bold; color: #065f46;">Bale Discount per unit:</td>
+                        <td style="padding: 8px 12px; font-size: 11px; text-align: right; font-weight: bold; color: #065f46;">-R${baleDiscount.toFixed(2)}</td>
+                      </tr>
+                    ` : ''}
+                    <tr style="background: #f4f7f5;">
+                      <td colspan="3" style="padding: 10px 12px; font-size: 12px; font-weight: bold; border-bottom: 1px solid #d9ded6;">Bale Price (x${item.quantity}):</td>
+                      <td style="padding: 10px 12px; font-size: 12px; text-align: right; font-weight: bold; border-bottom: 1px solid #d9ded6;">R${Number(item.subtotal).toFixed(2)}</td>
+                    </tr>
+                  `}).join('')}
+                  <tr style="background: #2E4D38; color: white;">
+                    <td colspan="3" style="padding: 15px 12px; font-size: 16px; font-weight: bold;">TOTAL</td>
+                    <td style="padding: 15px 12px; font-size: 16px; text-align: right; font-weight: bold;">R${Number(order.total_amount).toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
