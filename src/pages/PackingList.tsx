@@ -150,17 +150,39 @@ const PackingList = () => {
       </style>
 
       <div className="print-container">
-        {/* Header */}
-        <div className="border-b-2 border-gray-800 pb-4 mb-6">
-          <h1 className="text-3xl font-bold mb-2">PACKING LIST</h1>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        {/* Header with Branding */}
+        <div className="border-b-2 border-gray-800 pb-6 mb-6">
+          <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="font-semibold">Order Number:</p>
-              <p className="text-lg">{order.order_number}</p>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">KHANYA</h1>
+              <p className="text-lg text-gray-600 mb-3">Quality Clothing Bales</p>
+              <div className="space-y-1 text-sm">
+                <p className="flex items-center gap-2">
+                  <span className="font-semibold">🌐 Website:</span>
+                  <span className="text-blue-600">www.khanya.store</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="font-semibold">📧 Email:</span>
+                  <span>sales@khanya.store</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="font-semibold">📱 WhatsApp:</span>
+                  <span>Your WhatsApp Number</span>
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-semibold">Date:</p>
-              <p>{new Date(order.created_at).toLocaleDateString()}</p>
+            <div className="text-right">
+              <h2 className="text-2xl font-bold mb-3">PACKING LIST</h2>
+              <div className="text-sm space-y-1">
+                <div>
+                  <p className="font-semibold">Order Number:</p>
+                  <p className="text-lg">{order.order_number}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Date:</p>
+                  <p>{new Date(order.created_at).toLocaleDateString()}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -252,9 +274,48 @@ const PackingList = () => {
           ))}
         </div>
 
+        {/* Promotions */}
+        <div className="mt-8 pt-6 border-t-2 border-gray-800">
+          <h3 className="text-xl font-bold mb-4 text-center">EXCLUSIVE PROMOTIONS</h3>
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            <div className="border-2 border-blue-600 rounded-lg p-4 bg-blue-50">
+              <h4 className="font-bold text-lg mb-2 text-blue-800">🎯 Goal Achieved Reward</h4>
+              <p className="text-sm mb-3">Place a second order within 1 week of your previous order to receive:</p>
+              <div className="bg-white rounded p-3 mb-2">
+                <p className="font-bold text-blue-600">10 FREE COAT-HANGERS</p>
+                <p className="text-xs text-gray-600 mt-1">Perfect for displaying your clothing professionally</p>
+              </div>
+            </div>
+            
+            <div className="border-2 border-green-600 rounded-lg p-4 bg-green-50">
+              <h4 className="font-bold text-lg mb-2 text-green-800">📦 Brand Builder Package</h4>
+              <p className="text-sm mb-3">Order 8 bales in a month to receive your choice of:</p>
+              <div className="bg-white rounded p-3 space-y-2">
+                <p className="font-bold text-green-600">8 FREE Khanya Branded Caps</p>
+                <p className="text-center font-semibold">OR</p>
+                <p className="font-bold text-green-600">8 FREE Khanya Branded T-Shirts</p>
+                <p className="text-xs text-gray-600 mt-2">Use yourself or give to your favourite customers!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Footer */}
-        <div className="mt-8 pt-4 border-t border-gray-300 text-center text-sm text-gray-600">
-          <p>Please check all items carefully. Contact us immediately if there are any discrepancies.</p>
+        <div className="mt-6 pt-4 border-t border-gray-300">
+          <div className="text-center mb-4">
+            <p className="text-sm text-gray-600 mb-2">Please check all items carefully. Contact us immediately if there are any discrepancies.</p>
+            <div className="flex items-center justify-center gap-6 text-sm font-semibold">
+              <span className="text-blue-600">📱 WhatsApp Us</span>
+              <span className="text-gray-400">|</span>
+              <span className="text-blue-600">🌐 www.khanya.store</span>
+              <span className="text-gray-400">|</span>
+              <span className="text-blue-600">📧 sales@khanya.store</span>
+            </div>
+          </div>
+          <div className="bg-gray-800 text-white text-center py-3 -mx-8 -mb-8 rounded-b">
+            <p className="font-bold text-lg">Thank you for choosing KHANYA!</p>
+            <p className="text-sm">Visit www.khanya.store for more great deals</p>
+          </div>
         </div>
       </div>
     </div>
