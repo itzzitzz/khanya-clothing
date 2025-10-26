@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from "@/components/ui/table";
-import { Trash2, Plus, Edit, Eye, Loader2 } from "lucide-react";
+import { Trash2, Plus, Edit, Eye, Loader2, Printer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -335,6 +335,10 @@ export const BaleManager = () => {
     }
   };
 
+  const handlePrintBale = (baleId: number) => {
+    window.open(`/bale-packing-list?baleId=${baleId}`, '_blank');
+  };
+
   const totals = calculateTotals();
 
   if (loading) return <div>Loading...</div>;
@@ -618,6 +622,14 @@ export const BaleManager = () => {
                 </div>
 
                 <div className="flex gap-2 pt-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handlePrintBale(bale.id)}
+                    title="Print Bale Contents"
+                  >
+                    <Printer className="h-3 w-3" />
+                  </Button>
                   <Button 
                     size="sm" 
                     variant="outline" 
