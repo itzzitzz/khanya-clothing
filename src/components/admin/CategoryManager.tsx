@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-interface Category {
+interface StockCategory {
   id: number;
   name: string;
   icon_name: string;
@@ -16,23 +16,21 @@ interface Category {
 }
 
 export const CategoryManager = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<StockCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<Category | null>(null);
+  const [editing, setEditing] = useState<StockCategory | null>(null);
   const [formData, setFormData] = useState({ name: '', icon_name: '', display_order: 0 });
   const { toast } = useToast();
 
   const loadCategories = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const response = await supabase.functions.invoke('manage-categories', {
-        body: { action: 'list' },
-        headers: { Authorization: `Bearer ${session?.access_token}` }
-      });
+      const { data, error } = await supabase
+        .from('stock_categories')
+        .select('*')
+        .order('display_order');
 
-      if (response.data?.success) {
-        setCategories(response.data.categories);
-      }
+      if (error) throw error;
+      if (data) setCategories(data);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
@@ -47,49 +45,49 @@ export const CategoryManager = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const action = editing ? 'update' : 'create';
-
-      const response = await supabase.functions.invoke('manage-categories', {
-        body: { 
-          action, 
-          id: editing?.id,
-          ...formData 
-        },
-        headers: { Authorization: `Bearer ${session?.access_token}` }
-      });
-
-      if (response.data?.success) {
-        toast({ title: "Success", description: response.data.message });
-        setFormData({ name: '', icon_name: '', display_order: 0 });
-        setEditing(null);
-        loadCategories();
+      if (editing) {
+        const { error } = await supabase
+          .from('stock_categories')
+          .update(formData)
+          .eq('id', editing.id);
+        
+        if (error) throw error;
+        toast({ title: "Success", description: "Stock category updated" });
+      } else {
+        const { error } = await supabase
+          .from('stock_categories')
+          .insert([formData]);
+        
+        if (error) throw error;
+        toast({ title: "Success", description: "Stock category created" });
       }
+      
+      setFormData({ name: '', icon_name: '', display_order: 0 });
+      setEditing(null);
+      loadCategories();
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this category?')) return;
+    if (!confirm('Delete this stock category?')) return;
     
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const response = await supabase.functions.invoke('manage-categories', {
-        body: { action: 'delete', id },
-        headers: { Authorization: `Bearer ${session?.access_token}` }
-      });
-
-      if (response.data?.success) {
-        toast({ title: "Success", description: "Category deleted" });
-        loadCategories();
-      }
+      const { error } = await supabase
+        .from('stock_categories')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      toast({ title: "Success", description: "Stock category deleted" });
+      loadCategories();
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
-  const handleEdit = (category: Category) => {
+  const handleEdit = (category: StockCategory) => {
     setEditing(category);
     setFormData({
       name: category.name,
@@ -103,7 +101,7 @@ export const CategoryManager = () => {
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">{editing ? 'Edit' : 'Add'} Category</h3>
+        <h3 className="text-lg font-semibold mb-4">{editing ? 'Edit' : 'Add'} Stock Category</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Name</Label>
@@ -154,7 +152,7 @@ export const CategoryManager = () => {
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Categories</h3>
+        <h3 className="text-lg font-semibold mb-4">Stock Categories</h3>
         <Table>
           <TableHeader>
             <TableRow>

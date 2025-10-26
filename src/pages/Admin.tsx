@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Package, FolderOpen, ShoppingCart } from "lucide-react";
+import { LogOut, Package, FolderOpen, ShoppingCart, Box } from "lucide-react";
 import { CategoryManager } from "@/components/admin/CategoryManager";
-import { ProductManager } from "@/components/admin/ProductManager";
+import { StockItemManager } from "@/components/admin/StockItemManager";
+import { BaleManager } from "@/components/admin/BaleManager";
 import OrderManager from "@/components/admin/OrderManager";
 import Header from "@/components/Header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -116,15 +117,19 @@ const Admin = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="categories" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-2xl">
-            <TabsTrigger value="categories">
+        <Tabs defaultValue="stock-categories" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="stock-categories">
               <FolderOpen className="h-4 w-4 mr-2" />
-              Categories
+              Stock Categories
             </TabsTrigger>
-            <TabsTrigger value="products">
+            <TabsTrigger value="stock-items">
               <Package className="h-4 w-4 mr-2" />
-              Products
+              Stock Items
+            </TabsTrigger>
+            <TabsTrigger value="build-bales">
+              <Box className="h-4 w-4 mr-2" />
+              Build Bales
             </TabsTrigger>
             <TabsTrigger value="orders">
               <ShoppingCart className="h-4 w-4 mr-2" />
@@ -132,12 +137,16 @@ const Admin = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="categories" className="mt-6">
+          <TabsContent value="stock-categories" className="mt-6">
             <CategoryManager />
           </TabsContent>
 
-          <TabsContent value="products" className="mt-6">
-            <ProductManager />
+          <TabsContent value="stock-items" className="mt-6">
+            <StockItemManager />
+          </TabsContent>
+
+          <TabsContent value="build-bales" className="mt-6">
+            <BaleManager />
           </TabsContent>
 
           <TabsContent value="orders" className="mt-6">
