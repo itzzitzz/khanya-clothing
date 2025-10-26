@@ -11,9 +11,23 @@ const PackingList = () => {
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
-      if (!orderId) return;
+      if (!orderId) {
+        console.error('No orderId provided');
+        setLoading(false);
+        return;
+      }
 
       try {
+        console.log('Fetching order with ID:', orderId);
+        
+        // Check authentication first
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.error('No active session');
+          setLoading(false);
+          return;
+        }
+
         const { data: orderData, error: orderError } = await supabase
           .from('orders')
           .select(`
@@ -23,9 +37,20 @@ const PackingList = () => {
             )
           `)
           .eq('id', orderId)
-          .single();
+          .maybeSingle();
 
-        if (orderError) throw orderError;
+        if (orderError) {
+          console.error('Order fetch error:', orderError);
+          throw orderError;
+        }
+
+        if (!orderData) {
+          console.error('No order found with ID:', orderId);
+          setLoading(false);
+          return;
+        }
+
+        console.log('Order fetched successfully:', orderData);
 
         // Fetch bale details for each order item
         const itemsWithBaleDetails = await Promise.all(
