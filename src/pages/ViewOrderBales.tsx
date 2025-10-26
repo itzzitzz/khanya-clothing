@@ -184,7 +184,7 @@ const ViewOrderBales = () => {
                       <Package className="h-8 w-8 text-primary" />
                       <h2 className="text-3xl font-bold">{category.name}</h2>
                     </div>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                       {categoryBales.map((bale) => (
                         <div 
                           key={bale.id} 
@@ -197,26 +197,26 @@ const ViewOrderBales = () => {
                               alt={bale.description}
                               className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                             />
-                            <div className="absolute top-2 right-2 bg-background/90 px-2 py-1 rounded-full text-xs font-medium">
+                            <div className="absolute top-1 right-1 bg-background/90 px-1.5 py-0.5 rounded-full text-[10px] font-medium">
                               {bale.bale_items.reduce((sum, item) => sum + item.quantity, 0)} items
                             </div>
                           </div>
-                          <div className="p-3">
-                            <h3 className="text-base font-bold mb-2">
+                          <div className="p-2">
+                            <h3 className="text-xs font-bold mb-1.5 line-clamp-2">
                               {bale.description}
                             </h3>
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="text-lg font-bold text-primary">R{bale.actual_selling_price.toFixed(2)}</span>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-bold text-primary">R{bale.actual_selling_price.toFixed(2)}</span>
                             </div>
                             <Button 
                               size="sm" 
-                              className="w-full"
+                              className="w-full h-7 text-xs"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleAddToCart(bale);
                               }}
                             >
-                              <ShoppingCart className="h-3 w-3 mr-1" />
+                              <ShoppingCart className="h-2.5 w-2.5 mr-1" />
                               Add to Cart
                             </Button>
                           </div>
