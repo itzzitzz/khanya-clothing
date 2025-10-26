@@ -179,18 +179,67 @@ export const StockItemManager = () => {
     });
   };
 
+  const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions maintaining aspect ratio
+          if (width > height) {
+            if (width > maxWidth) {
+              height = (height * maxWidth) / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = (width * maxHeight) / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) resolve(blob);
+              else reject(new Error('Failed to resize image'));
+            },
+            'image/jpeg',
+            0.85
+          );
+        };
+        img.onerror = reject;
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !editing) return;
 
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
+      // Resize image for portrait orientation (max 800px width, 1200px height)
+      const resizedBlob = await resizeImage(file, 800, 1200);
+      
+      const fileExt = 'jpg';
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('product-images')
-        .upload(fileName, file);
+        .upload(fileName, resizedBlob);
 
       if (uploadError) throw uploadError;
 
@@ -401,10 +450,16 @@ export const StockItemManager = () => {
               </div>
 
               {images.length > 0 && (
-                <div className="grid grid-cols-3 gap-4 mt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                   {images.map((img) => (
                     <div key={img.id} className="relative border rounded p-2">
-                      <img src={img.image_url} alt="Stock item" className="w-full h-32 object-cover rounded" />
+                      <div className="aspect-[3/4] w-full">
+                        <img 
+                          src={img.image_url} 
+                          alt="Stock item" 
+                          className="w-full h-full object-cover rounded" 
+                        />
+                      </div>
                       <Button
                         type="button"
                         size="sm"
