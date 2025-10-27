@@ -16,6 +16,7 @@ const OrderManager = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -154,23 +155,48 @@ const OrderManager = () => {
     );
   }
 
+  const filteredOrders = selectedStatusFilter === 'all' 
+    ? orders 
+    : orders.filter(order => order.order_status === selectedStatusFilter);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Order Management</h2>
-        <Button onClick={fetchOrders} variant="outline" size="sm">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="w-64">
+            <Select 
+              value={selectedStatusFilter} 
+              onValueChange={(v) => setSelectedStatusFilter(v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="new_order">New Order</SelectItem>
+                <SelectItem value="packing">Packing</SelectItem>
+                <SelectItem value="shipped">Shipped</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button onClick={fetchOrders} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
-      {orders.length === 0 ? (
+      {filteredOrders.length === 0 ? (
         <div className="text-center p-12 border rounded-lg">
-          <p className="text-muted-foreground">No orders yet</p>
+          <p className="text-muted-foreground">
+            {orders.length === 0 ? 'No orders yet' : 'No orders found with selected status'}
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <div key={order.id} className="border rounded-lg p-6 bg-card">
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div>
