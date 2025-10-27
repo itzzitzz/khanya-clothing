@@ -356,7 +356,7 @@ const handler = async (req: Request): Promise<Response> => {
           },
           body: JSON.stringify({
             from: "Khanya <noreply@mail.khanya.store>",
-            to: ["sales@khanya.store"],
+            to: ["orders@khanya.store"],
             subject: `New Order - ${orderNumber}`,
             html: salesHtml,
           }),
