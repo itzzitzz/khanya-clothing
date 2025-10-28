@@ -421,8 +421,8 @@ export const BaleManager = () => {
     } = useSortable({ id: bale.id, disabled: !isDraggingEnabled });
 
     const style = {
-      transform: isDragging ? CSS.Transform.toString(transform) : undefined,
-      transition: isDragging ? transition : undefined,
+      transform: CSS.Transform.toString(transform),
+      transition,
       opacity: isDragging ? 0.4 : 1,
     };
 
