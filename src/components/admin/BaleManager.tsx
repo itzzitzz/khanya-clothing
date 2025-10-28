@@ -7,9 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from "@/components/ui/table";
-import { Trash2, Plus, Edit, Eye, Loader2, Printer } from "lucide-react";
+import { Trash2, Plus, Edit, Loader2, Printer, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { cn } from "@/lib/utils";
 
 interface StockItem {
   id: number;
@@ -65,6 +69,7 @@ export const BaleManager = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [baleToDelete, setBaleToDelete] = useState<number | null>(null);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<number>(0);
+  const [activeDragId, setActiveDragId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     product_category_id: 0,
     description: '',
@@ -73,6 +78,17 @@ export const BaleManager = () => {
     quantity_in_stock: 1
   });
   const { toast } = useToast();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const loadData = async () => {
     try {
@@ -293,6 +309,52 @@ export const BaleManager = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveDragId(event.active.id as number);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveDragId(null);
+
+    if (!over || active.id === over.id) return;
+
+    const filteredBales = bales.filter(b => b.product_category_id === selectedCategoryFilter);
+    const oldIndex = filteredBales.findIndex(b => b.id === active.id);
+    const newIndex = filteredBales.findIndex(b => b.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reorderedBales = arrayMove(filteredBales, oldIndex, newIndex);
+
+    // Optimistically update UI
+    const updatedBales = bales.map(bale => {
+      const newOrderIndex = reorderedBales.findIndex(rb => rb.id === bale.id);
+      if (newOrderIndex !== -1) {
+        return { ...bale, display_order: newOrderIndex };
+      }
+      return bale;
+    });
+    setBales(updatedBales);
+
+    // Update display_order in database
+    try {
+      const updates = reorderedBales.map((bale, index) => 
+        supabase
+          .from('bales')
+          .update({ display_order: index })
+          .eq('id', bale.id)
+      );
+
+      await Promise.all(updates);
+      toast({ title: "Success", description: "Bale order updated" });
+      await loadData();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      await loadData(); // Reload to restore correct order
+    }
+  };
+
   const handleCancelEdit = () => {
     setEditingBaleId(null);
     setBaleItems([]);
@@ -341,7 +403,142 @@ export const BaleManager = () => {
 
   const totals = calculateTotals();
 
+  const filteredBales = bales.filter(b => selectedCategoryFilter === 0 || b.product_category_id === selectedCategoryFilter);
+  const isDraggingEnabled = selectedCategoryFilter !== 0;
+
   if (loading) return <div>Loading...</div>;
+
+  // Sortable Card Component
+  const SortableCard = ({ bale, isDraggingEnabled }: { bale: Bale, isDraggingEnabled: boolean }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id: bale.id, disabled: !isDraggingEnabled });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+      <Card 
+        ref={setNodeRef} 
+        style={style} 
+        className={cn(
+          "p-4 space-y-3 relative",
+          isDraggingEnabled && "cursor-grab active:cursor-grabbing",
+          isDragging && "shadow-lg ring-2 ring-primary z-50"
+        )}
+      >
+        {isDraggingEnabled && (
+          <div 
+            {...attributes} 
+            {...listeners}
+            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-none"
+          >
+            <GripVertical className="h-5 w-5" />
+          </div>
+        )}
+        <div className="flex items-start justify-between">
+          <div className="flex-1 pr-8">
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="font-semibold">{bale.description}</h4>
+              {!bale.active && (
+                <span className="text-xs bg-muted px-2 py-0.5 rounded">Inactive</span>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {bale.product_categories?.name}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-1 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Items:</span>
+            <span className="font-medium">
+              {bale.bale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0}
+            </span>
+          </div>
+          <div className="flex justify-between items-center gap-2">
+            <span className="text-muted-foreground">Qty in Stock:</span>
+            <Input 
+              type="number"
+              min="0"
+              value={bale.quantity_in_stock}
+              onChange={async (e) => {
+                const newQty = parseInt(e.target.value) || 0;
+                try {
+                  const { error } = await supabase
+                    .from('bales')
+                    .update({ quantity_in_stock: newQty })
+                    .eq('id', bale.id);
+                  
+                  if (error) throw error;
+                  
+                  await loadData();
+                  toast({ title: "Success", description: "Quantity updated" });
+                } catch (error: any) {
+                  toast({ title: "Error", description: error.message, variant: "destructive" });
+                }
+              }}
+              className="w-20 h-7 text-sm"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Cost Price:</span>
+            <span>R{bale.total_cost_price.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Selling Price:</span>
+            <span className="font-semibold">R{bale.actual_selling_price.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Profit:</span>
+            <span className={bale.bale_profit >= 0 ? 'text-green-600' : 'text-red-600'}>
+              R{bale.bale_profit.toFixed(2)} ({bale.bale_margin_percentage.toFixed(1)}%)
+            </span>
+          </div>
+        </div>
+
+        <div className="flex gap-2 pt-2">
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={() => handlePrintBale(bale.id)}
+            title="Print Bale Contents"
+          >
+            <Printer className="h-3 w-3" />
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="flex-1"
+            onClick={() => handleEditBale(bale)}
+          >
+            <Edit className="h-3 w-3 mr-1" />
+            Edit
+          </Button>
+          <Button 
+            size="sm" 
+            variant="destructive" 
+            onClick={() => {
+              setBaleToDelete(bale.id);
+              setDeleteDialogOpen(true);
+            }}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      </Card>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -552,107 +749,45 @@ export const BaleManager = () => {
             </Select>
           </div>
         </div>
-        {bales.filter(b => selectedCategoryFilter === 0 || b.product_category_id === selectedCategoryFilter).length === 0 ? (
+        
+        {isDraggingEnabled && filteredBales.length > 0 && (
+          <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg text-sm">
+            <p className="text-foreground flex items-center gap-2">
+              <GripVertical className="h-4 w-4" />
+              <span>Drag and drop enabled. Use the grip icon to reorder bales within this category.</span>
+            </p>
+          </div>
+        )}
+
+        {filteredBales.length === 0 ? (
           <p className="text-muted-foreground text-center py-8">No bales found</p>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {bales.filter(b => selectedCategoryFilter === 0 || b.product_category_id === selectedCategoryFilter).map((bale) => (
-              <Card key={bale.id} className="p-4 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold">{bale.description}</h4>
-                      {!bale.active && (
-                        <span className="text-xs bg-muted px-2 py-0.5 rounded">Inactive</span>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {bale.product_categories?.name}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Items:</span>
-                    <span className="font-medium">
-                      {bale.bale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center gap-2">
-                    <span className="text-muted-foreground">Qty in Stock:</span>
-                    <Input 
-                      type="number"
-                      min="0"
-                      value={bale.quantity_in_stock}
-                      onChange={async (e) => {
-                        const newQty = parseInt(e.target.value) || 0;
-                        try {
-                          const { error } = await supabase
-                            .from('bales')
-                            .update({ quantity_in_stock: newQty })
-                            .eq('id', bale.id);
-                          
-                          if (error) throw error;
-                          
-                          await loadData();
-                          toast({ title: "Success", description: "Quantity updated" });
-                        } catch (error: any) {
-                          toast({ title: "Error", description: error.message, variant: "destructive" });
-                        }
-                      }}
-                      className="w-20 h-7 text-sm"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Cost Price:</span>
-                    <span>R{bale.total_cost_price.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Selling Price:</span>
-                    <span className="font-semibold">R{bale.actual_selling_price.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Profit:</span>
-                    <span className={bale.bale_profit >= 0 ? 'text-green-600' : 'text-red-600'}>
-                      R{bale.bale_profit.toFixed(2)} ({bale.bale_margin_percentage.toFixed(1)}%)
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handlePrintBale(bale.id)}
-                    title="Print Bale Contents"
-                  >
-                    <Printer className="h-3 w-3" />
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={() => handleEditBale(bale)}
-                  >
-                    <Edit className="h-3 w-3 mr-1" />
-                    Edit
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="destructive" 
-                    onClick={() => {
-                      setBaleToDelete(bale.id);
-                      setDeleteDialogOpen(true);
-                    }}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={filteredBales.map(b => b.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredBales.map((bale) => (
+                  <SortableCard key={bale.id} bale={bale} isDraggingEnabled={isDraggingEnabled} />
+                ))}
+              </div>
+            </SortableContext>
+            <DragOverlay>
+              {activeDragId ? (
+                <Card className="p-4 opacity-50 shadow-2xl rotate-2">
+                  <h4 className="font-semibold">
+                    {filteredBales.find(b => b.id === activeDragId)?.description}
+                  </h4>
+                </Card>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         )}
       </Card>
 
