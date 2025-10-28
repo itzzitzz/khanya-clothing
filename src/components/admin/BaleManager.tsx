@@ -421,8 +421,9 @@ export const BaleManager = () => {
 
     const style = {
       transform: CSS.Transform.toString(transform),
-      transition,
-      opacity: isDragging ? 0.5 : 1,
+      transition: transition || 'transform 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 150ms ease',
+      opacity: isDragging ? 0.3 : 1,
+      zIndex: isDragging ? 999 : 'auto',
     };
 
     return (
@@ -430,9 +431,9 @@ export const BaleManager = () => {
         ref={setNodeRef} 
         style={style} 
         className={cn(
-          "p-4 space-y-3 relative",
+          "p-4 space-y-3 relative transition-transform duration-200",
           isDraggingEnabled && "cursor-grab active:cursor-grabbing",
-          isDragging && "shadow-lg ring-2 ring-primary z-50"
+          isDragging && "shadow-2xl ring-2 ring-primary scale-105"
         )}
       >
         {isDraggingEnabled && (
