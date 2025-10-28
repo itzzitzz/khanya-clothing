@@ -120,24 +120,28 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="stock-categories" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="stock-categories">
+          <TabsList className="w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 h-auto">
+            <TabsTrigger value="stock-categories" className="flex-shrink-0">
               <FolderOpen className="h-4 w-4 mr-2" />
-              Stock Categories
+              <span className="hidden sm:inline">Stock Categories</span>
+              <span className="sm:hidden">Stock Cat.</span>
             </TabsTrigger>
-            <TabsTrigger value="stock-items">
+            <TabsTrigger value="stock-items" className="flex-shrink-0">
               <Package className="h-4 w-4 mr-2" />
-              Stock Items
+              <span className="hidden sm:inline">Stock Items</span>
+              <span className="sm:hidden">Stock</span>
             </TabsTrigger>
-            <TabsTrigger value="product-categories">
+            <TabsTrigger value="product-categories" className="flex-shrink-0">
               <Tags className="h-4 w-4 mr-2" />
-              Product Categories
+              <span className="hidden sm:inline">Product Categories</span>
+              <span className="sm:hidden">Products</span>
             </TabsTrigger>
-            <TabsTrigger value="build-bales">
+            <TabsTrigger value="build-bales" className="flex-shrink-0">
               <Box className="h-4 w-4 mr-2" />
-              Build Bales
+              <span className="hidden sm:inline">Build Bales</span>
+              <span className="sm:hidden">Bales</span>
             </TabsTrigger>
-            <TabsTrigger value="orders">
+            <TabsTrigger value="orders" className="flex-shrink-0">
               <ShoppingCart className="h-4 w-4 mr-2" />
               Orders
             </TabsTrigger>
