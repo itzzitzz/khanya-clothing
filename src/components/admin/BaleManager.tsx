@@ -417,25 +417,28 @@ export const BaleManager = () => {
       transform,
       transition,
       isDragging,
+      isOver,
     } = useSortable({ id: bale.id, disabled: !isDraggingEnabled });
 
     const style = {
-      transform: CSS.Transform.toString(transform),
-      transition: transition || 'transform 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 150ms ease',
-      opacity: isDragging ? 0.3 : 1,
-      zIndex: isDragging ? 999 : 'auto',
+      opacity: isDragging ? 0.4 : 1,
     };
 
     return (
-      <Card 
-        ref={setNodeRef} 
-        style={style} 
-        className={cn(
-          "p-4 space-y-3 relative transition-transform duration-200",
-          isDraggingEnabled && "cursor-grab active:cursor-grabbing",
-          isDragging && "shadow-2xl ring-2 ring-primary scale-105"
+      <div className="relative">
+        {/* Green drop indicator line */}
+        {isOver && activeDragId !== bale.id && (
+          <div className="absolute -left-2 top-0 bottom-0 w-1 bg-green-500 rounded-full z-50 animate-pulse" />
         )}
-      >
+        <Card 
+          ref={setNodeRef} 
+          style={style} 
+          className={cn(
+            "p-4 space-y-3 relative",
+            isDraggingEnabled && "cursor-grab active:cursor-grabbing",
+            isDragging && "shadow-2xl ring-2 ring-primary"
+          )}
+        >
         {isDraggingEnabled && (
           <div 
             {...attributes} 
@@ -538,6 +541,7 @@ export const BaleManager = () => {
           </Button>
         </div>
       </Card>
+      </div>
     );
   };
 
