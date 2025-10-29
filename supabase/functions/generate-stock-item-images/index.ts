@@ -12,6 +12,8 @@ serve(async (req) => {
   }
 
   try {
+    const { showPeople = true } = await req.json();
+    
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -33,17 +35,35 @@ serve(async (req) => {
       throw new Error('No stock items found');
     }
 
-    console.log(`Generating images for ${stockItems.length} stock items`);
+    // Get image counts for each stock item
+    const itemsWithCounts = await Promise.all(
+      stockItems.map(async (item) => {
+        const { count } = await supabase
+          .from('stock_item_images')
+          .select('*', { count: 'exact', head: true })
+          .eq('stock_item_id', item.id);
+        return { ...item, imageCount: count || 0 };
+      })
+    );
+
+    // Sort by image count (ascending) - prioritize items with no images first
+    const sortedItems = itemsWithCounts.sort((a, b) => a.imageCount - b.imageCount);
+
+    console.log(`Generating images for ${sortedItems.length} stock items (prioritizing items with fewest images)`);
 
     const results = [];
 
-    for (const item of stockItems) {
-      console.log(`Generating images for: ${item.name}`);
+    for (const item of sortedItems) {
+      console.log(`Generating images for: ${item.name} (current count: ${item.imageCount})`);
       
       // Generate 2 images for each stock item
       for (let i = 0; i < 2; i++) {
         try {
-          const prompt = `Professional product photography of ${item.name}. ${item.description}. Age range: ${item.age_range || 'all ages'}. Clean white background, high quality, e-commerce style, well-lit, centered composition.`;
+          const basePrompt = `Professional product photography of ${item.name}. ${item.description}. Age range: ${item.age_range || 'all ages'}.`;
+          const stylePrompt = showPeople 
+            ? 'Black model wearing the clothes, natural pose, clean white background, high quality, e-commerce style, well-lit, centered composition.'
+            : 'Just the clothes without any people, flat lay or on mannequin, clean white background, high quality, e-commerce style, well-lit, centered composition.';
+          const prompt = `${basePrompt} ${stylePrompt}`;
           
           console.log(`Generating image ${i + 1} for ${item.name}`);
           
