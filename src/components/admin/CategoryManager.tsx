@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface StockCategory {
@@ -19,7 +19,7 @@ export const CategoryManager = () => {
   const [categories, setCategories] = useState<StockCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<StockCategory | null>(null);
-  const [formData, setFormData] = useState({ name: '', icon_name: '', display_order: 0 });
+  const [formData, setFormData] = useState({ name: '', icon_name: '' });
   const { toast } = useToast();
 
   const loadCategories = async () => {
@@ -27,7 +27,7 @@ export const CategoryManager = () => {
       const { data, error } = await supabase
         .from('stock_categories')
         .select('*')
-        .order('display_order');
+        .order('name');
 
       if (error) throw error;
       if (data) setCategories(data);
@@ -62,7 +62,7 @@ export const CategoryManager = () => {
         toast({ title: "Success", description: "Stock category created" });
       }
       
-      setFormData({ name: '', icon_name: '', display_order: 0 });
+      setFormData({ name: '', icon_name: '' });
       setEditing(null);
       loadCategories();
     } catch (error: any) {
@@ -91,9 +91,34 @@ export const CategoryManager = () => {
     setEditing(category);
     setFormData({
       name: category.name,
-      icon_name: category.icon_name,
-      display_order: category.display_order
+      icon_name: category.icon_name
     });
+  };
+
+  const moveCategory = async (id: number, direction: 'up' | 'down') => {
+    const index = categories.findIndex(c => c.id === id);
+    if (index === -1) return;
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === categories.length - 1) return;
+
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    const newCategories = [...categories];
+    [newCategories[index], newCategories[newIndex]] = [newCategories[newIndex], newCategories[index]];
+
+    try {
+      await Promise.all(
+        newCategories.map((cat, idx) => 
+          supabase
+            .from('stock_categories')
+            .update({ display_order: idx })
+            .eq('id', cat.id)
+        )
+      );
+      setCategories(newCategories);
+      toast({ title: "Success", description: "Category order updated" });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
   };
 
   if (loading) return <div>Loading...</div>;
@@ -121,16 +146,6 @@ export const CategoryManager = () => {
               required
             />
           </div>
-          <div>
-            <Label htmlFor="display_order">Display Order</Label>
-            <Input
-              id="display_order"
-              type="number"
-              value={formData.display_order}
-              onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) })}
-              required
-            />
-          </div>
           <div className="flex gap-2">
             <Button type="submit">
               {editing ? 'Update' : 'Create'}
@@ -141,7 +156,7 @@ export const CategoryManager = () => {
                 variant="outline"
                 onClick={() => {
                   setEditing(null);
-                  setFormData({ name: '', icon_name: '', display_order: 0 });
+                  setFormData({ name: '', icon_name: '' });
                 }}
               >
                 Cancel
@@ -158,18 +173,32 @@ export const CategoryManager = () => {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Icon</TableHead>
-              <TableHead>Order</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {categories.map((category) => (
+            {categories.map((category, index) => (
               <TableRow key={category.id}>
                 <TableCell>{category.name}</TableCell>
                 <TableCell>{category.icon_name}</TableCell>
-                <TableCell>{category.display_order}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => moveCategory(category.id, 'up')}
+                      disabled={index === 0}
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => moveCategory(category.id, 'down')}
+                      disabled={index === categories.length - 1}
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </Button>
                     <Button size="sm" variant="outline" onClick={() => handleEdit(category)}>
                       <Pencil className="h-4 w-4" />
                     </Button>

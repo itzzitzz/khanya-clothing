@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from "@/components/ui/table";
-import { Pencil, Trash2, Upload, Image as ImageIcon } from "lucide-react";
+import { Pencil, Trash2, Upload, ArrowUp, ArrowDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 
@@ -42,6 +42,8 @@ export const StockItemManager = () => {
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [categories, setCategories] = useState<StockCategory[]>([]);
   const [images, setImages] = useState<StockItemImage[]>([]);
+  const [imageCounts, setImageCounts] = useState<Record<number, number>>({});
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState<StockItem | null>(null);
@@ -54,20 +56,29 @@ export const StockItemManager = () => {
     selling_price: 0,
     margin_percentage: 50,
     stock_on_hand: 0,
-    display_order: 0,
     active: true
   });
   const { toast } = useToast();
 
   const loadData = async () => {
     try {
-      const [itemsRes, categoriesRes] = await Promise.all([
-        supabase.from('stock_items').select('*').order('display_order'),
-        supabase.from('stock_categories').select('*').order('display_order')
+      const [itemsRes, categoriesRes, imagesCountRes] = await Promise.all([
+        supabase.from('stock_items').select('*').order('name'),
+        supabase.from('stock_categories').select('*').order('name'),
+        supabase.from('stock_item_images').select('stock_item_id')
       ]);
 
       if (itemsRes.data) setStockItems(itemsRes.data);
       if (categoriesRes.data) setCategories(categoriesRes.data);
+      
+      // Count images per stock item
+      if (imagesCountRes.data) {
+        const counts: Record<number, number> = {};
+        imagesCountRes.data.forEach((img: any) => {
+          counts[img.stock_item_id] = (counts[img.stock_item_id] || 0) + 1;
+        });
+        setImageCounts(counts);
+      }
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
@@ -156,7 +167,6 @@ export const StockItemManager = () => {
       selling_price: item.selling_price,
       margin_percentage: item.margin_percentage,
       stock_on_hand: item.stock_on_hand,
-      display_order: item.display_order,
       active: item.active
     });
     loadImages(item.id);
@@ -174,10 +184,52 @@ export const StockItemManager = () => {
       selling_price: 0,
       margin_percentage: 50,
       stock_on_hand: 0,
-      display_order: 0,
       active: true
     });
   };
+
+  const moveStockItem = async (id: number, direction: 'up' | 'down', categoryId: number) => {
+    const categoryItems = stockItems.filter(item => item.stock_category_id === categoryId);
+    const index = categoryItems.findIndex(item => item.id === id);
+    if (index === -1) return;
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === categoryItems.length - 1) return;
+
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    const newCategoryItems = [...categoryItems];
+    [newCategoryItems[index], newCategoryItems[newIndex]] = [newCategoryItems[newIndex], newCategoryItems[index]];
+
+    try {
+      await Promise.all(
+        newCategoryItems.map((item, idx) => 
+          supabase
+            .from('stock_items')
+            .update({ display_order: idx })
+            .eq('id', item.id)
+        )
+      );
+      
+      const updatedItems = stockItems.map(item => {
+        const updated = newCategoryItems.find(ci => ci.id === item.id);
+        return updated ? { ...item, display_order: newCategoryItems.indexOf(updated) } : item;
+      });
+      setStockItems(updatedItems);
+      toast({ title: "Success", description: "Stock item order updated" });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const filteredItems = selectedCategory === 'all' 
+    ? stockItems 
+    : stockItems.filter(item => item.stock_category_id === parseInt(selectedCategory));
+
+  const groupedItems = filteredItems.reduce((acc, item) => {
+    const catId = item.stock_category_id;
+    if (!acc[catId]) acc[catId] = [];
+    acc[catId].push(item);
+    return acc;
+  }, {} as Record<number, StockItem[]>);
 
   const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<Blob> => {
     return new Promise((resolve, reject) => {
@@ -407,24 +459,12 @@ export const StockItemManager = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Display Order</Label>
-              <Input 
-                type="number"
-                value={formData.display_order} 
-                onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) })} 
-                required 
-              />
-            </div>
-
-            <div className="flex items-center space-x-2 pt-8">
-              <Switch
-                checked={formData.active}
-                onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
-              />
-              <Label>Active</Label>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={formData.active}
+              onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
+            />
+            <Label>Active</Label>
           </div>
 
           {editing && (
@@ -490,51 +530,89 @@ export const StockItemManager = () => {
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Stock Items</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Age Range</TableHead>
-              <TableHead>Cost</TableHead>
-              <TableHead>Selling</TableHead>
-              <TableHead>Margin %</TableHead>
-              <TableHead>Stock</TableHead>
-              <TableHead>Active</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {stockItems.map((item) => {
-              const category = categories.find(c => c.id === item.stock_category_id);
-              return (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell className="max-w-xs truncate">{item.description}</TableCell>
-                  <TableCell>{category?.name}</TableCell>
-                  <TableCell>{item.age_range || '-'}</TableCell>
-                  <TableCell>R{item.cost_price.toFixed(2)}</TableCell>
-                  <TableCell>R{item.selling_price.toFixed(2)}</TableCell>
-                  <TableCell>{item.margin_percentage.toFixed(1)}%</TableCell>
-                  <TableCell>{item.stock_on_hand}</TableCell>
-                  <TableCell>{item.active ? '✓' : '✗'}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(item.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Stock Items</h3>
+          <div className="flex items-center gap-2">
+            <Label>Filter:</Label>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Showing All</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {Object.entries(groupedItems).map(([categoryId, items]) => {
+          const category = categories.find(c => c.id === parseInt(categoryId));
+          return (
+            <div key={categoryId} className="mb-8">
+              <h4 className="text-md font-semibold mb-2 text-muted-foreground">{category?.name}</h4>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Age Range</TableHead>
+                    <TableHead>Cost</TableHead>
+                    <TableHead>Selling</TableHead>
+                    <TableHead>Margin %</TableHead>
+                    <TableHead>Stock</TableHead>
+                    <TableHead>Photos</TableHead>
+                    <TableHead>Active</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {items.map((item, index) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">{item.name}</TableCell>
+                      <TableCell className="max-w-xs truncate">{item.description}</TableCell>
+                      <TableCell>{item.age_range || '-'}</TableCell>
+                      <TableCell>R{item.cost_price.toFixed(2)}</TableCell>
+                      <TableCell>R{item.selling_price.toFixed(2)}</TableCell>
+                      <TableCell>{item.margin_percentage.toFixed(1)}%</TableCell>
+                      <TableCell>{item.stock_on_hand}</TableCell>
+                      <TableCell>{imageCounts[item.id] || 0}</TableCell>
+                      <TableCell>{item.active ? '✓' : '✗'}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => moveStockItem(item.id, 'up', item.stock_category_id)}
+                            disabled={index === 0}
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => moveStockItem(item.id, 'down', item.stock_category_id)}
+                            disabled={index === items.length - 1}
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleDelete(item.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          );
+        })}
       </Card>
     </div>
   );
