@@ -34,17 +34,22 @@ export const GenerateStockImages = () => {
       const totalCount = data.results?.length || 0;
 
       // Check for specific errors
-      if (data.creditError) {
+      if (data.creditError && successCount === 0) {
         toast({
           title: "Insufficient Credits",
-          description: "Not enough AI credits to generate images. Please add credits to your Lovable workspace in Settings > Workspace > Usage.",
+          description: "Not enough AI credits available. Please add credits to your Lovable workspace in Settings > Workspace > Usage. Each image costs approximately 0.5-1 credits.",
           variant: "destructive",
+        });
+      } else if (data.creditError && successCount > 0) {
+        toast({
+          title: "Partial Success",
+          description: `Generated ${successCount} images before running out of credits. Add more credits in Settings > Workspace > Usage to generate more.`,
         });
       } else if (data.rateLimitError) {
         toast({
           title: "Rate Limit Exceeded",
-          description: "Too many requests. Please wait a few minutes and try again.",
-          variant: "destructive",
+          description: `Generated ${successCount} images before hitting rate limit. Please wait a few minutes and try again.`,
+          variant: successCount > 0 ? "default" : "destructive",
         });
       } else if (successCount === 0 && totalCount > 0) {
         toast({
@@ -55,7 +60,7 @@ export const GenerateStockImages = () => {
       } else {
         toast({
           title: "Success",
-          description: `Generated ${successCount} out of ${totalCount} images for ${data.totalItems} stock items.`,
+          description: `Generated ${successCount} images across ${data.totalItems} stock items.`,
         });
       }
 

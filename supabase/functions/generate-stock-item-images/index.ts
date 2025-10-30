@@ -54,12 +54,19 @@ serve(async (req) => {
     const results = [];
     let creditError = false;
     let rateLimitError = false;
+    let shouldStop = false;
 
     for (const item of sortedItems) {
+      if (shouldStop) {
+        console.log(`Stopping generation due to insufficient credits. Generated images for ${results.filter(r => r.success).length} items so far.`);
+        break;
+      }
+
       console.log(`Generating images for: ${item.name} (current count: ${item.imageCount})`);
       
       // Generate 2 images for each stock item
       for (let i = 0; i < 2; i++) {
+        if (shouldStop) break;
         try {
           const basePrompt = `Professional product photography of ${item.name}. ${item.description}. Age range: ${item.age_range || 'all ages'}.`;
           const stylePrompt = showPeople 
@@ -91,11 +98,15 @@ serve(async (req) => {
             const errorText = await response.text();
             console.error(`AI Gateway error for ${item.name}:`, response.status, errorText);
             
-            // Track specific error types
+            // Track specific error types and stop if out of credits
             if (response.status === 402) {
               creditError = true;
+              shouldStop = true;
+              console.log('Insufficient credits - stopping image generation');
             } else if (response.status === 429) {
               rateLimitError = true;
+              shouldStop = true;
+              console.log('Rate limit exceeded - stopping image generation');
             }
             
             results.push({
@@ -105,7 +116,7 @@ serve(async (req) => {
               success: false,
               error: response.status === 402 ? 'insufficient_credits' : response.status === 429 ? 'rate_limit' : 'api_error'
             });
-            continue;
+            break; // Stop trying more images for this item
           }
 
           const data = await response.json();
