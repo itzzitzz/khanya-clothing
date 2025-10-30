@@ -83,8 +83,7 @@ export const GenerateStockImages = () => {
         <div>
           <h3 className="text-lg font-semibold mb-2">Generate AI Images</h3>
           <p className="text-sm text-muted-foreground">
-            Generate 2 professional product images for stock items with no or few images.
-            This will create images based on the item's name, description, and age range.
+            Generate 1 professional product image per item, prioritizing items with no images first. This will create images based on the item's name, description, and age range.
           </p>
         </div>
 
@@ -136,7 +135,7 @@ export const GenerateStockImages = () => {
 
         <p className="text-xs text-muted-foreground">
           Note: Prioritizes items with no images first, then those with fewest images. 
-          Generates 2 images per item. Make sure you have sufficient AI credits in your Lovable workspace.
+          Generates 1 image per item per run. Make sure you have sufficient AI credits in your Lovable workspace.
         </p>
       </div>
     </Card>

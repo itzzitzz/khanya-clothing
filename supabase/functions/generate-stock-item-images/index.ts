@@ -64,8 +64,8 @@ serve(async (req) => {
 
       console.log(`Generating images for: ${item.name} (current count: ${item.imageCount})`);
       
-      // Generate 2 images for each stock item
-      for (let i = 0; i < 2; i++) {
+      // Generate 1 image for each stock item
+      for (let i = 0; i < 1; i++) {
         if (shouldStop) break;
         try {
           const basePrompt = `Professional product photography of ${item.name}. ${item.description}. Age range: ${item.age_range || 'all ages'}.`;
