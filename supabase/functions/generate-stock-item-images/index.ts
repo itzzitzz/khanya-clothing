@@ -52,6 +52,8 @@ serve(async (req) => {
     console.log(`Generating images for ${sortedItems.length} stock items (prioritizing items with fewest images)`);
 
     const results = [];
+    let creditError = false;
+    let rateLimitError = false;
 
     for (const item of sortedItems) {
       console.log(`Generating images for: ${item.name} (current count: ${item.imageCount})`);
@@ -88,6 +90,21 @@ serve(async (req) => {
           if (!response.ok) {
             const errorText = await response.text();
             console.error(`AI Gateway error for ${item.name}:`, response.status, errorText);
+            
+            // Track specific error types
+            if (response.status === 402) {
+              creditError = true;
+            } else if (response.status === 429) {
+              rateLimitError = true;
+            }
+            
+            results.push({
+              stockItemId: item.id,
+              stockItemName: item.name,
+              imageNumber: i + 1,
+              success: false,
+              error: response.status === 402 ? 'insufficient_credits' : response.status === 429 ? 'rate_limit' : 'api_error'
+            });
             continue;
           }
 
@@ -169,7 +186,9 @@ serve(async (req) => {
       JSON.stringify({ 
         message: 'Image generation completed',
         totalItems: stockItems.length,
-        results 
+        results,
+        creditError,
+        rateLimitError
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

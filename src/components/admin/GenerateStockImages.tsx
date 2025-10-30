@@ -33,10 +33,31 @@ export const GenerateStockImages = () => {
       const successCount = data.results?.filter((r: any) => r.success).length || 0;
       const totalCount = data.results?.length || 0;
 
-      toast({
-        title: "Success",
-        description: `Generated ${successCount} out of ${totalCount} images for ${data.totalItems} stock items.`,
-      });
+      // Check for specific errors
+      if (data.creditError) {
+        toast({
+          title: "Insufficient Credits",
+          description: "Not enough AI credits to generate images. Please add credits to your Lovable workspace in Settings > Workspace > Usage.",
+          variant: "destructive",
+        });
+      } else if (data.rateLimitError) {
+        toast({
+          title: "Rate Limit Exceeded",
+          description: "Too many requests. Please wait a few minutes and try again.",
+          variant: "destructive",
+        });
+      } else if (successCount === 0 && totalCount > 0) {
+        toast({
+          title: "Image Generation Failed",
+          description: "Failed to generate any images. Check the edge function logs for details.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: `Generated ${successCount} out of ${totalCount} images for ${data.totalItems} stock items.`,
+        });
+      }
 
       setProgress(100);
     } catch (error: any) {
