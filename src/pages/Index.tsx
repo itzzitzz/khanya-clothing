@@ -104,8 +104,8 @@ const Index = () => {
                   loading="lazy"
                 />
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-card/80 backdrop-blur border-2 border-primary/20 rounded-full">
-                  <span className="text-3xl">🇿🇦</span>
-                  <span className="text-sm font-semibold text-muted-foreground">South Africa</span>
+                  <span className="text-2xl leading-none">🇿🇦</span>
+                  <span className="text-sm font-semibold text-muted-foreground leading-none">South Africa</span>
                 </div>
               </div>
               <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
