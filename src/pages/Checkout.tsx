@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
-import { Loader2, Mail, MessageCircle } from 'lucide-react';
+import { Loader2, Mail, MessageCircle, CheckCircle2, Package, Truck, ShieldCheck, MapPin, User } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -362,12 +362,78 @@ const Checkout = () => {
       <Header />
       <div className="min-h-screen bg-background py-8">
         <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+          {/* Hero Section */}
+          <div className="text-center mb-12 animate-fade-in">
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <Package className="h-20 w-20 text-primary animate-scale-in" />
+                <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm animate-scale-in">
+                  🎉
+                </div>
+              </div>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              You're Almost There!
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Just a few quick steps and your quality clothing bales will be on their way to you
+            </p>
+          </div>
+
+          {/* Progress Steps */}
+          <div className="mb-12">
+            <div className="flex justify-center items-center gap-2 md:gap-4">
+              <div className="flex flex-col items-center">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${pinVerified ? 'bg-primary text-primary-foreground' : 'bg-primary/20 text-primary'} transition-colors`}>
+                  {pinVerified ? <CheckCircle2 className="h-6 w-6" /> : <ShieldCheck className="h-6 w-6" />}
+                </div>
+                <p className="text-xs mt-2 text-center">Verify</p>
+              </div>
+              <div className={`h-1 w-12 md:w-24 ${pinVerified ? 'bg-primary' : 'bg-muted'} transition-colors`} />
+              <div className="flex flex-col items-center">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${pinVerified ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'} transition-colors`}>
+                  <User className="h-6 w-6" />
+                </div>
+                <p className="text-xs mt-2 text-center">Details</p>
+              </div>
+              <div className={`h-1 w-12 md:w-24 bg-muted transition-colors`} />
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+                  <Truck className="h-6 w-6" />
+                </div>
+                <p className="text-xs mt-2 text-center">Done</p>
+              </div>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmitOrder} className="space-y-8">
             {/* Verification */}
-            <div className="border rounded-lg p-6 bg-card">
-              <h2 className="text-xl font-bold mb-4">Verification</h2>
+            <div className="border rounded-lg p-6 bg-card shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <ShieldCheck className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Let's Verify It's Really You! 🔐</h2>
+                  <p className="text-muted-foreground">
+                    We need to verify your identity so we can:
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      Keep your order secure and protected
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      Send you order tracking updates
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      Make sure we send your goodies to the right place
+                    </li>
+                  </ul>
+                </div>
+              </div>
               <div className="space-y-4">
                 <div>
                   <Label>How would you like to receive your verification code? *</Label>
@@ -462,11 +528,36 @@ const Checkout = () => {
               </div>
             </div>
 
+            {/* Success Message */}
+            {pinVerified && (
+              <div className="border rounded-lg p-6 bg-primary/5 border-primary/20 animate-fade-in">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-8 w-8 text-primary" />
+                  <div>
+                    <h3 className="font-bold text-lg">Awesome! You're Verified! ✨</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Now let's get your details so we can deliver your quality bales
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Customer Details */}
             {pinVerified && (
               <>
-                <div className="border rounded-lg p-6 bg-card">
-                  <h2 className="text-xl font-bold mb-4">Customer Details</h2>
+                <div className="border rounded-lg p-6 bg-card shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="bg-primary/10 p-3 rounded-full">
+                      <User className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold mb-2">Tell Us About You 👋</h2>
+                      <p className="text-muted-foreground text-sm">
+                        Just the basics so we can keep in touch about your order
+                      </p>
+                    </div>
+                  </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="customer_name">Full Name *</Label>
@@ -492,9 +583,19 @@ const Checkout = () => {
                 </div>
 
                 {/* Delivery Address */}
-                <div className="border rounded-lg p-6 bg-card">
-                  <h2 className="text-xl font-bold mb-4">Delivery Address</h2>
-                  <p className="text-sm text-green-600 mb-4">FREE delivery to anywhere in South Africa</p>
+                <div className="border rounded-lg p-6 bg-card shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="bg-primary/10 p-3 rounded-full">
+                      <MapPin className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold mb-2">Where Should We Send Your Goodies? 📦</h2>
+                      <div className="flex items-center gap-2 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-4 py-2 rounded-lg">
+                        <Truck className="h-5 w-5" />
+                        <span className="font-semibold">FREE delivery anywhere in South Africa!</span>
+                      </div>
+                    </div>
+                  </div>
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="delivery_address">Street Address *</Label>
@@ -542,8 +643,18 @@ const Checkout = () => {
                 </div>
 
                 {/* Payment Method */}
-                <div className="border rounded-lg p-6 bg-card">
-                  <h2 className="text-xl font-bold mb-4">Payment Method</h2>
+                <div className="border rounded-lg p-6 bg-card shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="bg-primary/10 p-3 rounded-full">
+                      <Package className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold mb-2">How Would You Like to Pay? 💳</h2>
+                      <p className="text-muted-foreground text-sm">
+                        Choose your preferred payment method
+                      </p>
+                    </div>
+                  </div>
                   <RadioGroup
                     value={formData.payment_method}
                     onValueChange={(value) =>
@@ -558,8 +669,11 @@ const Checkout = () => {
                 </div>
 
                 {/* Order Summary */}
-                <div className="border rounded-lg p-6 bg-card">
-                  <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+                <div className="border rounded-lg p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <Package className="h-6 w-6 text-primary" />
+                    Your Order Summary
+                  </h2>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
@@ -576,10 +690,24 @@ const Checkout = () => {
                   </div>
                 </div>
 
-                <Button type="submit" size="lg" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Place Order
+                <Button type="submit" size="lg" className="w-full text-lg h-14 hover-scale" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Processing Your Order...
+                    </>
+                  ) : (
+                    <>
+                      <Truck className="mr-2 h-5 w-5" />
+                      Complete Order & Get Your Bales! 🎉
+                    </>
+                  )}
                 </Button>
+                
+                <p className="text-center text-sm text-muted-foreground">
+                  <ShieldCheck className="inline h-4 w-4 mr-1" />
+                  Your information is secure and protected
+                </p>
               </>
             )}
           </form>
