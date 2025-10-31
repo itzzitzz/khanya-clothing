@@ -508,19 +508,19 @@ export const StockItemManager = () => {
               {images.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                   {images.map((img) => (
-                    <div key={img.id} className="relative border rounded p-2">
-                      <div className="aspect-[3/4] w-full">
+                    <div key={img.id} className="relative border rounded overflow-hidden">
+                      <div className="aspect-square w-full bg-gray-50">
                         <img 
                           src={img.image_url} 
                           alt="Stock item" 
-                          className="w-full h-full object-cover rounded" 
+                          className="w-full h-full object-contain" 
                         />
                       </div>
                       <Button
                         type="button"
                         size="sm"
                         variant="destructive"
-                        className="absolute top-1 right-1"
+                        className="absolute top-2 right-2"
                         onClick={() => handleDeleteImage(img.id)}
                       >
                         <Trash2 className="h-3 w-3" />
