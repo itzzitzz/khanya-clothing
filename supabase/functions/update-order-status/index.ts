@@ -242,6 +242,20 @@ const handler = async (req: Request): Promise<Response> => {
       throw updateError;
     }
 
+    // Log status change to history
+    const { error: historyError } = await supabase
+      .from("order_status_history")
+      .insert({
+        order_id: order_id,
+        status: new_status,
+        changed_at: new Date().toISOString()
+      });
+
+    if (historyError) {
+      console.error("Error logging status history:", historyError);
+      // Don't throw - history logging is not critical
+    }
+
     // If payment status is being set to 'paid', deduct bale quantities from stock
     if (payment_status === 'paid') {
       console.log("Payment confirmed - deducting bale quantities from stock");

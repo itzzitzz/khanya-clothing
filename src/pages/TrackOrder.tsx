@@ -167,6 +167,17 @@ const TrackOrder = () => {
     return labels[status] || status;
   };
 
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-ZA', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
       case 'paid':
@@ -314,14 +325,48 @@ const TrackOrder = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 mb-4 p-4 bg-muted rounded">
-                    {getStatusIcon(order.order_status)}
-                    <div>
-                      <p className="font-semibold">{getStatusLabel(order.order_status)}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Last updated: {new Date(order.updated_at).toLocaleString()}
-                      </p>
+                  <div className="mb-4 p-4 bg-muted rounded">
+                    <div className="flex items-center gap-3 mb-3">
+                      {getStatusIcon(order.order_status)}
+                      <div>
+                        <p className="font-semibold">{getStatusLabel(order.order_status)}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Last updated: {new Date(order.updated_at).toLocaleString()}
+                        </p>
+                      </div>
                     </div>
+
+                    {/* Status History Timeline */}
+                    {order.order_status_history && order.order_status_history.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Status History</h4>
+                        <div className="space-y-3 pl-4 border-l-2 border-primary/30">
+                          {order.order_status_history.map((history: any) => (
+                            <div key={history.id} className="flex items-start gap-3 relative">
+                              <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-primary border-2 border-background" />
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-sm">{getStatusLabel(history.status)}</span>
+                                </div>
+                                <div className="text-xs text-muted-foreground">{formatDateTime(history.changed_at)}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Shipping Notice */}
+                    {order.order_status === 'shipped' && (
+                      <div className="mt-4 p-3 bg-background/50 rounded border border-border">
+                        <p className="text-sm">
+                          <strong className="text-foreground">Shipping Information:</strong>
+                          <span className="text-muted-foreground"> Delivery times depend on the courier service. 
+                          The courier will contact you to arrange delivery. Couriers typically take up to 3 business days, 
+                          but deliveries are often sooner in major cities.</span>
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2 mb-4">

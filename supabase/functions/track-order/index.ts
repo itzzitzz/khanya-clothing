@@ -54,7 +54,13 @@ const handler = async (req: Request): Promise<Response> => {
       .from("orders")
       .select(`
         *,
-        order_items (*)
+        order_items (*),
+        order_status_history (
+          id,
+          status,
+          changed_at,
+          notes
+        )
       `);
 
     // Filter by email or phone
@@ -86,6 +92,15 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log(`Found ${orders.length} orders for:`, email || phone);
+
+    // Sort status history chronologically for each order
+    orders.forEach(order => {
+      if (order.order_status_history) {
+        order.order_status_history.sort((a: any, b: any) => 
+          new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime()
+        );
+      }
+    });
 
     return new Response(
       JSON.stringify({ success: true, orders }),
