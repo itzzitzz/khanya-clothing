@@ -255,33 +255,33 @@ const ViewOrderBales = () => {
                       <Package className="h-8 w-8 text-primary" />
                       <h2 className="text-3xl font-bold">{category.name}</h2>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
                       {categoryBales.map((bale) => (
                         <div 
                           key={bale.id} 
                           className="bg-card border rounded-lg overflow-hidden hover:shadow-md transition-all group cursor-pointer"
                           onClick={() => handleBaleClick(bale)}
                         >
-                          <div className="aspect-square overflow-hidden relative bg-gray-50">
+                          <div className="aspect-square overflow-hidden relative bg-muted/20 flex items-center justify-center">
                             <img 
                               src={getRandomBaleImage(bale)} 
                               alt={bale.description}
-                              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                             />
                             <div className="absolute top-2 right-2 bg-background/90 px-1.5 py-0.5 rounded-full text-[10px] font-medium">
                               {bale.bale_items.reduce((sum, item) => sum + item.quantity, 0)} items
                             </div>
                           </div>
-                          <div className="px-2 pt-1.5 pb-2">
-                            <h3 className="text-xs font-bold mb-1.5 line-clamp-2">
+                          <div className="p-2 sm:px-3 sm:pt-2 sm:pb-2.5">
+                            <h3 className="text-xs sm:text-sm font-bold mb-1.5 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem]">
                               {bale.description}
                             </h3>
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-bold text-primary">R{bale.actual_selling_price.toFixed(2)}</span>
+                              <span className="text-sm sm:text-base font-bold text-primary">R{bale.actual_selling_price.toFixed(2)}</span>
                             </div>
                             <Button 
                               size="sm" 
-                              className="w-full h-7 text-xs"
+                              className="w-full h-7 sm:h-8 text-xs"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleAddToCart(bale);
