@@ -62,6 +62,9 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
     return sum + (item.stock_item.selling_price * item.quantity);
   }, 0);
 
+  const totalItems = bale.bale_items.reduce((sum, item) => sum + item.quantity, 0);
+  const averagePricePerItem = totalItems > 0 ? bale.actual_selling_price / totalItems : 0;
+
   const discount = itemsTotal - bale.actual_selling_price;
   const hasDiscount = discount > 0;
 
@@ -260,6 +263,14 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
             <div className="flex justify-between text-lg font-bold">
               <span>Bale Price:</span>
               <span>R{bale.actual_selling_price.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm border-t pt-2">
+              <span className="text-muted-foreground">Total Number of Items:</span>
+              <span>{totalItems}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Average Price per Item:</span>
+              <span>R{averagePricePerItem.toFixed(2)}</span>
             </div>
           </div>
 
