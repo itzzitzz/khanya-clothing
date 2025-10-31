@@ -129,9 +129,9 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
         <ScrollArea className="h-[70vh] pr-4">
           {/* Image Gallery */}
           {allImages.length > 0 && (
-            <div className="mb-6">
+            <div className="mb-6 w-full overflow-hidden">
               <div 
-                className="relative w-full max-w-xs aspect-[3/4] mx-auto bg-muted rounded-lg overflow-hidden"
+                className="relative w-full max-w-[280px] sm:max-w-xs aspect-[3/4] mx-auto bg-muted rounded-lg overflow-hidden"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -141,9 +141,11 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
                 <img
                   src={allImages[currentImageIndex].image_url}
                   alt={`Bale item ${currentImageIndex + 1}`}
-                  className="w-full h-full object-contain transition-transform select-none"
+                  className="w-full h-full object-contain object-center transition-transform select-none"
                   style={{
                     transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+                    maxWidth: '100%',
+                    maxHeight: '100%',
                   }}
                   draggable={false}
                 />
