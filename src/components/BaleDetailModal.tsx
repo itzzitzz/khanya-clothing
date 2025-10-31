@@ -236,7 +236,7 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
             <h3 className="font-semibold text-lg">Items Included</h3>
             {bale.bale_items.map((item) => (
               <div key={item.id} className="border rounded-lg p-3 space-y-2">
-                <div className="grid grid-cols-[1fr_auto] items-start gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start gap-3">
                   <div className="min-w-0">
                     <h4 className="font-semibold text-sm truncate">{item.stock_item.name}</h4>
                     <p className="text-xs text-muted-foreground line-clamp-2 break-words">
@@ -248,14 +248,10 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
                       </p>
                     )}
                   </div>
-                  <div className="text-right shrink-0 w-28 sm:w-32">
+                  <div className="sm:text-right text-left w-full sm:w-32">
                     <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
-                    <p className="text-xs text-muted-foreground">
-                      @R{item.stock_item.selling_price.toFixed(2)}
-                    </p>
-                    <p className="font-semibold text-sm">
-                      R{(item.stock_item.selling_price * item.quantity).toFixed(2)}
-                    </p>
+                    <p className="text-xs text-muted-foreground">@R{item.stock_item.selling_price.toFixed(2)}</p>
+                    <p className="font-semibold text-sm">R{(item.stock_item.selling_price * item.quantity).toFixed(2)}</p>
                   </div>
                 </div>
               </div>
