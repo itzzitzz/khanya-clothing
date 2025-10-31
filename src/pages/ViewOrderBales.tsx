@@ -193,7 +193,7 @@ const ViewOrderBales = () => {
                           className="bg-card border rounded-lg overflow-hidden hover:shadow-md transition-all group cursor-pointer"
                           onClick={() => handleBaleClick(bale)}
                         >
-                          <div className="aspect-[2/3] overflow-hidden relative bg-gray-50">
+                          <div className="aspect-square overflow-hidden relative bg-gray-50">
                             <img 
                               src={getRandomBaleImage(bale)} 
                               alt={bale.description}
