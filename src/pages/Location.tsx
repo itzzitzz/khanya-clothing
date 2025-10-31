@@ -1,51 +1,42 @@
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
-const setMeta = (name: string, content: string) => {
-  let tag = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
-  if (!tag) {
-    tag = document.createElement("meta");
-    tag.setAttribute("name", name);
-    document.head.appendChild(tag);
-  }
-  tag.setAttribute("content", content);
-};
-
-const ensureCanonical = (href: string) => {
-  let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-  if (!link) {
-    link = document.createElement("link");
-    link.setAttribute("rel", "canonical");
-    document.head.appendChild(link);
-  }
-  link.setAttribute("href", href);
-};
+import { Helmet } from "react-helmet-async";
 
 const Location = () => {
-  useEffect(() => {
-    document.title = "Payment Details & Free Delivery | Khanya";
-    setMeta(
-      "description",
-      "Khanya payment details and free delivery information. EFT payment accepted with free shipping to anywhere in South Africa on all orders."
-    );
-    ensureCanonical(window.location.href);
-  }, []);
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "Khanya",
-    description:
-      "Affordable bulk secondhand clothing bales for resellers in South Africa.",
-    areaServed: "South Africa",
-    telephone: "+27 82 852 1112",
-    email: "sales@khanya.store",
-    paymentAccepted: ["BankTransfer"],
-    url: typeof window !== "undefined" ? window.location.origin + "/location" : "https://khanya.example/location",
-  };
-
   return (
     <div>
+      <Helmet>
+        <title>Payment & Free Delivery Info | EFT Banking Details | Khanya</title>
+        <meta name="description" content="Khanya payment details: FNB EFT transfer. Free delivery anywhere in South Africa. Account 63173001256, Branch 250655. Order clothing bales with free nationwide shipping." />
+        <meta name="keywords" content="Khanya payment, EFT payment details, FNB banking, free delivery South Africa, nationwide shipping, clothing bales delivery, payment information" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/location` : "/location"} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Payment & Free Delivery | Khanya" />
+        <meta property="og:description" content="Simple EFT payment with free delivery to anywhere in South Africa. View our banking details and shipping information." />
+        <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": "Khanya",
+            "description": "Affordable bulk secondhand clothing bales for resellers in South Africa with free nationwide delivery.",
+            "areaServed": {
+              "@type": "Country",
+              "name": "South Africa"
+            },
+            "telephone": "+27828521112",
+            "email": "sales@khanya.store",
+            "paymentAccepted": ["Bank Transfer", "EFT"],
+            "priceRange": "R1000-R1600",
+            "url": typeof window !== "undefined" ? `${window.location.origin}/location` : "/location",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "ZA"
+            }
+          })}
+        </script>
+      </Helmet>
       <Header active="location" />
 
       <main>
@@ -116,11 +107,6 @@ const Location = () => {
           </article>
         </section>
       </main>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
 
       <footer className="border-t">
         <div className="container mx-auto py-8 flex items-center justify-between text-sm">

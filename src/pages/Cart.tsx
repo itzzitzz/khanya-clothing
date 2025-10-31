@@ -19,7 +19,9 @@ const Cart = () => {
     return (
       <>
         <Helmet>
-          <title>Shopping Cart | Your Business Name</title>
+          <title>Shopping Cart - Empty | Khanya Clothing Bales</title>
+          <meta name="description" content="Your shopping cart is empty. Browse our selection of quality secondhand clothing bales from R1,000 with free delivery across South Africa." />
+          <meta name="robots" content="noindex, follow" />
         </Helmet>
         <Header />
         <div className="min-h-screen bg-background py-12">
@@ -43,7 +45,10 @@ const Cart = () => {
   return (
     <>
       <Helmet>
-        <title>{`Shopping Cart (${cartCount}) | Your Business Name`}</title>
+        <title>{`Shopping Cart (${cartCount} ${cartCount === 1 ? 'Item' : 'Items'}) | Khanya`}</title>
+        <meta name="description" content={`Review your cart with ${cartCount} clothing bale${cartCount === 1 ? '' : 's'}. Total: R${cartTotal.toFixed(2)}. Free delivery anywhere in South Africa.`} />
+        <meta name="robots" content="noindex, follow" />
+        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/cart` : "/cart"} />
       </Helmet>
       <Header />
       <div className="min-h-screen bg-background py-8">

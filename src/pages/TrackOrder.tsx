@@ -102,7 +102,14 @@ const TrackOrder = () => {
   return (
     <>
       <Helmet>
-        <title>Track Order | Your Business Name</title>
+        <title>Track Your Order Status | Khanya Clothing Bales Delivery</title>
+        <meta name="description" content="Track your Khanya clothing bales order. Enter your email and order number to view real-time shipping status and delivery updates." />
+        <meta name="keywords" content="track order, order status, delivery tracking, shipping status, Khanya order tracking" />
+        <meta name="robots" content="noindex, follow" />
+        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/track-order` : "/track-order"} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Track Your Order | Khanya" />
+        <meta property="og:description" content="Check the status of your clothing bales order with real-time tracking." />
       </Helmet>
       <Header />
       <div className="min-h-screen bg-background py-12">

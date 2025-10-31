@@ -281,10 +281,12 @@ const Checkout = () => {
 
   if (cart.length === 0) {
     return (
-      <>
-        <Helmet>
-          <title>Checkout | Your Business Name</title>
-        </Helmet>
+    <>
+      <Helmet>
+        <title>Secure Checkout | Khanya Clothing Bales</title>
+        <meta name="description" content="Complete your order securely. Free delivery nationwide. EFT payment accepted for wholesale clothing bales." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
         <Header />
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">

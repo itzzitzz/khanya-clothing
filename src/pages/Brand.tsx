@@ -1,56 +1,34 @@
-import { useEffect } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-
+import { Helmet } from "react-helmet-async";
 
 const Brand = () => {
-  useEffect(() => {
-    const title = "Khanya Brand – Clothing That Shines";
-    document.title = title;
-
-    const metaName = "description";
-    const description =
-      "Khanya is an African-inspired clothing brand that radiates light, pride, and possibility. Wear bold designs that uplift communities.";
-    let meta = document.querySelector(`meta[name="${metaName}"]`);
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.setAttribute("name", metaName);
-      document.head.appendChild(meta);
-    }
-    meta.setAttribute("content", description);
-
-    const canonicalHref = typeof window !== "undefined" ? `${window.location.origin}/brand` : "/brand";
-    let linkCanonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (!linkCanonical) {
-      linkCanonical = document.createElement("link");
-      linkCanonical.setAttribute("rel", "canonical");
-      document.head.appendChild(linkCanonical);
-    }
-    linkCanonical.setAttribute("href", canonicalHref);
-
-    const jsonLd = {
-      "@context": "https://schema.org",
-      "@type": "Brand",
-      name: "Khanya",
-      slogan: "Clothing That Shines From the Inside Out",
-      description:
-        "Khanya blends African patterns and modern comfort to celebrate pride, resilience, and possibility. Wear light. Shine from within.",
-      url: typeof window !== "undefined" ? window.location.origin : "https://khanya.example",
-      logo: `${typeof window !== "undefined" ? window.location.origin : ""}/lovable-uploads/5b6d7d92-ae7b-4906-b2ef-216c9365a312.png`,
-    } as const;
-
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.text = JSON.stringify(jsonLd);
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
-
   return (
     <>
+      <Helmet>
+        <title>Khanya Brand - African-Inspired Clothing That Shines | South Africa</title>
+        <meta name="description" content="Khanya is an African-inspired clothing brand celebrating pride, resilience, and possibility. Bold designs that uplift communities. Shop Khanya branded apparel." />
+        <meta name="keywords" content="Khanya brand, African clothing brand, South African fashion, African-inspired apparel, township clothing, community uplift fashion, Khanya apparel" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/brand` : "/brand"} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Khanya Brand - Clothing That Shines From the Inside Out" />
+        <meta property="og:description" content="African-inspired clothing that radiates light, pride, and possibility. Wear Khanya, shine from within." />
+        <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
+        <meta property="og:image" content="/lovable-uploads/30d2102c-d664-4ad3-9cbb-0f88e0856966.png" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Brand",
+            "name": "Khanya",
+            "slogan": "Clothing That Shines From the Inside Out",
+            "description": "Khanya blends African patterns and modern comfort to celebrate pride, resilience, and possibility. Wear light. Shine from within.",
+            "url": typeof window !== "undefined" ? `${window.location.origin}/brand` : "/brand",
+            "logo": `${typeof window !== "undefined" ? window.location.origin : ""}/lovable-uploads/5b6d7d92-ae7b-4906-b2ef-216c9365a312.png`,
+            "image": `${typeof window !== "undefined" ? window.location.origin : ""}/lovable-uploads/30d2102c-d664-4ad3-9cbb-0f88e0856966.png`
+          })}
+        </script>
+      </Helmet>
       <Header active="brand" />
       <main>
         <article className="container mx-auto py-10 md:py-14">

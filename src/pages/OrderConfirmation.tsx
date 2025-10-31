@@ -28,8 +28,9 @@ const OrderConfirmation = () => {
   return (
     <>
       <Helmet>
-        <title>Order Confirmation - Khanya</title>
-        <meta name="description" content="Your order has been placed successfully" />
+        <title>Order Confirmed - {orderDetails.order_number} | Khanya</title>
+        <meta name="description" content={`Your order ${orderDetails.order_number} has been confirmed. Please complete EFT payment of R${orderDetails.total_amount?.toFixed(2)} and send proof to sales@khanya.store`} />
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       
       <div className="min-h-screen bg-background">

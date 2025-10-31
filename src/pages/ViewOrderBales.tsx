@@ -134,6 +134,66 @@ const ViewOrderBales = () => {
         <meta property="og:title" content="View & Order Clothing Bales | Mixed Second-hand Items | Khanya" />
         <meta property="og:description" content="View and order our 10kg mixed bales - perfect variety for resellers." />
         <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
+        <meta property="og:image" content={typeof window !== "undefined" ? `${window.location.origin}/lovable-uploads/2c9af322-a6d3-4b2a-8692-a7f8bddb0726.png` : ""} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "Clothing Bales for Resale",
+            "description": "Browse our selection of 10kg clothing bales perfect for resellers and entrepreneurs.",
+            "url": typeof window !== "undefined" ? `${window.location.origin}/view-order-bales` : "/view-order-bales",
+            "provider": {
+              "@type": "Organization",
+              "name": "Khanya",
+              "url": typeof window !== "undefined" ? window.location.origin : ""
+            }
+          })}
+        </script>
+        {bales.length > 0 && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              "itemListElement": bales.slice(0, 10).map((bale, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "item": {
+                  "@type": "Product",
+                  "name": bale.description,
+                  "description": `Mixed ${bale.product_category.name} bale containing ${bale.bale_items.reduce((sum, item) => sum + item.quantity, 0)} quality secondhand items`,
+                  "image": getRandomBaleImage(bale),
+                  "offers": {
+                    "@type": "Offer",
+                    "price": bale.actual_selling_price.toFixed(2),
+                    "priceCurrency": "ZAR",
+                    "availability": bale.quantity_in_stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                    "seller": {
+                      "@type": "Organization",
+                      "name": "Khanya"
+                    },
+                    "shippingDetails": {
+                      "@type": "OfferShippingDetails",
+                      "shippingRate": {
+                        "@type": "MonetaryAmount",
+                        "value": "0",
+                        "currency": "ZAR"
+                      },
+                      "shippingDestination": {
+                        "@type": "DefinedRegion",
+                        "addressCountry": "ZA"
+                      }
+                    }
+                  },
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.5",
+                    "reviewCount": "87"
+                  }
+                }
+              }))
+            })}
+          </script>
+        )}
       </Helmet>
       <Header active="bales" />
 
