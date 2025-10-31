@@ -121,7 +121,7 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="max-w-2xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{bale.description}</DialogTitle>
         </DialogHeader>
@@ -131,7 +131,7 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
           {allImages.length > 0 && (
             <div className="mb-6">
               <div 
-                className="relative max-w-md w-full aspect-[3/4] mx-auto bg-muted rounded-lg overflow-hidden"
+                className="relative w-full max-w-xs aspect-[3/4] mx-auto bg-muted rounded-lg overflow-hidden"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -195,7 +195,7 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
               
               {/* Thumbnails */}
               {allImages.length > 1 && (
-                <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
+                <div className="flex gap-2 mt-2 overflow-x-auto pb-2 scrollbar-thin">
                   {allImages.map((image, idx) => (
                     <button
                       key={image.id}
@@ -203,7 +203,7 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
                         setCurrentImageIndex(idx);
                         resetZoom();
                       }}
-                      className={`flex-shrink-0 w-24 h-36 rounded-lg overflow-hidden border-2 bg-gray-50 ${
+                      className={`flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 bg-gray-50 ${
                         idx === currentImageIndex ? 'border-primary ring-2 ring-primary/50' : 'border-transparent hover:border-primary/50'
                       }`}
                     >
@@ -223,23 +223,23 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">Items Included</h3>
             {bale.bale_items.map((item) => (
-              <div key={item.id} className="border rounded-lg p-4 space-y-2">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h4 className="font-semibold">{item.stock_item.name}</h4>
-                    <p className="text-sm text-muted-foreground">{item.stock_item.description}</p>
+              <div key={item.id} className="border rounded-lg p-3 space-y-2">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-sm">{item.stock_item.name}</h4>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{item.stock_item.description}</p>
                     {item.stock_item.age_range && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Age Range: {item.stock_item.age_range}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Age: {item.stock_item.age_range}
                       </p>
                     )}
                   </div>
-                  <div className="text-right ml-4">
-                    <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Unit Price: R{item.stock_item.selling_price.toFixed(2)}
+                  <div className="text-right shrink-0">
+                    <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                    <p className="text-xs text-muted-foreground">
+                      @R{item.stock_item.selling_price.toFixed(2)}
                     </p>
-                    <p className="font-semibold">
+                    <p className="font-semibold text-sm">
                       R{(item.stock_item.selling_price * item.quantity).toFixed(2)}
                     </p>
                   </div>
