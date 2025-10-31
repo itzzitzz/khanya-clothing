@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Package, Shirt, Users, ShoppingCart, Plus } from "lucide-react";
+import { CheckCircle2, Package, Shirt, Users, ShoppingCart, Plus, Award } from "lucide-react";
 import Header from "@/components/Header";
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { BaleDetailModal } from "@/components/BaleDetailModal";
+import { Badge } from "@/components/ui/badge";
 
 interface StockItemImage {
   id: number;
@@ -202,6 +203,12 @@ const ViewOrderBales = () => {
           <div className="container mx-auto text-center">
             <div className="mb-6">
               <Package className="h-16 w-16 mx-auto text-primary mb-4" />
+            </div>
+            <div className="flex justify-center mb-4">
+              <Badge variant="default" className="text-lg px-6 py-2 bg-primary hover:bg-primary/90 flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                High Quality A Grade
+              </Badge>
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
               View & Order Bales
