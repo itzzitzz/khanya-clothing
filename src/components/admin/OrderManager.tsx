@@ -9,7 +9,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, RefreshCw, Printer } from 'lucide-react';
+import { Loader2, RefreshCw, Printer, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const OrderManager = () => {
   const { toast } = useToast();
@@ -17,6 +29,10 @@ const OrderManager = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<any>(null);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -147,6 +163,86 @@ const OrderManager = () => {
     window.open(`/packing-list?orderId=${orderId}`, '_blank');
   };
 
+  const handleDeleteClick = (order: any) => {
+    setOrderToDelete(order);
+    setDeletePassword('');
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!orderToDelete || !deletePassword) {
+      toast({
+        title: 'Error',
+        description: 'Please enter your password',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      // Get current user's email
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user?.email) {
+        throw new Error('Unable to verify user');
+      }
+
+      // Verify password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: deletePassword,
+      });
+
+      if (signInError) {
+        throw new Error('Incorrect password');
+      }
+
+      // Password verified, proceed with deletion
+      // Delete order items first (cascade should handle this, but being explicit)
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .delete()
+        .eq('order_id', orderToDelete.id);
+
+      if (itemsError) throw itemsError;
+
+      // Delete order status history
+      const { error: historyError } = await supabase
+        .from('order_status_history')
+        .delete()
+        .eq('order_id', orderToDelete.id);
+
+      if (historyError) throw historyError;
+
+      // Delete the order
+      const { error: orderError } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderToDelete.id);
+
+      if (orderError) throw orderError;
+
+      toast({
+        title: 'Success',
+        description: `Order ${orderToDelete.order_number} has been deleted`,
+      });
+
+      setDeleteDialogOpen(false);
+      setOrderToDelete(null);
+      setDeletePassword('');
+      await fetchOrders();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete order',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -209,6 +305,15 @@ const OrderManager = () => {
                       title="Print Packing List"
                     >
                       <Printer className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      onClick={() => handleDeleteClick(order)}
+                      variant="outline"
+                      size="sm"
+                      title="Delete Order"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -341,6 +446,56 @@ const OrderManager = () => {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete order <strong>{orderToDelete?.order_number}</strong>?
+              This action cannot be undone and will permanently delete the order and all its items.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Label htmlFor="delete-password">Enter your password to confirm</Label>
+            <Input
+              id="delete-password"
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              placeholder="Your account password"
+              className="mt-2"
+              disabled={isDeleting}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !isDeleting) {
+                  handleDeleteConfirm();
+                }
+              }}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDeleteConfirm();
+              }}
+              disabled={isDeleting || !deletePassword}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Order'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
