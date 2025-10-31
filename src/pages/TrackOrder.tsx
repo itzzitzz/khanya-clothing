@@ -98,13 +98,26 @@ const TrackOrder = () => {
       
       const { data, error } = await supabase.functions.invoke('track-order', {
         body: { 
-          email: trackingMethod === 'email' ? email : undefined,
+          email: trackingMethod === 'email' ? email.trim().toLowerCase() : undefined,
           phone: trackingMethod === 'phone' ? cleanPhone : undefined,
-          order_number: orderNumber || undefined 
+          order_number: orderNumber.trim() || undefined 
         },
       });
 
-      if (error) throw error;
+      // Gracefully handle "no orders" 404 without error toast
+      if (error) {
+        const status = (error as any)?.context?.status;
+        const ctxBody = (error as any)?.context?.body;
+        const ctxBodyStr = typeof ctxBody === 'string' ? ctxBody : JSON.stringify(ctxBody || '');
+        const msg = (error as any)?.message || '';
+        const notFound = status === 404 || msg.includes('No orders found') || ctxBodyStr.includes('No orders found');
+        if (notFound) {
+          setOrders([]);
+          setNoOrdersFound(true);
+          return;
+        }
+        throw error;
+      }
 
       if (!data.orders || data.orders.length === 0) {
         setOrders([]);
