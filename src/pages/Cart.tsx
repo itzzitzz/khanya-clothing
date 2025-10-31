@@ -60,61 +60,66 @@ const Cart = () => {
               {cart.map((item) => (
                 <div
                   key={item.product_id}
-                  className="flex gap-4 p-4 border rounded-lg bg-card"
+                  className="flex flex-col sm:flex-row gap-4 p-4 border rounded-lg bg-card"
                 >
-                  <img
-                    src={item.product_image}
-                    alt={item.product_name}
-                    className="w-24 h-32 object-contain rounded"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-semibold mb-2">{item.product_name}</h3>
-                    <p className="text-lg font-bold mb-2">
-                      R{Number(item.price_per_unit).toFixed(2)}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() =>
-                          updateQuantity(item.product_id, item.quantity - 1)
-                        }
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) =>
-                          updateQuantity(
-                            item.product_id,
-                            parseInt(e.target.value) || 1
-                          )
-                        }
-                        className="w-20 text-center"
-                      />
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() =>
-                          updateQuantity(item.product_id, item.quantity + 1)
-                        }
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        onClick={() => removeFromCart(item.product_id)}
-                        className="ml-auto"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  <div className="flex gap-4 sm:flex-1">
+                    <img
+                      src={item.product_image}
+                      alt={item.product_name}
+                      className="w-20 h-24 sm:w-24 sm:h-32 object-contain rounded flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold mb-2 text-sm sm:text-base">{item.product_name}</h3>
+                      <p className="text-base sm:text-lg font-bold mb-2">
+                        R{Number(item.price_per_unit).toFixed(2)}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-8 w-8"
+                          onClick={() =>
+                            updateQuantity(item.product_id, item.quantity - 1)
+                          }
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) =>
+                            updateQuantity(
+                              item.product_id,
+                              parseInt(e.target.value) || 1
+                            )
+                          }
+                          className="w-16 sm:w-20 text-center h-8"
+                        />
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-8 w-8"
+                          onClick={() =>
+                            updateQuantity(item.product_id, item.quantity + 1)
+                          }
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="destructive"
+                          className="ml-auto h-8 w-8"
+                          onClick={() => removeFromCart(item.product_id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold">
+                  <div className="flex justify-between items-center sm:block sm:text-right sm:min-w-[100px] border-t sm:border-t-0 pt-3 sm:pt-0">
+                    <span className="text-sm text-muted-foreground sm:hidden">Item Total:</span>
+                    <p className="text-base sm:text-lg font-bold">
                       R{(Number(item.price_per_unit) * item.quantity).toFixed(2)}
                     </p>
                   </div>
