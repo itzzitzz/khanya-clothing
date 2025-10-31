@@ -199,11 +199,11 @@ const ViewOrderBales = () => {
                               alt={bale.description}
                               className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                             />
-                            <div className="absolute top-1 right-1 bg-background/90 px-1.5 py-0.5 rounded-full text-[10px] font-medium">
+                            <div className="absolute top-2 right-2 bg-background/90 px-1.5 py-0.5 rounded-full text-[10px] font-medium">
                               {bale.bale_items.reduce((sum, item) => sum + item.quantity, 0)} items
                             </div>
                           </div>
-                          <div className="p-2">
+                          <div className="px-2 pt-1.5 pb-2">
                             <h3 className="text-xs font-bold mb-1.5 line-clamp-2">
                               {bale.description}
                             </h3>
