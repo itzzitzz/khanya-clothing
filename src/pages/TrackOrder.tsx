@@ -17,6 +17,8 @@ const TrackOrder = () => {
   const [phone, setPhone] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
   const [orders, setOrders] = useState<any[]>([]);
+  const [searched, setSearched] = useState(false);
+  const [noOrdersFound, setNoOrdersFound] = useState(false);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
@@ -88,6 +90,8 @@ const TrackOrder = () => {
     }
 
     setLoading(true);
+    setSearched(true);
+    setNoOrdersFound(false);
     try {
       // Strip formatting from phone before sending
       const cleanPhone = phone ? phone.replace(/\D/g, '') : undefined;
@@ -103,16 +107,13 @@ const TrackOrder = () => {
       if (error) throw error;
 
       if (!data.orders || data.orders.length === 0) {
-        toast({
-          title: 'No Orders Found',
-          description: 'No orders found with this ' + (trackingMethod === 'email' ? 'email' : 'phone number') + (orderNumber ? ' and order number' : ''),
-          variant: 'destructive',
-        });
         setOrders([]);
+        setNoOrdersFound(true);
         return;
       }
 
       setOrders(data.orders);
+      setNoOrdersFound(false);
       toast({
         title: 'Orders Found',
         description: `Found ${data.orders.length} order(s)`,
@@ -260,6 +261,20 @@ const TrackOrder = () => {
               </Button>
             </form>
           </div>
+
+          {noOrdersFound && (
+            <div className="text-center py-12 animate-fade-in">
+              <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+              <h3 className="text-2xl font-bold mb-2">No Orders Found</h3>
+              <p className="text-muted-foreground mb-4">
+                We couldn't find any orders with {trackingMethod === 'email' ? 'that email address' : 'that phone number'}
+                {orderNumber && ' and order number'}.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Double-check your information or try a different search method.
+              </p>
+            </div>
+          )}
 
           {orders.length > 0 && (
             <div className="space-y-6 animate-fade-in">
