@@ -193,9 +193,9 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
                 </div>
               </div>
               
-              {/* Thumbnails */}
+              {/* Thumbnails - hidden on mobile */}
               {allImages.length > 1 && (
-                <div className="flex gap-2 mt-2 justify-center pb-2">
+                <div className="hidden sm:flex gap-2 mt-2 justify-center pb-2">
                   {(() => {
                     // Calculate visible range: 2 images before and 2 after the current one
                     const start = Math.max(0, currentImageIndex - 2);
