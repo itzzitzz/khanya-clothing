@@ -4,6 +4,7 @@ import heroImg from "@/assets/chinese-clothing-bales.jpg";
 import baleImg from "@/assets/bale-warehouse.jpg";
 import flatlayImg from "@/assets/mixed-clothing-flatlay.jpg";
 import marketImg from "@/assets/market-stall-r50.jpg";
+import saFlag from "@/assets/south-africa-flag.png";
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import { Helmet } from "react-helmet-async";
@@ -104,7 +105,7 @@ const Index = () => {
                   loading="lazy"
                 />
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-card/80 backdrop-blur border-2 border-primary/20 rounded-full">
-                  <span className="text-2xl leading-none">🇿🇦</span>
+                  <img src={saFlag} alt="South Africa flag" className="w-6 h-4 object-cover rounded-sm" />
                   <span className="text-sm font-semibold text-muted-foreground leading-none">South Africa</span>
                 </div>
               </div>
