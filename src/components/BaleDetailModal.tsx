@@ -195,25 +195,35 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
               
               {/* Thumbnails */}
               {allImages.length > 1 && (
-                <div className="flex gap-2 mt-2 overflow-x-auto pb-2 scrollbar-thin">
-                  {allImages.map((image, idx) => (
-                    <button
-                      key={image.id}
-                      onClick={() => {
-                        setCurrentImageIndex(idx);
-                        resetZoom();
-                      }}
-                      className={`flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 bg-gray-50 ${
-                        idx === currentImageIndex ? 'border-primary ring-2 ring-primary/50' : 'border-transparent hover:border-primary/50'
-                      }`}
-                    >
-                      <img
-                        src={image.image_url}
-                        alt={`Thumbnail ${idx + 1}`}
-                        className="w-full h-full object-contain"
-                      />
-                    </button>
-                  ))}
+                <div className="flex gap-2 mt-2 justify-center pb-2">
+                  {(() => {
+                    // Calculate visible range: 2 images before and 2 after the current one
+                    const start = Math.max(0, currentImageIndex - 2);
+                    const end = Math.min(allImages.length, currentImageIndex + 3);
+                    const visibleImages = allImages.slice(start, end);
+                    
+                    return visibleImages.map((image, idx) => {
+                      const actualIdx = start + idx;
+                      return (
+                        <button
+                          key={image.id}
+                          onClick={() => {
+                            setCurrentImageIndex(actualIdx);
+                            resetZoom();
+                          }}
+                          className={`flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 bg-gray-50 transition-all ${
+                            actualIdx === currentImageIndex ? 'border-primary ring-2 ring-primary/50 scale-110' : 'border-transparent hover:border-primary/50'
+                          }`}
+                        >
+                          <img
+                            src={image.image_url}
+                            alt={`Thumbnail ${actualIdx + 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                        </button>
+                      );
+                    });
+                  })()}
                 </div>
               )}
             </div>
