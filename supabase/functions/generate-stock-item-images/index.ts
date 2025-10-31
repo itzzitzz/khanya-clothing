@@ -103,6 +103,7 @@ serve(async (req) => {
               creditError = true;
               shouldStop = true;
               console.log('Insufficient credits - stopping image generation');
+              console.log('Full error response:', errorText);
             } else if (response.status === 429) {
               rateLimitError = true;
               shouldStop = true;
@@ -114,7 +115,8 @@ serve(async (req) => {
               stockItemName: item.name,
               imageNumber: i + 1,
               success: false,
-              error: response.status === 402 ? 'insufficient_credits' : response.status === 429 ? 'rate_limit' : 'api_error'
+              error: response.status === 402 ? 'insufficient_credits' : response.status === 429 ? 'rate_limit' : 'api_error',
+              errorDetails: errorText
             });
             break; // Stop trying more images for this item
           }
@@ -193,13 +195,22 @@ serve(async (req) => {
       }
     }
 
+    const successCount = results.filter(r => r.success).length;
+    const errorMessage = creditError 
+      ? results.find(r => r.error === 'insufficient_credits')?.errorDetails || 'Insufficient credits'
+      : rateLimitError 
+      ? 'Rate limit exceeded'
+      : null;
+
     return new Response(
       JSON.stringify({ 
         message: 'Image generation completed',
         totalItems: stockItems.length,
+        successCount,
         results,
         creditError,
-        rateLimitError
+        rateLimitError,
+        errorMessage
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

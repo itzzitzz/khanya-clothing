@@ -30,31 +30,32 @@ export const GenerateStockImages = () => {
 
       if (error) throw error;
 
-      const successCount = data.results?.filter((r: any) => r.success).length || 0;
+      const successCount = data.successCount || 0;
       const totalCount = data.results?.length || 0;
+      const errorDetails = data.errorMessage ? `\n\nAPI Error: ${data.errorMessage}` : '';
 
       // Check for specific errors
       if (data.creditError && successCount === 0) {
         toast({
           title: "Insufficient Credits",
-          description: "Not enough AI credits available. Please add credits to your Lovable workspace in Settings > Workspace > Usage. Each image costs approximately 0.5-1 credits.",
+          description: `Not enough AI credits available. Please add credits to your Lovable workspace in Settings > Workspace > Usage. Each image costs approximately 0.5-1 credits.${errorDetails}`,
           variant: "destructive",
         });
       } else if (data.creditError && successCount > 0) {
         toast({
           title: "Partial Success",
-          description: `Generated ${successCount} images before running out of credits. Add more credits in Settings > Workspace > Usage to generate more.`,
+          description: `Generated ${successCount} images before running out of credits. Add more credits in Settings > Workspace > Usage to generate more.${errorDetails}`,
         });
       } else if (data.rateLimitError) {
         toast({
           title: "Rate Limit Exceeded",
-          description: `Generated ${successCount} images before hitting rate limit. Please wait a few minutes and try again.`,
+          description: `Generated ${successCount} images before hitting rate limit. Please wait a few minutes and try again.${errorDetails}`,
           variant: successCount > 0 ? "default" : "destructive",
         });
       } else if (successCount === 0 && totalCount > 0) {
         toast({
           title: "Image Generation Failed",
-          description: "Failed to generate any images. Check the edge function logs for details.",
+          description: `Failed to generate any images. Check the edge function logs for details.${errorDetails}`,
           variant: "destructive",
         });
       } else {
