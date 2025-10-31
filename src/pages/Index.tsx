@@ -96,19 +96,23 @@ const Index = () => {
         >
           <div className="container mx-auto grid lg:grid-cols-2 gap-10 items-center py-16">
             <div>
-              <div className="mb-4">
+              <div className="mb-4 flex items-center gap-3">
                 <img
                   src="/lovable-uploads/5b6d7d92-ae7b-4906-b2ef-216c9365a312.png"
                   alt="Khanya sun logo"
                   className="h-24 md:h-32 w-auto"
                   loading="lazy"
                 />
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-card/80 backdrop-blur border-2 border-primary/20 rounded-full">
+                  <span className="text-3xl">🇿🇦</span>
+                  <span className="text-sm font-semibold text-muted-foreground">South Africa</span>
+                </div>
               </div>
               <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
                 Start Your Own Clothing Business Today
               </h1>
               <p className="text-lg text-muted-foreground mb-6 max-w-xl">
-                Khanya empowers entrepreneurs to build their own clothing businesses with curated bales of quality secondhand clothing. Start for as little as R1,000 and serve your community with affordable fashion.
+                Khanya empowers South African entrepreneurs to build their own clothing businesses with curated bales of quality secondhand clothing. Start for as little as R1,000 and serve your community with affordable fashion.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button variant="hero" size="xl" asChild>
@@ -153,9 +157,12 @@ const Index = () => {
             <p>
               <strong>Real profit margins.</strong> Buy a bale for R1,000-R1,600 containing 30-45 quality items (depending on the type). Sell individual pieces at R50-R100 each at your market stall, street corner, or to neighbors. Many of our traders are making 2-3× their investment on each bale—that's R2,000-R4,500 from a single R1,000-R1,600 purchase.
             </p>
-            <p>
-              <strong>Free delivery anywhere in South Africa.</strong> We deliver your bales for free to your door, whether you're in Johannesburg, Cape Town, Durban, or a small township. No hidden costs. Just opportunity.
-            </p>
+            <div className="flex items-start gap-3 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <span className="text-2xl">🇿🇦</span>
+              <p>
+                <strong>Free delivery anywhere in South Africa.</strong> We deliver your bales for free to your door, whether you're in Johannesburg, Cape Town, Durban, or a small township. No hidden costs. Just opportunity.
+              </p>
+            </div>
           </div>
           
           <div className="mt-8 bg-accent/10 border-2 border-accent rounded-xl p-6">
@@ -248,8 +255,11 @@ const Index = () => {
 
         <section id="contact" className="container mx-auto py-16">
           <div className="bg-card border rounded-2xl p-8 md:p-12 text-center shadow-[var(--shadow-elegant)]">
-            <h2 className="text-3xl font-extrabold mb-3">Ready to start?</h2>
-            <p className="text-muted-foreground mb-6">Get pricing, availability and delivery options for your area.</p>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <span className="text-2xl">🇿🇦</span>
+              <h2 className="text-3xl font-extrabold">Ready to start?</h2>
+            </div>
+            <p className="text-muted-foreground mb-6">Get pricing, availability and delivery options for your area in South Africa.</p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Button variant="hero" size="lg" asChild>
                 <a href="mailto:sales@khanya.store?subject=Khanya%20Bales%20Enquiry">Email sales@khanya.store</a>
