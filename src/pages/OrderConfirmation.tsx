@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Header from '@/components/Header';
-import { CheckCircle2, Mail } from 'lucide-react';
+import { CheckCircle2, Mail, MessageCircle } from 'lucide-react';
 
 const OrderConfirmation = () => {
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const OrderConfirmation = () => {
     <>
       <Helmet>
         <title>Order Confirmed - {orderDetails.order_number} | Khanya</title>
-        <meta name="description" content={`Your order ${orderDetails.order_number} has been confirmed. Please complete EFT payment of R${orderDetails.total_amount?.toFixed(2)} and send proof to sales@khanya.store`} />
+        <meta name="description" content={`Your order ${orderDetails.order_number} has been confirmed. Please complete EFT payment of R${orderDetails.total_amount?.toFixed(2)} and send proof to sales@khanya.store or WhatsApp 082 852 1112`} />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       
@@ -50,7 +50,7 @@ const OrderConfirmation = () => {
               <h2 className="text-2xl font-semibold mb-4">Bank Transfer Details</h2>
               <p className="mb-4">
                 Please deposit <strong className="text-primary">R{orderDetails.total_amount?.toFixed(2)}</strong> into 
-                the following account and send proof of payment to <strong>sales@khanya.store</strong>:
+                the following account and send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>082 852 1112</strong>:
               </p>
               
               <div className="bg-muted p-6 rounded-lg space-y-3">
@@ -94,7 +94,7 @@ const OrderConfirmation = () => {
                 <div>
                   <p className="font-medium">Send Proof of Payment</p>
                   <p className="text-sm text-muted-foreground">
-                    Email your proof of payment to <strong>sales@khanya.store</strong>
+                    Email your proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>082 852 1112</strong>
                   </p>
                 </div>
               </div>
@@ -125,14 +125,23 @@ const OrderConfirmation = () => {
             </div>
 
             <div className="pt-6 border-t">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => window.open('mailto:sales@khanya.store')}
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                Email Proof of Payment to sales@khanya.store
-              </Button>
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => window.open('mailto:sales@khanya.store')}
+                >
+                  <Mail className="mr-2 h-4 w-4" />
+                  Email Proof
+                </Button>
+                <Button
+                  className="w-full"
+                  onClick={() => window.open('https://wa.me/27828521112')}
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  WhatsApp Proof
+                </Button>
+              </div>
             </div>
           </Card>
 
