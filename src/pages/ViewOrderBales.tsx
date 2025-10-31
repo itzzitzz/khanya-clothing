@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { BaleDetailModal } from "@/components/BaleDetailModal";
 import { Badge } from "@/components/ui/badge";
+import saFlag from "@/assets/south-africa-flag.png";
 
 interface StockItemImage {
   id: number;
@@ -213,8 +214,9 @@ const ViewOrderBales = () => {
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
               View & Order Bales
             </h1>
-            <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Start or grow your clothing business with curated bales of quality second-hand items—with FREE delivery anywhere in South Africa!
+            <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto inline-flex items-center justify-center gap-2 flex-wrap">
+              <span>Start or grow your clothing business with curated bales of quality second-hand items—with FREE delivery anywhere in South Africa!</span>
+              <img src={saFlag} alt="South Africa flag" className="w-8 h-5 object-cover rounded-sm inline-block" />
             </p>
           </div>
         </section>
