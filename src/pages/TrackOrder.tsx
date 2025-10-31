@@ -162,12 +162,20 @@ const TrackOrder = () => {
         <meta property="og:title" content="Track Your Order | Khanya" />
         <meta property="og:description" content="Check the status of your clothing bales order with real-time tracking." />
       </Helmet>
-      <Header />
-      <div className="min-h-screen bg-background py-12">
+      <Header active="track" />
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background py-12">
         <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="text-3xl font-bold mb-8">Track Your Order</h1>
+          <div className="text-center mb-8 animate-fade-in">
+            <Package className="h-16 w-16 mx-auto mb-4 text-primary animate-bounce" />
+            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Track Your Order! 🎉
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Your exciting clothing bales are on their way!
+            </p>
+          </div>
 
-          <div className="border rounded-lg p-6 bg-card mb-8">
+          <div className="border rounded-lg p-6 bg-card/80 backdrop-blur mb-8 shadow-lg">
             <form onSubmit={handleSearch} className="space-y-4">
               <div>
                 <Label>Track order using *</Label>
@@ -238,10 +246,15 @@ const TrackOrder = () => {
           </div>
 
           {orders.length > 0 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Your Orders</h2>
+            <div className="space-y-6 animate-fade-in">
+              <div className="text-center mb-6">
+                <CheckCircle className="h-12 w-12 mx-auto mb-3 text-green-500 animate-bounce" />
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                  Woohoo! Found Your Orders! 🎊
+                </h2>
+              </div>
               {orders.map((order) => (
-                <div key={order.id} className="border rounded-lg p-6 bg-card">
+                <div key={order.id} className="border rounded-lg p-6 bg-card/80 backdrop-blur shadow-lg hover:shadow-xl transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="text-xl font-bold">{order.order_number}</h3>
