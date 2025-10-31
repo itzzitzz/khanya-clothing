@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from "@
 import { Pencil, Trash2, Upload, ArrowUp, ArrowDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
+import { GenerateSingleImage } from "./GenerateSingleImage";
 
 interface StockItem {
   id: number;
@@ -468,25 +469,40 @@ export const StockItemManager = () => {
           </div>
 
           {editing && (
-            <div className="space-y-2">
+            <div className="space-y-4">
               <Label>Stock Item Images</Label>
-              <div className="flex gap-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="image-upload"
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('image-upload')?.click()}
+                      disabled={uploading}
+                      className="w-full"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {uploading ? 'Uploading...' : 'Upload Image'}
+                    </Button>
+                  </div>
+                </div>
+
+                <GenerateSingleImage
+                  stockItemId={editing.id}
+                  stockItemName={formData.name}
+                  stockItemDescription={formData.description}
+                  categoryName={categories.find(c => c.id === formData.stock_category_id)?.name || ''}
+                  ageRange={formData.age_range}
+                  onImageGenerated={() => loadImages(editing.id)}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => document.getElementById('image-upload')?.click()}
-                  disabled={uploading}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  {uploading ? 'Uploading...' : 'Upload Image'}
-                </Button>
               </div>
 
               {images.length > 0 && (
