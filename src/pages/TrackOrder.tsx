@@ -18,6 +18,41 @@ const TrackOrder = () => {
   const [orderNumber, setOrderNumber] = useState('');
   const [orders, setOrders] = useState<any[]>([]);
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    
+    // Ensure it starts with 27 (South Africa)
+    if (value && !value.startsWith('27')) {
+      if (value.startsWith('0')) {
+        value = '27' + value.substring(1);
+      } else {
+        value = '27' + value;
+      }
+    }
+    
+    // Limit to 11 digits (27 + 9 digits)
+    if (value.length > 11) {
+      value = value.substring(0, 11);
+    }
+    
+    // Format as +27 XX XXX XXXX
+    let formatted = '';
+    if (value.length > 0) {
+      formatted = '+27';
+      if (value.length > 2) {
+        formatted += ' ' + value.substring(2, 4);
+      }
+      if (value.length > 4) {
+        formatted += ' ' + value.substring(4, 7);
+      }
+      if (value.length > 7) {
+        formatted += ' ' + value.substring(7, 11);
+      }
+    }
+    
+    setPhone(formatted);
+  };
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -173,12 +208,12 @@ const TrackOrder = () => {
                     id="phone"
                     type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={handlePhoneChange}
                     placeholder="+27 XX XXX XXXX"
                     required
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Enter the phone number you used when placing your order
+                    South African numbers only. Format: +27 XX XXX XXXX
                   </p>
                 </div>
               )}
