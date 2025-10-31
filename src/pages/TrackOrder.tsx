@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
@@ -11,14 +12,16 @@ import { Loader2, Package, Truck, CheckCircle, Clock } from 'lucide-react';
 const TrackOrder = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [trackingMethod, setTrackingMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
   const [orders, setOrders] = useState<any[]>([]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email) {
+    if (trackingMethod === 'email' && !email) {
       toast({
         title: 'Error',
         description: 'Please enter your email address',
@@ -27,10 +30,23 @@ const TrackOrder = () => {
       return;
     }
 
+    if (trackingMethod === 'phone' && !phone) {
+      toast({
+        title: 'Error',
+        description: 'Please enter your phone number',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('track-order', {
-        body: { email, order_number: orderNumber || undefined },
+        body: { 
+          email: trackingMethod === 'email' ? email : undefined,
+          phone: trackingMethod === 'phone' ? phone : undefined,
+          order_number: orderNumber || undefined 
+        },
       });
 
       if (error) throw error;
@@ -38,7 +54,7 @@ const TrackOrder = () => {
       if (!data.orders || data.orders.length === 0) {
         toast({
           title: 'No Orders Found',
-          description: 'No orders found with this email' + (orderNumber ? ' and order number' : ''),
+          description: 'No orders found with this ' + (trackingMethod === 'email' ? 'email' : 'phone number') + (orderNumber ? ' and order number' : ''),
           variant: 'destructive',
         });
         setOrders([]);
@@ -103,7 +119,7 @@ const TrackOrder = () => {
     <>
       <Helmet>
         <title>Track Your Order Status | Khanya Clothing Bales Delivery</title>
-        <meta name="description" content="Track your Khanya clothing bales order. Enter your email and order number to view real-time shipping status and delivery updates." />
+        <meta name="description" content="Track your Khanya clothing bales order. Enter your email or phone number and order number to view real-time shipping status and delivery updates." />
         <meta name="keywords" content="track order, order status, delivery tracking, shipping status, Khanya order tracking" />
         <meta name="robots" content="noindex, follow" />
         <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/track-order` : "/track-order"} />
@@ -119,16 +135,54 @@ const TrackOrder = () => {
           <div className="border rounded-lg p-6 bg-card mb-8">
             <form onSubmit={handleSearch} className="space-y-4">
               <div>
-                <Label htmlFor="email">Email Address *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                />
+                <Label>Track order using *</Label>
+                <RadioGroup
+                  value={trackingMethod}
+                  onValueChange={(value: 'email' | 'phone') => setTrackingMethod(value)}
+                  className="mt-2"
+                >
+                  <div className="flex items-center space-x-2 p-3 border rounded">
+                    <RadioGroupItem value="email" id="track-email" />
+                    <Label htmlFor="track-email" className="cursor-pointer">Email Address</Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 border rounded">
+                    <RadioGroupItem value="phone" id="track-phone" />
+                    <Label htmlFor="track-phone" className="cursor-pointer">Phone Number</Label>
+                  </div>
+                </RadioGroup>
               </div>
+
+              {trackingMethod === 'email' && (
+                <div>
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+              )}
+
+              {trackingMethod === 'phone' && (
+                <div>
+                  <Label htmlFor="phone">Phone Number *</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+27 XX XXX XXXX"
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Enter the phone number you used when placing your order
+                  </p>
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="orderNumber">Order Number (Optional)</Label>
                 <Input

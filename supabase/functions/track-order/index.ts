@@ -7,7 +7,8 @@ const corsHeaders = {
 };
 
 interface TrackOrderRequest {
-  email: string;
+  email?: string;
+  phone?: string;
   order_number?: string;
 }
 
@@ -17,11 +18,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, order_number }: TrackOrderRequest = await req.json();
+    const { email, phone, order_number }: TrackOrderRequest = await req.json();
 
-    if (!email) {
+    if (!email && !phone) {
       return new Response(
-        JSON.stringify({ error: "Email is required" }),
+        JSON.stringify({ error: "Email or phone number is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -36,14 +37,21 @@ const handler = async (req: Request): Promise<Response> => {
       .select(`
         *,
         order_items (*)
-      `)
-      .eq("customer_email", email.toLowerCase())
-      .order("created_at", { ascending: false });
+      `);
+
+    // Filter by email or phone
+    if (email) {
+      query = query.eq("customer_email", email.toLowerCase());
+    } else if (phone) {
+      query = query.eq("customer_phone", phone);
+    }
 
     // Filter by order number if provided
     if (order_number) {
       query = query.eq("order_number", order_number);
     }
+
+    query = query.order("created_at", { ascending: false });
 
     const { data: orders, error: fetchError } = await query;
 
@@ -59,7 +67,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Found ${orders.length} orders for:`, email);
+    console.log(`Found ${orders.length} orders for:`, email || phone);
 
     return new Response(
       JSON.stringify({ success: true, orders }),
