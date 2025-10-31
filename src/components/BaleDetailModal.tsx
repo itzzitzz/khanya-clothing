@@ -171,24 +171,24 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
                   </>
                 )}
                 {/* Zoom controls */}
-                <div className="absolute top-2 right-2 flex gap-2">
+                <div className="absolute top-2 right-2 flex gap-1 sm:gap-2">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="bg-background/80 hover:bg-background"
+                    className="h-8 w-8 sm:h-10 sm:w-10 bg-background/80 hover:bg-background"
                     onClick={handleZoomOut}
                     disabled={zoom <= 1}
                   >
-                    <ZoomOut className="h-4 w-4" />
+                    <ZoomOut className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="bg-background/80 hover:bg-background"
+                    className="h-8 w-8 sm:h-10 sm:w-10 bg-background/80 hover:bg-background"
                     onClick={handleZoomIn}
                     disabled={zoom >= 3}
                   >
-                    <ZoomIn className="h-4 w-4" />
+                    <ZoomIn className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>

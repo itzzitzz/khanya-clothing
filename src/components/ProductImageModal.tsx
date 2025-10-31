@@ -143,24 +143,24 @@ export const ProductImageModal = ({
             )}
 
             {/* Zoom controls */}
-            <div className="absolute bottom-4 right-4 flex gap-2">
+            <div className="absolute bottom-4 right-2 sm:right-4 flex gap-1 sm:gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                className="bg-background/80 hover:bg-background"
+                className="h-9 w-9 sm:h-10 sm:w-10 bg-background/80 hover:bg-background"
                 onClick={handleZoomOut}
                 disabled={zoom <= 1}
               >
-                <ZoomOut className="h-5 w-5" />
+                <ZoomOut className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="bg-background/80 hover:bg-background"
+                className="h-9 w-9 sm:h-10 sm:w-10 bg-background/80 hover:bg-background"
                 onClick={handleZoomIn}
                 disabled={zoom >= 3}
               >
-                <ZoomIn className="h-5 w-5" />
+                <ZoomIn className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </div>
 
