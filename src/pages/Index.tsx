@@ -159,7 +159,7 @@ const Index = () => {
               <strong>Real profit margins.</strong> Buy a bale for R1,000-R1,600 containing 30-45 quality items (depending on the type). Sell individual pieces at R50-R100 each at your market stall, street corner, or to neighbors. Many of our traders are making 2-3× their investment on each bale—that's R2,000-R4,500 from a single R1,000-R1,600 purchase.
             </p>
             <div className="flex items-start gap-3 p-4 bg-primary/5 border border-primary/20 rounded-lg">
-              <span className="text-2xl">🇿🇦</span>
+              <img src={saFlag} alt="South Africa flag" className="w-8 h-5 object-cover rounded-sm mt-0.5 flex-shrink-0" />
               <p>
                 <strong>Free delivery anywhere in South Africa.</strong> We deliver your bales for free to your door, whether you're in Johannesburg, Cape Town, Durban, or a small township. No hidden costs. Just opportunity.
               </p>
@@ -257,7 +257,7 @@ const Index = () => {
         <section id="contact" className="container mx-auto py-16">
           <div className="bg-card border rounded-2xl p-8 md:p-12 text-center shadow-[var(--shadow-elegant)]">
             <div className="flex items-center justify-center gap-2 mb-3">
-              <span className="text-2xl">🇿🇦</span>
+              <img src={saFlag} alt="South Africa flag" className="w-8 h-5 object-cover rounded-sm" />
               <h2 className="text-3xl font-extrabold">Ready to start?</h2>
             </div>
             <p className="text-muted-foreground mb-6">Get pricing, availability and delivery options for your area in South Africa.</p>
