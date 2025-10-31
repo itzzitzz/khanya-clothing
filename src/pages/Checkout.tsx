@@ -34,6 +34,7 @@ const Checkout = () => {
     customer_name: '',
     customer_email: '',
     customer_phone: '',
+    business_name: '',
     delivery_address: '',
     delivery_city: '',
     delivery_province: '',
@@ -175,6 +176,12 @@ const Checkout = () => {
       }
 
       setPinVerified(true);
+      
+      // Auto-fill phone if SMS was used
+      if (verificationMethod === 'sms' && verificationPhone) {
+        setFormData(prev => ({ ...prev, customer_phone: phoneNumber }));
+      }
+      
       toast({
         title: verificationMethod === 'email' ? 'Email Verified' : 'Phone Verified',
         description: 'You can now complete your order',
@@ -569,16 +576,35 @@ const Checkout = () => {
                         required
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="customer_phone">Phone Number *</Label>
-                      <Input
-                        id="customer_phone"
-                        name="customer_phone"
-                        value={formData.customer_phone}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
+                    {verificationMethod === 'email' && (
+                      <div>
+                        <Label htmlFor="customer_phone">Phone Number *</Label>
+                        <Input
+                          id="customer_phone"
+                          name="customer_phone"
+                          type="tel"
+                          value={formData.customer_phone}
+                          onChange={handleInputChange}
+                          placeholder="+27 XX XXX XXXX"
+                          required
+                        />
+                      </div>
+                    )}
+                    {verificationMethod === 'sms' && (
+                      <div>
+                        <Label htmlFor="customer_phone">Phone Number *</Label>
+                        <Input
+                          id="customer_phone"
+                          name="customer_phone"
+                          value={formData.customer_phone}
+                          disabled
+                          className="bg-muted"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Using verified phone number
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -598,12 +624,26 @@ const Checkout = () => {
                   </div>
                   <div className="space-y-4">
                     <div>
+                      <Label htmlFor="business_name">Business Name / Complex Number and Name</Label>
+                      <Input
+                        id="business_name"
+                        name="business_name"
+                        value={formData.business_name}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Fashion Hub or Unit 5, Sunset Complex"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Optional - helps courier find you
+                      </p>
+                    </div>
+                    <div>
                       <Label htmlFor="delivery_address">Street Address *</Label>
                       <Input
                         id="delivery_address"
                         name="delivery_address"
                         value={formData.delivery_address}
                         onChange={handleInputChange}
+                        placeholder="e.g. 123 Main Street"
                         required
                       />
                     </div>
