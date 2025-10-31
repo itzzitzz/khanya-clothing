@@ -31,6 +31,24 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Normalize phone number if provided
+    let normalizedPhone = phone;
+    if (phone) {
+      // Remove all non-digits
+      const digitsOnly = phone.replace(/\D/g, '');
+      
+      // Convert 0828521112 to +27828521112 format
+      if (digitsOnly.startsWith('0')) {
+        normalizedPhone = '+27' + digitsOnly.substring(1);
+      } else if (digitsOnly.startsWith('27')) {
+        normalizedPhone = '+' + digitsOnly;
+      } else {
+        normalizedPhone = '+27' + digitsOnly;
+      }
+      
+      console.log(`Phone normalization: ${phone} -> ${normalizedPhone}`);
+    }
+
     // Build query
     let query = supabase
       .from("orders")
@@ -42,8 +60,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Filter by email or phone
     if (email) {
       query = query.eq("customer_email", email.toLowerCase());
-    } else if (phone) {
-      query = query.eq("customer_phone", phone);
+    } else if (normalizedPhone) {
+      query = query.eq("customer_phone", normalizedPhone);
     }
 
     // Filter by order number if provided
