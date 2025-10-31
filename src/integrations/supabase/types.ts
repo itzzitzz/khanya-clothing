@@ -115,25 +115,28 @@ export type Database = {
       email_verifications: {
         Row: {
           created_at: string
-          email: string
+          email: string | null
           expires_at: string
           id: string
+          phone: string | null
           pin_code: string
           verified: boolean
         }
         Insert: {
           created_at?: string
-          email: string
+          email?: string | null
           expires_at: string
           id?: string
+          phone?: string | null
           pin_code: string
           verified?: boolean
         }
         Update: {
           created_at?: string
-          email?: string
+          email?: string | null
           expires_at?: string
           id?: string
+          phone?: string | null
           pin_code?: string
           verified?: boolean
         }

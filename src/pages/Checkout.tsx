@@ -27,6 +27,8 @@ const Checkout = () => {
   const [pinSent, setPinSent] = useState(false);
   const [pinVerified, setPinVerified] = useState(false);
   const [verifyingPin, setVerifyingPin] = useState(false);
+  const [verificationMethod, setVerificationMethod] = useState<'email' | 'sms'>('email');
+  const [verificationPhone, setVerificationPhone] = useState('');
   
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -47,8 +49,43 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    
+    // Ensure it starts with 27 (South Africa)
+    if (value && !value.startsWith('27')) {
+      if (value.startsWith('0')) {
+        value = '27' + value.substring(1);
+      } else {
+        value = '27' + value;
+      }
+    }
+    
+    // Limit to 11 digits (27 + 9 digits)
+    if (value.length > 11) {
+      value = value.substring(0, 11);
+    }
+    
+    // Format as +27 XX XXX XXXX
+    let formatted = '';
+    if (value.length > 0) {
+      formatted = '+27';
+      if (value.length > 2) {
+        formatted += ' ' + value.substring(2, 4);
+      }
+      if (value.length > 4) {
+        formatted += ' ' + value.substring(4, 7);
+      }
+      if (value.length > 7) {
+        formatted += ' ' + value.substring(7, 11);
+      }
+    }
+    
+    setVerificationPhone(formatted);
+  };
+
   const handleSendPin = async () => {
-    if (!formData.customer_email) {
+    if (verificationMethod === 'email' && !formData.customer_email) {
       toast({
         title: 'Error',
         description: 'Please enter your email address',
@@ -57,13 +94,26 @@ const Checkout = () => {
       return;
     }
 
+    if (verificationMethod === 'sms' && !verificationPhone) {
+      toast({
+        title: 'Error',
+        description: 'Please enter your phone number',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
+      const phoneNumber = verificationPhone.replace(/\s/g, ''); // Remove spaces
       const { data, error } = await supabase.functions.invoke('send-verification-pin', {
-        body: { email: formData.customer_email },
+        body: { 
+          email: verificationMethod === 'email' ? formData.customer_email : undefined,
+          phone: verificationMethod === 'sms' ? phoneNumber : undefined,
+          method: verificationMethod
+        },
       });
 
-      // Check for error in response body (handles non-2xx responses)
       if (error) {
         throw new Error(error.message || 'Failed to send PIN');
       }
@@ -75,7 +125,9 @@ const Checkout = () => {
       setPinSent(true);
       toast({
         title: 'PIN Sent',
-        description: 'Check your email for the verification PIN',
+        description: verificationMethod === 'email' 
+          ? 'Check your email for the verification PIN'
+          : 'Check your phone for the verification PIN',
       });
     } catch (error: any) {
       toast({
@@ -100,14 +152,16 @@ const Checkout = () => {
 
     setVerifyingPin(true);
     try {
+      const phoneNumber = verificationPhone.replace(/\s/g, '');
       const { data, error } = await supabase.functions.invoke('verify-pin', {
         body: { 
-          email: formData.customer_email,
-          pin: pin 
+          email: verificationMethod === 'email' ? formData.customer_email : undefined,
+          phone: verificationMethod === 'sms' ? phoneNumber : undefined,
+          pin: pin,
+          method: verificationMethod
         },
       });
 
-      // Check for error in response body (handles non-2xx responses)
       if (error) {
         throw new Error(error.message || 'Failed to verify PIN');
       }
@@ -122,7 +176,7 @@ const Checkout = () => {
 
       setPinVerified(true);
       toast({
-        title: 'Email Verified',
+        title: verificationMethod === 'email' ? 'Email Verified' : 'Phone Verified',
         description: 'You can now complete your order',
       });
     } catch (error: any) {
@@ -311,27 +365,68 @@ const Checkout = () => {
           <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
           <form onSubmit={handleSubmitOrder} className="space-y-8">
-            {/* Email Verification */}
+            {/* Verification */}
             <div className="border rounded-lg p-6 bg-card">
-              <h2 className="text-xl font-bold mb-4">Email Verification</h2>
+              <h2 className="text-xl font-bold mb-4">Verification</h2>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="customer_email">Email Address *</Label>
-                  <Input
-                    id="customer_email"
-                    name="customer_email"
-                    type="email"
-                    value={formData.customer_email}
-                    onChange={handleInputChange}
-                    required
+                  <Label>How would you like to receive your verification code? *</Label>
+                  <RadioGroup
+                    value={verificationMethod}
+                    onValueChange={(value: 'email' | 'sms') => {
+                      setVerificationMethod(value);
+                      setPinSent(false);
+                      setPin('');
+                    }}
                     disabled={pinVerified}
-                  />
+                  >
+                    <div className="flex items-center space-x-2 p-3 border rounded">
+                      <RadioGroupItem value="email" id="verify-email" />
+                      <Label htmlFor="verify-email">Email</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded">
+                      <RadioGroupItem value="sms" id="verify-sms" />
+                      <Label htmlFor="verify-sms">SMS (South Africa only)</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
+
+                {verificationMethod === 'email' && (
+                  <div>
+                    <Label htmlFor="customer_email">Email Address *</Label>
+                    <Input
+                      id="customer_email"
+                      name="customer_email"
+                      type="email"
+                      value={formData.customer_email}
+                      onChange={handleInputChange}
+                      required
+                      disabled={pinVerified}
+                    />
+                  </div>
+                )}
+
+                {verificationMethod === 'sms' && (
+                  <div>
+                    <Label htmlFor="verification_phone">Phone Number *</Label>
+                    <Input
+                      id="verification_phone"
+                      value={verificationPhone}
+                      onChange={handlePhoneChange}
+                      placeholder="+27 XX XXX XXXX"
+                      disabled={pinVerified}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      South African numbers only. Format: +27 XX XXX XXXX
+                    </p>
+                  </div>
+                )}
+
                 {!pinSent && (
                   <Button
                     type="button"
                     onClick={handleSendPin}
-                    disabled={loading || !formData.customer_email}
+                    disabled={loading || (verificationMethod === 'email' && !formData.customer_email) || (verificationMethod === 'sms' && !verificationPhone)}
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Send Verification PIN
@@ -360,7 +455,9 @@ const Checkout = () => {
                   </div>
                 )}
                 {pinVerified && (
-                  <p className="text-green-600 font-semibold">✓ Email verified</p>
+                  <p className="text-green-600 font-semibold">
+                    ✓ {verificationMethod === 'email' ? 'Email' : 'Phone'} verified
+                  </p>
                 )}
               </div>
             </div>

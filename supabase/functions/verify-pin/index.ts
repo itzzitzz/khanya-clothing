@@ -7,8 +7,10 @@ const corsHeaders = {
 };
 
 interface VerifyPinRequest {
-  email: string;
+  email?: string;
+  phone?: string;
   pin: string;
+  method: 'email' | 'sms';
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -17,11 +19,25 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, pin }: VerifyPinRequest = await req.json();
+    const { email, phone, pin, method }: VerifyPinRequest = await req.json();
 
-    if (!email || !pin) {
+    if (!pin) {
       return new Response(
-        JSON.stringify({ error: "Email and PIN are required" }),
+        JSON.stringify({ error: "PIN is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (method === 'email' && !email) {
+      return new Response(
+        JSON.stringify({ error: "Email is required for email verification" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (method === 'sms' && !phone) {
+      return new Response(
+        JSON.stringify({ error: "Phone is required for SMS verification" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -31,15 +47,22 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Find matching PIN
-    const { data: verifications, error: fetchError } = await supabase
+    let query = supabase
       .from("email_verifications")
       .select("*")
-      .eq("email", email.toLowerCase())
       .eq("pin_code", pin)
       .eq("verified", false)
       .gt("expires_at", new Date().toISOString())
       .order("created_at", { ascending: false })
       .limit(1);
+
+    if (method === 'email') {
+      query = query.eq("email", email!.toLowerCase());
+    } else {
+      query = query.eq("phone", phone!);
+    }
+
+    const { data: verifications, error: fetchError } = await query;
 
     if (fetchError) {
       console.error("Database error:", fetchError);
@@ -64,7 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw updateError;
     }
 
-    console.log("PIN verified successfully for:", email);
+    console.log("PIN verified successfully for:", email || phone);
 
     return new Response(
       JSON.stringify({ success: true, verified: true }),
