@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
@@ -48,6 +49,10 @@ const Checkout = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleProvinceChange = (value: string) => {
+    setFormData({ ...formData, delivery_province: value });
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -655,18 +660,32 @@ const Checkout = () => {
                           name="delivery_city"
                           value={formData.delivery_city}
                           onChange={handleInputChange}
+                          placeholder="e.g. Johannesburg"
                           required
                         />
                       </div>
                       <div>
                         <Label htmlFor="delivery_province">Province *</Label>
-                        <Input
-                          id="delivery_province"
-                          name="delivery_province"
+                        <Select
                           value={formData.delivery_province}
-                          onChange={handleInputChange}
+                          onValueChange={handleProvinceChange}
                           required
-                        />
+                        >
+                          <SelectTrigger id="delivery_province" className="w-full">
+                            <SelectValue placeholder="Select province" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background z-50">
+                            <SelectItem value="Eastern Cape">Eastern Cape</SelectItem>
+                            <SelectItem value="Free State">Free State</SelectItem>
+                            <SelectItem value="Gauteng">Gauteng</SelectItem>
+                            <SelectItem value="KwaZulu-Natal">KwaZulu-Natal</SelectItem>
+                            <SelectItem value="Limpopo">Limpopo</SelectItem>
+                            <SelectItem value="Mpumalanga">Mpumalanga</SelectItem>
+                            <SelectItem value="Northern Cape">Northern Cape</SelectItem>
+                            <SelectItem value="North West">North West</SelectItem>
+                            <SelectItem value="Western Cape">Western Cape</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <Label htmlFor="delivery_postal_code">Postal Code *</Label>
@@ -675,6 +694,7 @@ const Checkout = () => {
                           name="delivery_postal_code"
                           value={formData.delivery_postal_code}
                           onChange={handleInputChange}
+                          placeholder="e.g. 2000"
                           required
                         />
                       </div>
