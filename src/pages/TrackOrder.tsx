@@ -65,21 +65,37 @@ const TrackOrder = () => {
       return;
     }
 
-    if (trackingMethod === 'phone' && !phone) {
-      toast({
-        title: 'Error',
-        description: 'Please enter your phone number',
-        variant: 'destructive',
-      });
-      return;
+    if (trackingMethod === 'phone') {
+      if (!phone) {
+        toast({
+          title: 'Error',
+          description: 'Please enter your phone number',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      // Strip formatting and validate complete phone number
+      const digitsOnly = phone.replace(/\D/g, '');
+      if (digitsOnly.length < 11) {
+        toast({
+          title: 'Incomplete Phone Number',
+          description: 'Please enter a complete South African phone number (11 digits)',
+          variant: 'destructive',
+        });
+        return;
+      }
     }
 
     setLoading(true);
     try {
+      // Strip formatting from phone before sending
+      const cleanPhone = phone ? phone.replace(/\D/g, '') : undefined;
+      
       const { data, error } = await supabase.functions.invoke('track-order', {
         body: { 
           email: trackingMethod === 'email' ? email : undefined,
-          phone: trackingMethod === 'phone' ? phone : undefined,
+          phone: trackingMethod === 'phone' ? cleanPhone : undefined,
           order_number: orderNumber || undefined 
         },
       });
