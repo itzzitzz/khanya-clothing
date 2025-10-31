@@ -121,7 +121,7 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh]">
+      <DialogContent className="w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{bale.description}</DialogTitle>
         </DialogHeader>
@@ -224,17 +224,19 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
             <h3 className="font-semibold text-lg">Items Included</h3>
             {bale.bale_items.map((item) => (
               <div key={item.id} className="border rounded-lg p-3 space-y-2">
-                <div className="flex justify-between items-start gap-3">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-sm">{item.stock_item.name}</h4>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{item.stock_item.description}</p>
+                <div className="grid grid-cols-[1fr_auto] items-start gap-3">
+                  <div className="min-w-0">
+                    <h4 className="font-semibold text-sm truncate">{item.stock_item.name}</h4>
+                    <p className="text-xs text-muted-foreground line-clamp-2 break-words">
+                      {item.stock_item.description}
+                    </p>
                     {item.stock_item.age_range && (
                       <p className="text-xs text-muted-foreground mt-1">
                         Age: {item.stock_item.age_range}
                       </p>
                     )}
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 w-28 sm:w-32">
                     <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
                     <p className="text-xs text-muted-foreground">
                       @R{item.stock_item.selling_price.toFixed(2)}
