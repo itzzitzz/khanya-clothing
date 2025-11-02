@@ -715,23 +715,30 @@ const Checkout = () => {
                       <Package className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold mb-2">How Would You Like to Pay? 💳</h2>
+                      <h2 className="text-2xl font-bold mb-2">Payment Method</h2>
                       <p className="text-muted-foreground text-sm">
-                        Choose your preferred payment method
+                        We accept payment via EFT (Electronic Funds Transfer) or by FNB E-Wallet to 083 305 4532
                       </p>
                     </div>
                   </div>
-                  <RadioGroup
-                    value={formData.payment_method}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, payment_method: value })
-                    }
-                  >
-                    <div className="flex items-center space-x-2 p-3 border rounded">
-                      <RadioGroupItem value="eft" id="eft" />
-                      <Label htmlFor="eft">EFT (Electronic Funds Transfer)</Label>
+                  
+                  <div className="bg-muted p-4 rounded-lg space-y-4">
+                    <div>
+                      <h3 className="font-semibold mb-2">Banking Details</h3>
+                      <div className="space-y-1 text-sm">
+                        <p><strong>Bank:</strong> First National Bank (FNB)</p>
+                        <p><strong>Branch Code:</strong> 250655</p>
+                        <p><strong>Account Number:</strong> 63173001256</p>
+                        <p><strong>Account Name:</strong> Khanya</p>
+                      </div>
                     </div>
-                  </RadioGroup>
+                    
+                    <div className="pt-3 border-t">
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Important:</strong> Please use your order number as the payment reference. After payment, send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>083 305 4532</strong>
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Order Summary */}
