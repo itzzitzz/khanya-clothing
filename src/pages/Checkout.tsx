@@ -322,7 +322,7 @@ const Checkout = () => {
                 <Button
                   variant="outline"
                   className="flex-1"
-                  onClick={() => window.open('https://wa.me/27821234567')}
+                  onClick={() => window.open('https://wa.me/27833054532')}
                 >
                   <MessageCircle className="mr-2 h-4 w-4" />
                   WhatsApp
