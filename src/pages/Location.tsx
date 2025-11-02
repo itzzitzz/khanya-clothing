@@ -6,9 +6,9 @@ const Location = () => {
   return (
     <div>
       <Helmet>
-        <title>Payment & Free Delivery Info | EFT Banking Details | Khanya</title>
-        <meta name="description" content="Khanya payment details: FNB EFT transfer. Free delivery anywhere in South Africa. Account 63173001256, Branch 250655. Order clothing bales with free nationwide shipping." />
-        <meta name="keywords" content="Khanya payment, EFT payment details, FNB banking, free delivery South Africa, nationwide shipping, clothing bales delivery, payment information" />
+        <title>Payment & Free Delivery Info | EFT & FNB E-Wallet | Khanya</title>
+        <meta name="description" content="Khanya payment options: EFT or FNB E-Wallet to 083 305 4532. Free delivery anywhere in South Africa. FNB Account 63173001256. Order clothing bales with free nationwide shipping." />
+        <meta name="keywords" content="Khanya payment, EFT payment details, FNB E-Wallet, FNB banking, free delivery South Africa, nationwide shipping, clothing bales delivery, payment information" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/location` : "/location"} />
         <meta property="og:type" content="website" />
@@ -27,7 +27,7 @@ const Location = () => {
             },
             "telephone": "+27833054532",
             "email": "sales@khanya.store",
-            "paymentAccepted": ["Bank Transfer", "EFT"],
+            "paymentAccepted": ["Bank Transfer", "EFT", "FNB E-Wallet"],
             "priceRange": "R1000-R1600",
             "url": typeof window !== "undefined" ? `${window.location.origin}/location` : "/location",
             "address": {
@@ -52,7 +52,7 @@ const Location = () => {
             <h2 className="text-2xl font-bold mb-4">Payment Method</h2>
             <div className="space-y-4">
               <p className="text-muted-foreground">
-                We accept payment via <strong>EFT (Electronic Funds Transfer)</strong> only.
+                We accept payment via <strong>EFT (Electronic Funds Transfer)</strong> or by <strong>FNB E-Wallet</strong> to <strong>083 305 4532</strong>
               </p>
               
               <div className="bg-accent/10 border border-accent/30 rounded-lg p-4">
@@ -67,7 +67,7 @@ const Location = () => {
 
               <div className="bg-primary/5 border rounded-lg p-4">
                 <p className="text-sm">
-                  <strong>Important:</strong> Please use your order number as the payment reference. After payment, send proof of payment to <a href="mailto:sales@khanya.store" className="text-primary hover:underline">sales@khanya.store</a>
+                  <strong>Important:</strong> Please use your order number as the payment reference. After payment, send proof of payment to <a href="mailto:sales@khanya.store" className="text-primary hover:underline">sales@khanya.store</a> or WhatsApp it to <strong>083 305 4532</strong>
                 </p>
               </div>
             </div>
