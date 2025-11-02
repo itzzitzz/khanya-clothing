@@ -170,7 +170,7 @@ const PackingList = () => {
                   </p>
                   <p className="flex items-center gap-2">
                     <span className="font-semibold">📱 WhatsApp:</span>
-                    <span>082 852 1112</span>
+                    <span>083 305 4532</span>
                   </p>
                 </div>
               </div>

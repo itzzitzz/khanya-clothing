@@ -274,7 +274,7 @@ const Checkout = () => {
           {formData.payment_method === 'eft' && (
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">Bank Transfer Details</h3>
-              <p className="text-sm">Please deposit <strong>R{orderDetails.total_amount.toFixed(2)}</strong> into the following account and send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>082 852 1112</strong>:</p>
+              <p className="text-sm">Please deposit <strong>R{orderDetails.total_amount.toFixed(2)}</strong> into the following account and send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>083 305 4532</strong>:</p>
               <div className="bg-muted p-4 rounded space-y-2">
                 <p><strong>Bank:</strong> First National Bank (FNB)</p>
                 <p><strong>Branch Code:</strong> 250655</p>

@@ -68,7 +68,7 @@ const Index = () => {
             "name":"Khanya",
             "url": typeof window !== "undefined" ? window.location.origin : "",
             "logo": "/lovable-uploads/5b6d7d92-ae7b-4906-b2ef-216c9365a312.png",
-            "contactPoint":[{"@type":"ContactPoint","contactType":"sales","email":"sales@khanya.store","telephone":"+27 82 852 1112","areaServed":"ZA"}]
+            "contactPoint":[{"@type":"ContactPoint","contactType":"sales","email":"sales@khanya.store","telephone":"+27 83 305 4532","areaServed":"ZA"}]
           })}
         </script>
         <script type="application/ld+json">
@@ -268,7 +268,7 @@ const Index = () => {
                 <a href="mailto:sales@khanya.store?subject=Khanya%20Bales%20Enquiry">Email sales@khanya.store</a>
               </Button>
               <Button variant="sun" size="lg" asChild>
-                <a href="https://wa.me/27828521112" target="_blank" rel="noreferrer">WhatsApp +27 82 852 1112</a>
+                <a href="https://wa.me/27833054532" target="_blank" rel="noreferrer">WhatsApp +27 83 305 4532</a>
               </Button>
             </div>
           </div>

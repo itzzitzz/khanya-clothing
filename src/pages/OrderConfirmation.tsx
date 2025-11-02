@@ -29,7 +29,7 @@ const OrderConfirmation = () => {
     <>
       <Helmet>
         <title>Order Confirmed - {orderDetails.order_number} | Khanya</title>
-        <meta name="description" content={`Your order ${orderDetails.order_number} has been confirmed. Please complete EFT payment of R${orderDetails.total_amount?.toFixed(2)} and send proof to sales@khanya.store or WhatsApp 082 852 1112`} />
+        <meta name="description" content={`Your order ${orderDetails.order_number} has been confirmed. Please complete EFT payment of R${orderDetails.total_amount?.toFixed(2)} and send proof to sales@khanya.store or WhatsApp 083 305 4532`} />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       
@@ -50,7 +50,7 @@ const OrderConfirmation = () => {
               <h2 className="text-2xl font-semibold mb-4">Bank Transfer Details</h2>
               <p className="mb-4">
                 Please deposit <strong className="text-primary">R{orderDetails.total_amount?.toFixed(2)}</strong> into 
-                the following account and send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>082 852 1112</strong>:
+                the following account and send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>083 305 4532</strong>:
               </p>
               
               <div className="bg-muted p-6 rounded-lg space-y-3">
@@ -94,7 +94,7 @@ const OrderConfirmation = () => {
                 <div>
                   <p className="font-medium">Send Proof of Payment</p>
                   <p className="text-sm text-muted-foreground">
-                    Email your proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>082 852 1112</strong>
+                    Email your proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>083 305 4532</strong>
                   </p>
                 </div>
               </div>
@@ -136,7 +136,7 @@ const OrderConfirmation = () => {
                 </Button>
                 <Button
                   className="w-full"
-                  onClick={() => window.open('https://wa.me/27828521112')}
+                  onClick={() => window.open('https://wa.me/27833054532')}
                 >
                   <MessageCircle className="mr-2 h-4 w-4" />
                   WhatsApp Proof

@@ -83,7 +83,7 @@ const Contact = () => {
     <div>
       <Helmet>
         <title>Contact Khanya | Bulk Clothing Bales Supplier South Africa</title>
-        <meta name="description" content="Contact Khanya to order bulk clothing bales (10kg). Delivery or collection available. Email sales@khanya.store or WhatsApp +27 82 852 1112." />
+        <meta name="description" content="Contact Khanya to order bulk clothing bales (10kg). Delivery or collection available. Email sales@khanya.store or WhatsApp +27 83 305 4532." />
         <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/contact` : "/contact"} />
         <meta name="robots" content="index, follow" />
         <script type="application/ld+json">
@@ -169,7 +169,7 @@ const Contact = () => {
                   <a href="mailto:sales@khanya.store?subject=Khanya%20Bales%20Enquiry">Email sales@khanya.store</a>
                 </Button>
                 <Button variant="sun" size="lg" asChild>
-                  <a href="https://wa.me/27828521112" target="_blank" rel="noreferrer">WhatsApp +27 82 852 1112</a>
+                  <a href="https://wa.me/27833054532" target="_blank" rel="noreferrer">WhatsApp +27 83 305 4532</a>
                 </Button>
               </div>
             </aside>

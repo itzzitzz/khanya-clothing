@@ -25,7 +25,7 @@ const Location = () => {
               "@type": "Country",
               "name": "South Africa"
             },
-            "telephone": "+27828521112",
+            "telephone": "+27833054532",
             "email": "sales@khanya.store",
             "paymentAccepted": ["Bank Transfer", "EFT"],
             "priceRange": "R1000-R1600",
@@ -100,7 +100,7 @@ const Location = () => {
                   <a href="/view-order-bales">Order Now</a>
                 </Button>
                 <Button variant="outline" asChild>
-                  <a href="https://wa.me/27828521112" target="_blank" rel="noreferrer">WhatsApp Us</a>
+                  <a href="https://wa.me/27833054532" target="_blank" rel="noreferrer">WhatsApp Us</a>
                 </Button>
               </div>
             </div>
