@@ -206,6 +206,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <strong>Account Number:</strong> 63173001256<br>
                   <strong>Reference:</strong> ${orderNumber}</p>
                   <p><em>Important: Please use your order number ${orderNumber} as the payment reference.</em></p>
+                  <p style="margin-top: 15px;"><strong>Alternatively</strong>, we can also accept a payment by FNB E-Wallet to <strong>083 305 4532</strong>. Please send the proof of an E-Wallet payment to <strong>083 305 4532</strong> via WhatsApp or SMS and include the order number <strong>${orderNumber}</strong></p>
                   <p style="margin-top: 10px; font-size: 13px;">Your order will be packed and couriered as soon as payment has reflected. You will be kept up to date on the status of your order by email.</p>
                 </div>
               ` : ''}
