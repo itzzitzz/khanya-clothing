@@ -115,7 +115,7 @@ const Index = () => {
                 Start Your Own Clothing Business Today
               </h1>
               <p className="text-lg text-muted-foreground mb-6 max-w-xl">
-                Khanya empowers South African entrepreneurs to build their own clothing businesses with curated bales of quality secondhand clothing. Start for as little as R1,000 and serve your community with affordable fashion.
+                Khanya empowers South African entrepreneurs to build their own clothing businesses with curated bales of quality secondhand clothing. Start for as little as R1,000 and serve your community with affordable fashion. Alternatively, buy for your kids and family.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button variant="hero" size="xl" asChild>
