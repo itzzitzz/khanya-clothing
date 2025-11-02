@@ -3,7 +3,7 @@ import { CheckCircle2 } from "lucide-react";
 import heroImg from "@/assets/bale-hero.png";
 import baleImg from "@/assets/clothing-display.jpg";
 import flatlayImg from "@/assets/mixed-clothing-flatlay.jpg";
-import marketImg from "@/assets/market-stall-r50.jpg";
+import marketImg from "@/assets/outdoor-market.png";
 import saFlag from "@/assets/south-africa-flag.png";
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
@@ -192,7 +192,7 @@ const Index = () => {
               <p className="text-muted-foreground">Realistic examples of bales and mixed clothing.</p>
             </header>
             <div className="grid md:grid-cols-3 gap-6">
-              {[{ src: baleImg, alt: "Two Khanya entrepreneurs proudly displaying quality clothing from their business" }, { src: flatlayImg, alt: "Assorted men's, women's and children's clothing laid out neatly" }, { src: marketImg, alt: "Market table with folded clothing and R50 price cards" }, { src: "/lovable-uploads/2c9af322-a6d3-4b2a-8692-a7f8bddb0726.png", alt: "Informal trader selling affordable clothing at a township market stall" }].map((img) => (
+              {[{ src: baleImg, alt: "Two Khanya entrepreneurs proudly displaying quality clothing from their business" }, { src: flatlayImg, alt: "Assorted men's, women's and children's clothing laid out neatly" }, { src: marketImg, alt: "Informal traders examining clothing at an outdoor market with tables displaying jeans and garments" }, { src: "/lovable-uploads/2c9af322-a6d3-4b2a-8692-a7f8bddb0726.png", alt: "Informal trader selling affordable clothing at a township market stall" }].map((img) => (
                 <figure key={img.alt} className="group overflow-hidden rounded-xl border bg-card">
                   <img
                     src={img.src}
