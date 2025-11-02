@@ -67,7 +67,7 @@ const Location = () => {
 
               <div className="bg-primary/5 border rounded-lg p-4">
                 <p className="text-sm">
-                  <strong>Important:</strong> Please use your order number as the payment reference. After payment, send proof of payment to <a href="mailto:sales@khanya.store" className="text-primary hover:underline">sales@khanya.store</a> or WhatsApp it to <strong>083 305 4532</strong>
+                  <strong>Important:</strong> Please use your order number as the payment reference. After payment, send proof of payment to <a href="mailto:sales@khanya.store" className="text-primary hover:underline font-bold">sales@khanya.store</a> or WhatsApp it to <strong>083 305 4532</strong>
                 </p>
               </div>
             </div>
