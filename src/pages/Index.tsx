@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
-import heroImg from "@/assets/chinese-clothing-bales.jpg";
+import heroImg from "@/assets/bale-hero.png";
 import baleImg from "@/assets/bale-warehouse.jpg";
 import flatlayImg from "@/assets/mixed-clothing-flatlay.jpg";
 import marketImg from "@/assets/market-stall-r50.jpg";
