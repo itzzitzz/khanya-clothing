@@ -29,7 +29,7 @@ const OrderConfirmation = () => {
     <>
       <Helmet>
         <title>Order Confirmed - {orderDetails.order_number} | Khanya</title>
-        <meta name="description" content={`Your order ${orderDetails.order_number} has been confirmed. Please complete EFT payment of R${orderDetails.total_amount?.toFixed(2)} and send proof to sales@khanya.store or WhatsApp 083 305 4532`} />
+        <meta name="description" content={`Your order ${orderDetails.order_number} has been confirmed. Pay via EFT or FNB E-Wallet to 083 305 4532. Amount: R${orderDetails.total_amount?.toFixed(2)}. Send proof to sales@khanya.store`} />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       
@@ -47,22 +47,32 @@ const OrderConfirmation = () => {
 
           <Card className="p-6 space-y-6">
             <div>
-              <h2 className="text-2xl font-semibold mb-4">Bank Transfer Details</h2>
+              <h2 className="text-2xl font-semibold mb-4">Payment Details</h2>
               <p className="mb-4">
-                Please deposit <strong className="text-primary">R{orderDetails.total_amount?.toFixed(2)}</strong> into 
-                the following account and send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>083 305 4532</strong>:
+                Please pay <strong className="text-primary">R{orderDetails.total_amount?.toFixed(2)}</strong> via EFT (Electronic Funds Transfer) or FNB E-Wallet and send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>083 305 4532</strong>:
               </p>
               
-              <div className="bg-muted p-6 rounded-lg space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <span className="font-semibold">Bank:</span>
-                  <span>First National Bank (FNB)</span>
-                  
-                  <span className="font-semibold">Branch Code:</span>
-                  <span>250655</span>
-                  
-                  <span className="font-semibold">Account Number:</span>
-                  <span>63173001256</span>
+              <div className="bg-muted p-6 rounded-lg space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-2">Option 1: EFT (Electronic Funds Transfer)</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="font-semibold">Bank:</span>
+                    <span>First National Bank (FNB)</span>
+                    
+                    <span className="font-semibold">Branch Code:</span>
+                    <span>250655</span>
+                    
+                    <span className="font-semibold">Account Number:</span>
+                    <span>63173001256</span>
+                  </div>
+                </div>
+                
+                <div className="pt-3 border-t">
+                  <h3 className="font-semibold mb-2">Option 2: FNB E-Wallet</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="font-semibold">Cell Number:</span>
+                    <span>083 305 4532</span>
+                  </div>
                 </div>
                 
                 <div className="pt-3 border-t">

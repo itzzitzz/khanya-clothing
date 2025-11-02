@@ -273,8 +273,8 @@ const Checkout = () => {
           
           {formData.payment_method === 'eft' && (
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg">Bank Transfer Details</h3>
-              <p className="text-sm">Please deposit <strong>R{orderDetails.total_amount.toFixed(2)}</strong> into the following account and send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>083 305 4532</strong>:</p>
+              <h3 className="font-semibold text-lg">EFT Payment Details</h3>
+              <p className="text-sm">Please deposit <strong>R{orderDetails.total_amount.toFixed(2)}</strong> via EFT (Electronic Funds Transfer) into the following account and send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>083 305 4532</strong>:</p>
               <div className="bg-muted p-4 rounded space-y-2">
                 <p><strong>Bank:</strong> First National Bank (FNB)</p>
                 <p><strong>Branch Code:</strong> 250655</p>
@@ -295,14 +295,20 @@ const Checkout = () => {
 
           {formData.payment_method === 'fnb_ewallet' && (
             <div className="space-y-4">
-              <h3 className="font-semibold">FNB e-Wallet Payment Details</h3>
-              <p>Please send <strong>R{orderDetails.total_amount.toFixed(2)}</strong> via FNB e-Wallet to:</p>
+              <h3 className="font-semibold text-lg">FNB E-Wallet Payment Details</h3>
+              <p className="text-sm">Please send <strong>R{orderDetails.total_amount.toFixed(2)}</strong> via FNB E-Wallet to:</p>
               <div className="bg-muted p-4 rounded space-y-2">
-                <p><strong>Cell Number:</strong> 0821234567</p>
-                <p><strong>Reference:</strong> {orderDetails.order_number}</p>
+                <p><strong>Cell Number:</strong> 083 305 4532</p>
+                <p className="mt-3 pt-3 border-t"><strong>Reference:</strong> {orderDetails.order_number}</p>
               </div>
+              <p className="text-sm font-medium">
+                Please use order number <strong>{orderDetails.order_number}</strong> as your payment reference.
+              </p>
               <p className="text-sm text-muted-foreground">
-                You will receive an email once payment has been confirmed.
+                Your order will be packed and couriered as soon as payment has reflected.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                You will be kept up to date on the status of your order by email.
               </p>
             </div>
           )}
@@ -350,7 +356,7 @@ const Checkout = () => {
     <>
       <Helmet>
         <title>Secure Checkout | Khanya Clothing Bales</title>
-        <meta name="description" content="Complete your order securely. Free delivery nationwide. EFT payment accepted for wholesale clothing bales." />
+        <meta name="description" content="Complete your order securely. Free delivery nationwide. Pay by EFT or FNB E-Wallet. Wholesale clothing bales from R1,000." />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
         <Header />
