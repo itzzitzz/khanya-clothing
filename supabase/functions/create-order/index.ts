@@ -143,97 +143,79 @@ const handler = async (req: Request): Promise<Response> => {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (resendApiKey) {
       try {
-        const baseStyles = `
-          <style>
-            body { font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1f2e27; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #faf9f6; }
-            .header { background: linear-gradient(135deg, #2E4D38 0%, #234130 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #ffffff; padding: 30px 20px; border: 1px solid #d9ded6; border-top: none; }
-            .order-number { font-size: 18px; font-weight: bold; color: #D6A220; margin: 10px 0; }
-            .info-box { background: #f4f7f5; border-left: 4px solid #2E4D38; padding: 15px; margin: 20px 0; border-radius: 4px; }
-            .payment-details { background: #fef9e7; border-left: 4px solid #D6A220; padding: 15px; margin: 20px 0; border-radius: 4px; }
-            .footer { text-align: center; color: #6b7b73; font-size: 12px; margin-top: 30px; padding: 20px; border-top: 1px solid #d9ded6; }
-            table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-            th, td { padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; }
-            th { background: #f4f7f5; font-weight: bold; color: #2E4D38; }
-            .button { display: inline-block; background: #D6A220; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0; font-weight: 600; }
-          </style>
-        `;
-
         // Customer confirmation email
         const customerHtml = `
-          ${baseStyles}
-          <div class="container">
-            <div class="header">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px; background: #faf9f6; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;">
+            <div style="background: linear-gradient(135deg, #2E4D38 0%, #234130 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
               <h1 style="margin: 0; font-size: 28px;">Order Confirmed!</h1>
             </div>
-            <div class="content">
-              <p>Hello ${orderData.customer_name},</p>
-              <p>Thank you for your order! We've received your order and will begin processing it once payment is confirmed.</p>
-              <div class="order-number">Order Number: ${orderNumber}</div>
+            <div style="background: #ffffff; padding: 30px 20px; border: 1px solid #d9ded6; border-top: none;">
+              <p style="line-height: 1.6; color: #1f2e27;">Hello ${orderData.customer_name},</p>
+              <p style="line-height: 1.6; color: #1f2e27;">Thank you for your order! We've received your order and will begin processing it once payment is confirmed.</p>
+              <div style="font-size: 18px; font-weight: bold; color: #D6A220; margin: 10px 0;">Order Number: ${orderNumber}</div>
               
-              <table>
+              <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
                 <thead>
                   <tr>
-                    <th>Item</th>
-                    <th>Qty</th>
-                    <th>Price</th>
-                    <th>Total</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; background: #f4f7f5; font-weight: bold; color: #2E4D38;">Item</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; background: #f4f7f5; font-weight: bold; color: #2E4D38;">Qty</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; background: #f4f7f5; font-weight: bold; color: #2E4D38;">Price</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; background: #f4f7f5; font-weight: bold; color: #2E4D38;">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${orderData.items.map(item => `
                     <tr>
-                      <td>${item.product_name}</td>
-                      <td>${item.quantity}</td>
-                      <td>R${item.price_per_unit.toFixed(2)}</td>
-                      <td>R${(item.price_per_unit * item.quantity).toFixed(2)}</td>
+                      <td style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">${item.product_name}</td>
+                      <td style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">${item.quantity}</td>
+                      <td style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">R${item.price_per_unit.toFixed(2)}</td>
+                      <td style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">R${(item.price_per_unit * item.quantity).toFixed(2)}</td>
                     </tr>
                   `).join('')}
                   <tr style="font-weight: bold; background: #f9fafb;">
-                    <td colspan="3">Total Amount:</td>
-                    <td>R${totalAmount.toFixed(2)}</td>
+                    <td colspan="3" style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">Total Amount:</td>
+                    <td style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">R${totalAmount.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
               
               ${orderData.payment_method === 'eft' ? `
-                <div class="payment-details">
+                <div style="background: #fef9e7; border-left: 4px solid #D6A220; padding: 15px; margin: 20px 0; border-radius: 4px;">
                   <h3 style="margin-top: 0; color: #2E4D38;">EFT Payment Details</h3>
-                  <p>Please deposit <strong>R${totalAmount.toFixed(2)}</strong> into the following account and send proof of payment to <strong>sales@khanya.store</strong>:</p>
-                  <p><strong>Bank:</strong> First National Bank (FNB)<br>
+                  <p style="line-height: 1.6; color: #1f2e27;">Please deposit <strong>R${totalAmount.toFixed(2)}</strong> into the following account and send proof of payment to <strong>sales@khanya.store</strong>:</p>
+                  <p style="line-height: 1.6; color: #1f2e27;"><strong>Bank:</strong> First National Bank (FNB)<br>
                   <strong>Branch Code:</strong> 250655<br>
                   <strong>Account Number:</strong> 63173001256<br>
                   <strong>Reference:</strong> ${orderNumber}</p>
-                  <p><em>Important: Please use your order number ${orderNumber} as the payment reference.</em></p>
-                  <p style="margin-top: 15px;"><strong>Alternatively</strong>, we can also accept a payment by FNB E-Wallet to <strong>083 305 4532</strong>. Please send the proof of an E-Wallet payment to <strong>083 305 4532</strong> via WhatsApp or SMS and include the order number <strong>${orderNumber}</strong></p>
-                  <p style="margin-top: 10px; font-size: 13px;">Your order will be packed and couriered as soon as payment has reflected. You will be kept up to date on the status of your order by email.</p>
+                  <p style="line-height: 1.6; color: #1f2e27;"><em>Important: Please use your order number ${orderNumber} as the payment reference.</em></p>
+                  <p style="margin-top: 15px; line-height: 1.6; color: #1f2e27;"><strong>Alternatively</strong>, we can also accept a payment by FNB E-Wallet to <strong>083 305 4532</strong>. Please send the proof of an E-Wallet payment to <strong>083 305 4532</strong> via WhatsApp or SMS and include the order number <strong>${orderNumber}</strong></p>
+                  <p style="margin-top: 10px; font-size: 13px; line-height: 1.6; color: #1f2e27;">Your order will be packed and couriered as soon as payment has reflected. You will be kept up to date on the status of your order by email.</p>
                 </div>
               ` : ''}
               
               ${orderData.payment_method === 'fnb_ewallet' ? `
-                <div class="payment-details">
-                  <h3 style="margin-top: 0;">FNB e-Wallet Payment Details</h3>
-                  <p>Please send <strong>R${totalAmount.toFixed(2)}</strong> via FNB e-Wallet to:</p>
-                  <p><strong>Cell Number:</strong> 0821234567<br>
+                <div style="background: #fef9e7; border-left: 4px solid #D6A220; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                  <h3 style="margin-top: 0; color: #2E4D38;">FNB E-Wallet Payment Details</h3>
+                  <p style="line-height: 1.6; color: #1f2e27;">Please send <strong>R${totalAmount.toFixed(2)}</strong> via FNB E-Wallet to:</p>
+                  <p style="line-height: 1.6; color: #1f2e27;"><strong>Cell Number:</strong> 083 305 4532<br>
                   <strong>Reference:</strong> ${orderNumber}</p>
-                  <p><em>Important: Please use your order number as the payment reference.</em></p>
+                  <p style="line-height: 1.6; color: #1f2e27;"><em>Important: Please use your order number as the payment reference.</em></p>
                 </div>
               ` : ''}
               
-              <div class="info-box">
+              <div style="background: #f4f7f5; border-left: 4px solid #2E4D38; padding: 15px; margin: 20px 0; border-radius: 4px;">
                 <strong>What happens next?</strong>
-                <p style="margin: 10px 0 0 0;">Once we confirm your payment, we'll start preparing your bales for shipment. You'll receive email updates at each step of the process.</p>
+                <p style="margin: 10px 0 0 0; line-height: 1.6; color: #1f2e27;">Once we confirm your payment, we'll start preparing your bales for shipment. You'll receive email updates at each step of the process.</p>
               </div>
               
-              <p><strong>Delivery Address:</strong><br>
+              <p style="line-height: 1.6; color: #1f2e27;"><strong>Delivery Address:</strong><br>
               ${orderData.delivery_address}<br>
               ${orderData.delivery_city}, ${orderData.delivery_province} ${orderData.delivery_postal_code}</p>
               
-              <p style="color: #059669; font-weight: bold;">✓ FREE delivery to anywhere in South Africa!</p>
+              <p style="color: #059669; font-weight: bold; line-height: 1.6;">✓ FREE delivery to anywhere in South Africa!</p>
             </div>
-            <div class="footer">
-              <p>Questions? Contact us at <a href="mailto:sales@khanya.store">sales@khanya.store</a></p>
+            <div style="text-align: center; color: #6b7b73; font-size: 12px; margin-top: 30px; padding: 20px; border-top: 1px solid #d9ded6;">
+              <p>Questions? Contact us at <a href="mailto:sales@khanya.store" style="color: #2E4D38;">sales@khanya.store</a></p>
               <p>© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
             </div>
           </div>
@@ -241,44 +223,35 @@ const handler = async (req: Request): Promise<Response> => {
 
         // Sales notification email
         const salesHtml = `
-          ${baseStyles}
-          <style>
-            .stock-breakdown { background: #f0f9ff; border: 2px solid #3b82f6; padding: 15px; margin: 15px 0; border-radius: 6px; }
-            .stock-breakdown h4 { margin: 0 0 10px 0; color: #1e40af; font-size: 16px; }
-            .stock-item { padding: 8px; margin: 5px 0; background: white; border-left: 3px solid #60a5fa; border-radius: 3px; }
-            .stock-item-name { font-weight: bold; color: #1e3a8a; }
-            .stock-item-qty { display: inline-block; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 3px; font-weight: bold; margin-left: 8px; }
-            .packing-header { background: #fef3c7; border: 2px solid #f59e0b; padding: 12px; margin: 20px 0; border-radius: 6px; text-align: center; }
-          </style>
-          <div class="container">
-            <div class="header">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px; background: #faf9f6; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;">
+            <div style="background: linear-gradient(135deg, #2E4D38 0%, #234130 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
               <h1 style="margin: 0; font-size: 28px;">New Order Received!</h1>
             </div>
-            <div class="content">
-              <div class="order-number">Order Number: ${orderNumber}</div>
+            <div style="background: #ffffff; padding: 30px 20px; border: 1px solid #d9ded6; border-top: none;">
+              <div style="font-size: 18px; font-weight: bold; color: #D6A220; margin: 10px 0;">Order Number: ${orderNumber}</div>
               
               <h3>Customer Information</h3>
-              <p><strong>Name:</strong> ${orderData.customer_name}<br>
+              <p style="line-height: 1.6; color: #1f2e27;"><strong>Name:</strong> ${orderData.customer_name}<br>
               <strong>Email:</strong> ${orderData.customer_email}<br>
               <strong>Phone:</strong> ${orderData.customer_phone}</p>
               
-              <div class="packing-header">
+              <div style="background: #fef3c7; border: 2px solid #f59e0b; padding: 12px; margin: 20px 0; border-radius: 6px; text-align: center;">
                 <strong style="color: #92400e; font-size: 16px;">⚠️ PACKING LIST - STOCK ITEMS TO INCLUDE IN EACH BALE</strong>
               </div>
               
               ${orderData.items.map(item => {
                 const stockItems = stockItemsByBale[item.product_id] || [];
                 return `
-                  <div class="stock-breakdown">
-                    <h4>📦 ${baleNumbersMap[item.product_id] || 'N/A'} - ${item.product_name}</h4>
+                  <div style="background: #f0f9ff; border: 2px solid #3b82f6; padding: 15px; margin: 15px 0; border-radius: 6px;">
+                    <h4 style="margin: 0 0 10px 0; color: #1e40af; font-size: 16px;">📦 ${baleNumbersMap[item.product_id] || 'N/A'} - ${item.product_name}</h4>
                     <p style="margin: 5px 0 10px 0; font-size: 13px; color: #64748b;">Quantity ordered: ${item.quantity}</p>
                     ${stockItems.length > 0 ? `
                       <div style="margin-top: 10px;">
                         <strong style="color: #1e40af;">Stock items to pack:</strong>
                         ${stockItems.map(stockItem => `
-                          <div class="stock-item">
-                            <span class="stock-item-name">${stockItem.name}</span>
-                            <span class="stock-item-qty">${stockItem.quantity}x</span>
+                          <div style="padding: 8px; margin: 5px 0; background: white; border-left: 3px solid #60a5fa; border-radius: 3px;">
+                            <span style="font-weight: bold; color: #1e3a8a;">${stockItem.name}</span>
+                            <span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 3px; font-weight: bold; margin-left: 8px;">${stockItem.quantity}x</span>
                             ${stockItem.age_range ? `<span style="font-size: 12px; color: #64748b; margin-left: 8px;">(${stockItem.age_range})</span>` : ''}
                             ${stockItem.description ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px;">${stockItem.description}</div>` : ''}
                           </div>
@@ -290,43 +263,43 @@ const handler = async (req: Request): Promise<Response> => {
               }).join('')}
               
               <h3>Order Summary</h3>
-              <table>
+              <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
                 <thead>
                   <tr>
-                    <th>Bale #</th>
-                    <th>Item</th>
-                    <th>Qty</th>
-                    <th>Price</th>
-                    <th>Total</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; background: #f4f7f5; font-weight: bold; color: #2E4D38;">Bale #</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; background: #f4f7f5; font-weight: bold; color: #2E4D38;">Item</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; background: #f4f7f5; font-weight: bold; color: #2E4D38;">Qty</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; background: #f4f7f5; font-weight: bold; color: #2E4D38;">Price</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; background: #f4f7f5; font-weight: bold; color: #2E4D38;">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${orderData.items.map(item => `
                     <tr>
-                      <td style="font-family: monospace; font-size: 11px;">${baleNumbersMap[item.product_id] || 'N/A'}</td>
-                      <td>${item.product_name}</td>
-                      <td>${item.quantity}</td>
-                      <td>R${item.price_per_unit.toFixed(2)}</td>
-                      <td>R${(item.price_per_unit * item.quantity).toFixed(2)}</td>
+                      <td style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6; font-family: monospace; font-size: 11px;">${baleNumbersMap[item.product_id] || 'N/A'}</td>
+                      <td style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">${item.product_name}</td>
+                      <td style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">${item.quantity}</td>
+                      <td style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">R${item.price_per_unit.toFixed(2)}</td>
+                      <td style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">R${(item.price_per_unit * item.quantity).toFixed(2)}</td>
                     </tr>
                   `).join('')}
                   <tr style="font-weight: bold; background: #f9fafb;">
-                    <td colspan="4">Total Amount:</td>
-                    <td>R${totalAmount.toFixed(2)}</td>
+                    <td colspan="4" style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">Total Amount:</td>
+                    <td style="padding: 10px; text-align: left; border-bottom: 1px solid #d9ded6;">R${totalAmount.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
               
-              <div class="info-box">
+              <div style="background: #f4f7f5; border-left: 4px solid #2E4D38; padding: 15px; margin: 20px 0; border-radius: 4px;">
                 <strong>Payment Method:</strong> ${orderData.payment_method.replace(/_/g, " ").toUpperCase()}<br>
                 <strong>Payment Status:</strong> Pending
               </div>
               
               <h3>Delivery Address</h3>
-              <p>${orderData.delivery_address}<br>
+              <p style="line-height: 1.6; color: #1f2e27;">${orderData.delivery_address}<br>
               ${orderData.delivery_city}, ${orderData.delivery_province} ${orderData.delivery_postal_code}</p>
             </div>
-            <div class="footer">
+            <div style="text-align: center; color: #6b7b73; font-size: 12px; margin-top: 30px; padding: 20px; border-top: 1px solid #d9ded6;">
               <p>View order details in the admin panel</p>
               <p>© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
             </div>
