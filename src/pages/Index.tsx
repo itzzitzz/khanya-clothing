@@ -263,12 +263,9 @@ const Index = () => {
               <h2 className="text-3xl font-extrabold">Ready to start?</h2>
             </div>
             <p className="text-muted-foreground mb-6">Get pricing, availability and delivery options for your area in South Africa.</p>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <Button variant="hero" size="lg" asChild>
-                <a href="mailto:sales@khanya.store?subject=Khanya%20Bales%20Enquiry">Email sales@khanya.store</a>
-              </Button>
-              <Button variant="sun" size="lg" asChild>
-                <a href="https://wa.me/27833054532" target="_blank" rel="noreferrer">WhatsApp +27 83 305 4532</a>
+            <div className="flex justify-center">
+              <Button variant="hero" size="xl" asChild>
+                <a href="/view-order-bales">View & order bales</a>
               </Button>
             </div>
           </div>
