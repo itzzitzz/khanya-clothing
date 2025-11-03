@@ -276,8 +276,13 @@ const ViewOrderBales = () => {
                             <h3 className="text-xs sm:text-sm font-bold mb-1.5 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem]">
                               {bale.description}
                             </h3>
-                            <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center justify-between mb-1">
                               <span className="text-sm sm:text-base font-bold text-primary">R{bale.actual_selling_price.toFixed(2)}</span>
+                            </div>
+                            <div className="mb-2">
+                              <span className="text-[10px] sm:text-xs text-muted-foreground">
+                                Avg R{(bale.actual_selling_price / bale.bale_items.reduce((sum, item) => sum + item.quantity, 0)).toFixed(2)}/item
+                              </span>
                             </div>
                             <Button 
                               size="sm" 
