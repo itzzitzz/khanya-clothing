@@ -107,7 +107,7 @@ const Brand = () => {
           <section className="mt-12 md:mt-16 bg-primary/5 rounded-xl p-8 md:p-12 text-center">
             <h2 className="text-2xl md:text-3xl font-extrabold mb-4">Ready to start your clothing business?</h2>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Browse our curated bales and order online now. Free delivery anywhere in South Africa!
+              Browse our bales and order online now. Free delivery anywhere in South Africa!
             </p>
             <Button size="lg" variant="hero" asChild>
               <a href="/view-order-bales">View & Order Bales Online</a>

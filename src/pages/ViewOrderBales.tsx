@@ -215,7 +215,7 @@ const ViewOrderBales = () => {
               View & Order Bales
             </h1>
             <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto inline-flex items-center justify-center gap-2 flex-wrap">
-              <span>Start or grow your clothing business with curated bales of quality second-hand items—with FREE delivery anywhere in South Africa!</span>
+              <span>Start or grow your clothing business with bales of quality second-hand items—with FREE delivery anywhere in South Africa!</span>
               <img src={saFlag} alt="South Africa flag" className="w-8 h-5 object-cover rounded-sm inline-block" />
             </p>
           </div>

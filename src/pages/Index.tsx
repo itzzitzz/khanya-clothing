@@ -53,13 +53,13 @@ const Index = () => {
     <div>
       <Helmet>
         <title>Start Your Clothing Business from R1,000 | Wholesale Bales South Africa | Khanya</title>
-        <meta name="description" content="Start your own clothing business with Khanya. Curated secondhand clothing bales from R1,000. Perfect for informal traders and entrepreneurs. Free delivery nationwide." />
+        <meta name="description" content="Start your own clothing business with Khanya. Secondhand clothing bales from R1,000. Perfect for informal traders and entrepreneurs. Free delivery nationwide." />
         <meta name="robots" content="index, follow" />
         <meta name="keywords" content="start clothing business, clothing bales R1000, second hand clothes, wholesale clothing South Africa, informal trader clothing, entrepreneur clothing business, reseller bales, township business" />
         <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/` : "/"} />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Start Your Clothing Business from R1,000 | Khanya" />
-        <meta property="og:description" content="Build your own clothing business with curated bales from R1,000. Free delivery. 2-3× profit margins. Perfect for informal market entrepreneurs." />
+        <meta property="og:description" content="Build your own clothing business with bales from R1,000. Free delivery. 2-3× profit margins. Perfect for informal market entrepreneurs." />
         <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -115,7 +115,7 @@ const Index = () => {
                 Start Your Own Clothing Business Today
               </h1>
               <p className="text-lg text-muted-foreground mb-6 max-w-xl">
-                Khanya empowers South African entrepreneurs to build their own clothing businesses with curated bales of quality secondhand clothing. Start for as little as R1,000 and serve your community with affordable fashion. Alternatively, buy for your kids and family.
+                Khanya empowers South African entrepreneurs to build their own clothing businesses with bales of quality secondhand clothing. Start for as little as R1,000 and serve your community with affordable fashion. Alternatively, buy for your kids and family.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button variant="hero" size="xl" asChild>
@@ -126,7 +126,7 @@ const Index = () => {
                 </Button>
               </div>
               <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                {["Start from R1,000", "Curated mixed bales", "2-3× profit margins", "Free delivery nationwide"].map((t) => (
+                {["Start from R1,000", "Mixed bales", "2-3× profit margins", "Free delivery nationwide"].map((t) => (
                   <li className="flex items-start gap-2" key={t}>
                     <CheckCircle2 className="text-accent" />
                     <span>{t}</span>
@@ -262,7 +262,7 @@ const Index = () => {
               <img src={saFlag} alt="South Africa flag" className="w-8 h-5 object-cover rounded-sm" />
               <h2 className="text-3xl font-extrabold">Ready to start?</h2>
             </div>
-            <p className="text-muted-foreground mb-6">Transform R1,000 into R3,000+ profit. Browse our curated bales and start your clothing business today!</p>
+            <p className="text-muted-foreground mb-6">Transform R1,000 into R3,000+ profit. Browse our bales and start your clothing business today!</p>
             <div className="flex justify-center">
               <Button variant="hero" size="xl" asChild>
                 <a href="/view-order-bales">View & order bales</a>
