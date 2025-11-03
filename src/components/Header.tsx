@@ -14,7 +14,7 @@ const Header = ({ active }: { active?: ActiveKey }) => {
 
   const navItems = [
     { key: "business" as const, label: "Home", href: "/" },
-    { key: "brand" as const, label: "Our Brand", href: "/brand" },
+    { key: "brand" as const, label: "Khanya Brand", href: "/brand" },
     { key: "bales" as const, label: "View & Order Bales", href: "/view-order-bales" },
     { key: "track" as const, label: "Track Order", href: "/track-order" },
     { key: "contact" as const, label: "Contact", href: "/contact" },
