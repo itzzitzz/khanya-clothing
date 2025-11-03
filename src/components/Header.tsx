@@ -17,7 +17,6 @@ const Header = ({ active }: { active?: ActiveKey }) => {
     { key: "brand" as const, label: "Our Brand", href: "/brand" },
     { key: "bales" as const, label: "View & Order Bales", href: "/view-order-bales" },
     { key: "track" as const, label: "Track Order", href: "/track-order" },
-    { key: "location" as const, label: "Location & Payments", href: "/location" },
     { key: "contact" as const, label: "Contact", href: "/contact" },
   ];
 

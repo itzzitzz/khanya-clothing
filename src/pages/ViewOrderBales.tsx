@@ -354,6 +354,11 @@ const ViewOrderBales = () => {
                 Track My Order
               </Button>
             </div>
+            <div className="mt-6">
+              <a href="/location" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
+                View payment methods and location info
+              </a>
+            </div>
           </div>
         </section>
       </main>
