@@ -262,7 +262,7 @@ const Index = () => {
               <img src={saFlag} alt="South Africa flag" className="w-8 h-5 object-cover rounded-sm" />
               <h2 className="text-3xl font-extrabold">Ready to start?</h2>
             </div>
-            <p className="text-muted-foreground mb-6">Get pricing, availability and delivery options for your area in South Africa.</p>
+            <p className="text-muted-foreground mb-6">Transform R1,000 into R3,000+ profit. Browse our curated bales and start your clothing business today!</p>
             <div className="flex justify-center">
               <Button variant="hero" size="xl" asChild>
                 <a href="/view-order-bales">View & order bales</a>
