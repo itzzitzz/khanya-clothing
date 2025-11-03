@@ -101,15 +101,17 @@ const Brand = () => {
                 <p className="text-muted-foreground">Not because it’s just a brand — but because it’s you.</p>
               </div>
 
-              <div className="flex gap-3 pt-2">
-                <Button asChild variant="hero">
-                  <a href="/#business" aria-label="Learn how Khanya works">How it works</a>
-                </Button>
-                <Button asChild variant="outline">
-                  <a href="/location" aria-label="Find our location and payment options">Location & Payments</a>
-                </Button>
-              </div>
             </div>
+          </section>
+
+          <section className="mt-12 md:mt-16 bg-primary/5 rounded-xl p-8 md:p-12 text-center">
+            <h2 className="text-2xl md:text-3xl font-extrabold mb-4">Ready to start your clothing business?</h2>
+            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+              Browse our curated bales and order online now. Free delivery anywhere in South Africa!
+            </p>
+            <Button size="lg" variant="hero" asChild>
+              <a href="/view-order-bales">View & Order Bales Online</a>
+            </Button>
           </section>
         </article>
       </main>
