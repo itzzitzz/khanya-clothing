@@ -9,11 +9,14 @@ const corsHeaders = {
 };
 
 interface NotificationRequest {
-  type: 'page_visit' | 'add_to_cart' | 'view_cart' | 'proceed_checkout';
+  type: 'page_visit' | 'add_to_cart' | 'view_cart' | 'proceed_checkout' | 'pin_request' | 'pin_verified';
   bale_name?: string;
   bale_price?: number;
   cart_total?: number;
   cart_count?: number;
+  email?: string;
+  phone?: string;
+  method?: 'email' | 'sms';
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -22,7 +25,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { type, bale_name, bale_price, cart_total, cart_count }: NotificationRequest = await req.json();
+    const { type, bale_name, bale_price, cart_total, cart_count, email, phone, method }: NotificationRequest = await req.json();
 
     let subject = "";
     let html = "";
@@ -59,6 +62,24 @@ const handler = async (req: Request): Promise<Response> => {
         <p>A customer has clicked "Proceed to Checkout".</p>
         <p><strong>Items in cart:</strong> ${cart_count || 0}</p>
         <p><strong>Cart total:</strong> R${cart_total?.toFixed(2) || '0.00'}</p>
+        <p><strong>Time:</strong> ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}</p>
+      `;
+    } else if (type === "pin_request") {
+      subject = "Customer requested verification PIN";
+      html = `
+        <h2>PIN Request Notification</h2>
+        <p>A customer has requested a verification PIN.</p>
+        <p><strong>Method:</strong> ${method === 'email' ? 'Email' : 'SMS'}</p>
+        <p><strong>Contact:</strong> ${email || phone || 'Unknown'}</p>
+        <p><strong>Time:</strong> ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}</p>
+      `;
+    } else if (type === "pin_verified") {
+      subject = "Customer successfully verified PIN";
+      html = `
+        <h2>PIN Verified Notification</h2>
+        <p>A customer has successfully entered their PIN and logged in.</p>
+        <p><strong>Method:</strong> ${method === 'email' ? 'Email' : 'SMS'}</p>
+        <p><strong>Contact:</strong> ${email || phone || 'Unknown'}</p>
         <p><strong>Time:</strong> ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}</p>
       `;
     }

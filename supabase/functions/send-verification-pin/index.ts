@@ -138,6 +138,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("PIN sent successfully to:", email || phone);
 
+    // Send notification to sales team
+    try {
+      await fetch(`${supabaseUrl}/functions/v1/send-sales-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({
+          type: 'pin_request',
+          email: email || null,
+          phone: phone || null,
+          method: method
+        })
+      });
+    } catch (notifError) {
+      console.error('Error sending sales notification:', notifError);
+      // Don't fail the request if notification fails
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
