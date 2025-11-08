@@ -9,9 +9,11 @@ const corsHeaders = {
 };
 
 interface NotificationRequest {
-  type: 'page_visit' | 'add_to_cart';
+  type: 'page_visit' | 'add_to_cart' | 'view_cart' | 'proceed_checkout';
   bale_name?: string;
   bale_price?: number;
+  cart_total?: number;
+  cart_count?: number;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -20,7 +22,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { type, bale_name, bale_price }: NotificationRequest = await req.json();
+    const { type, bale_name, bale_price, cart_total, cart_count }: NotificationRequest = await req.json();
 
     let subject = "";
     let html = "";
@@ -39,6 +41,24 @@ const handler = async (req: Request): Promise<Response> => {
         <p>A customer has added a bale to their cart.</p>
         <p><strong>Bale:</strong> ${bale_name}</p>
         <p><strong>Price:</strong> R${bale_price?.toFixed(2)}</p>
+        <p><strong>Time:</strong> ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}</p>
+      `;
+    } else if (type === "view_cart") {
+      subject = "Customer viewing cart";
+      html = `
+        <h2>View Cart Notification</h2>
+        <p>A customer has clicked to view their cart.</p>
+        <p><strong>Items in cart:</strong> ${cart_count || 0}</p>
+        <p><strong>Cart total:</strong> R${cart_total?.toFixed(2) || '0.00'}</p>
+        <p><strong>Time:</strong> ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}</p>
+      `;
+    } else if (type === "proceed_checkout") {
+      subject = "Customer proceeding to checkout";
+      html = `
+        <h2>Proceed to Checkout Notification</h2>
+        <p>A customer has clicked "Proceed to Checkout".</p>
+        <p><strong>Items in cart:</strong> ${cart_count || 0}</p>
+        <p><strong>Cart total:</strong> R${cart_total?.toFixed(2) || '0.00'}</p>
         <p><strong>Time:</strong> ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}</p>
       `;
     }

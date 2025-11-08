@@ -381,7 +381,21 @@ const ViewOrderBales = () => {
               Add bales to your cart and checkout with free delivery anywhere in South Africa.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              <Button size="lg" onClick={() => navigate('/cart')}>
+              <Button size="lg" onClick={async () => {
+                // Send view cart notification
+                try {
+                  await supabase.functions.invoke('send-sales-notification', {
+                    body: {
+                      type: 'view_cart',
+                      cart_total: 0,
+                      cart_count: 0
+                    }
+                  });
+                } catch (err) {
+                  console.error('Error sending view cart notification:', err);
+                }
+                navigate('/cart');
+              }}>
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 View Cart
               </Button>

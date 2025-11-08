@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
@@ -6,12 +6,45 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Header from '@/components/Header';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Cart = () => {
   const navigate = useNavigate();
   const { cart, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
 
-  const handleCheckout = () => {
+  useEffect(() => {
+    // Send view cart notification when page loads with items
+    if (cart.length > 0) {
+      const sendViewCartNotification = async () => {
+        try {
+          await supabase.functions.invoke('send-sales-notification', {
+            body: {
+              type: 'view_cart',
+              cart_total: cartTotal,
+              cart_count: cartCount
+            }
+          });
+        } catch (err) {
+          console.error('Error sending view cart notification:', err);
+        }
+      };
+      sendViewCartNotification();
+    }
+  }, []);
+
+  const handleCheckout = async () => {
+    // Send proceed to checkout notification
+    try {
+      await supabase.functions.invoke('send-sales-notification', {
+        body: {
+          type: 'proceed_checkout',
+          cart_total: cartTotal,
+          cart_count: cartCount
+        }
+      });
+    } catch (err) {
+      console.error('Error sending checkout notification:', err);
+    }
     navigate('/checkout');
   };
 
