@@ -49,6 +49,15 @@ const Cart = () => {
         <meta name="description" content={`Review your cart with ${cartCount} clothing bale${cartCount === 1 ? '' : 's'}. Total: R${cartTotal.toFixed(2)}. Free delivery anywhere in South Africa.`} />
         <meta name="robots" content="noindex, follow" />
         <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/cart` : "/cart"} />
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17692351759"></script>
+        <script>
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17692351759');
+          `}
+        </script>
       </Helmet>
       <Header />
       <div className="min-h-screen bg-background py-8">
