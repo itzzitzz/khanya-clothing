@@ -45,3 +45,6 @@ verify_jwt = false
 [functions.get-bales]
 verify_jwt = false
 
+[functions.send-sales-notification]
+verify_jwt = false
+

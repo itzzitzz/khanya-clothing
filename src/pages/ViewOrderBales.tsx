@@ -87,6 +87,19 @@ const ViewOrderBales = () => {
     };
 
     fetchBales();
+
+    // Send page visit notification
+    const sendPageVisitNotification = async () => {
+      try {
+        await supabase.functions.invoke('send-sales-notification', {
+          body: { type: 'page_visit' }
+        });
+      } catch (err) {
+        console.error('Error sending page visit notification:', err);
+      }
+    };
+
+    sendPageVisitNotification();
   }, []);
 
   const getBalesByCategory = (categoryId: number) => {
@@ -108,7 +121,7 @@ const ViewOrderBales = () => {
     setModalOpen(true);
   };
 
-  const handleAddToCart = (bale: Bale) => {
+  const handleAddToCart = async (bale: Bale) => {
     addToCart({
       product_id: bale.id,
       product_name: bale.description,
@@ -119,6 +132,19 @@ const ViewOrderBales = () => {
       title: "Added to cart",
       description: `${bale.description} added to your cart`,
     });
+
+    // Send add to cart notification
+    try {
+      await supabase.functions.invoke('send-sales-notification', {
+        body: {
+          type: 'add_to_cart',
+          bale_name: bale.description,
+          bale_price: bale.actual_selling_price
+        }
+      });
+    } catch (err) {
+      console.error('Error sending add to cart notification:', err);
+    }
   };
 
   const uniqueCategories = Array.from(
