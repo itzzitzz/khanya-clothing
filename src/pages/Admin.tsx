@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Package, FolderOpen, ShoppingCart, Box, Tags } from "lucide-react";
+import { LogOut, Package, FolderOpen, ShoppingCart, Box, Tags, BarChart3 } from "lucide-react";
 import { CategoryManager } from "@/components/admin/CategoryManager";
 import { StockItemManager } from "@/components/admin/StockItemManager";
 import { BaleManager } from "@/components/admin/BaleManager";
 import { ProductCategoryManager } from "@/components/admin/ProductCategoryManager";
 import OrderManager from "@/components/admin/OrderManager";
+import BaleMetricsManager from "@/components/admin/BaleMetricsManager";
 import Header from "@/components/Header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
@@ -119,7 +120,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="stock-categories" className="w-full">
-          <TabsList className="w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 h-auto">
+          <TabsList className="w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 h-auto">
             <TabsTrigger value="stock-categories" className="flex-shrink-0">
               <FolderOpen className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Stock Categories</span>
@@ -144,6 +145,11 @@ const Admin = () => {
               <ShoppingCart className="h-4 w-4 mr-2" />
               Orders
             </TabsTrigger>
+            <TabsTrigger value="metrics" className="flex-shrink-0">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Metrics</span>
+              <span className="sm:hidden">Stats</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="stock-categories" className="mt-6">
@@ -164,6 +170,10 @@ const Admin = () => {
 
           <TabsContent value="orders" className="mt-6">
             <OrderManager />
+          </TabsContent>
+
+          <TabsContent value="metrics" className="mt-6">
+            <BaleMetricsManager />
           </TabsContent>
         </Tabs>
       </main>

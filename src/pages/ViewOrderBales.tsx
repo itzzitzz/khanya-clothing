@@ -116,9 +116,18 @@ const ViewOrderBales = () => {
     return allImages[randomIndex].image_url;
   };
 
-  const handleBaleClick = (bale: Bale) => {
+  const handleBaleClick = async (bale: Bale) => {
     setSelectedBale(bale);
     setModalOpen(true);
+    
+    // Track bale view
+    try {
+      await supabase.functions.invoke('track-bale-metric', {
+        body: { baleId: bale.id, metricType: 'view' }
+      });
+    } catch (error) {
+      console.error('Error tracking bale view:', error);
+    }
   };
 
   const handleAddToCart = async (bale: Bale) => {
@@ -132,6 +141,15 @@ const ViewOrderBales = () => {
       title: "Added to cart",
       description: `${bale.description} added to your cart`,
     });
+
+    // Track add to cart metric
+    try {
+      await supabase.functions.invoke('track-bale-metric', {
+        body: { baleId: bale.id, metricType: 'add_to_cart' }
+      });
+    } catch (error) {
+      console.error('Error tracking add to cart:', error);
+    }
 
     // Send add to cart notification
     try {

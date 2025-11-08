@@ -56,6 +56,44 @@ export type Database = {
           },
         ]
       }
+      bale_metrics: {
+        Row: {
+          add_to_cart_count: number
+          bale_id: number
+          created_at: string
+          id: string
+          reset_date: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          add_to_cart_count?: number
+          bale_id: number
+          created_at?: string
+          id?: string
+          reset_date?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          add_to_cart_count?: number
+          bale_id?: number
+          created_at?: string
+          id?: string
+          reset_date?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bale_metrics_bale_id_fkey"
+            columns: ["bale_id"]
+            isOneToOne: true
+            referencedRelation: "bales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bales: {
         Row: {
           active: boolean
