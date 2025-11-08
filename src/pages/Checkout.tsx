@@ -376,6 +376,15 @@ const Checkout = () => {
     <>
       <Helmet>
         <title>Checkout | Your Business Name</title>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17692351759"></script>
+        <script>
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17692351759');
+          `}
+        </script>
       </Helmet>
       <Header />
       <div className="min-h-screen bg-background py-8">
