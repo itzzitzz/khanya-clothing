@@ -343,6 +343,43 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
+    // Send SMS notification to sales team
+    try {
+      const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
+      const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
+      const twilioPhone = Deno.env.get("TWILIO_PHONE_NUMBER");
+
+      if (accountSid && authToken && twilioPhone) {
+        const smsMessage = `🎉 NEW ORDER!\n\nOrder: ${orderNumber}\nCustomer: ${orderData.customer_name}\nTotal: R${totalAmount.toFixed(2)}\nItems: ${orderData.items.map(i => `${i.quantity}x ${i.product_name}`).join(', ')}\nPayment: ${orderData.payment_method.toUpperCase()}`;
+
+        const smsResponse = await fetch(
+          `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+          {
+            method: "POST",
+            headers: {
+              "Authorization": `Basic ${btoa(`${accountSid}:${authToken}`)}`,
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+              To: "+27828521112",
+              From: twilioPhone,
+              Body: smsMessage,
+            }),
+          }
+        );
+
+        if (smsResponse.ok) {
+          console.log("SMS notification sent to sales team");
+        } else {
+          const error = await smsResponse.text();
+          console.error("Failed to send SMS notification:", error);
+        }
+      }
+    } catch (smsError) {
+      console.error("Error sending SMS notification:", smsError);
+      // Don't fail the order creation if SMS fails
+    }
+
     console.log("Order created successfully:", orderNumber);
 
     return new Response(
