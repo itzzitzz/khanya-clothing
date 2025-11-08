@@ -128,6 +128,15 @@ const ViewOrderBales = () => {
     <div>
       <Helmet>
         <title>View & Order Clothing Bales | Mixed Second-hand Items | Khanya</title>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17692351759"></script>
+        <script>
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17692351759');
+          `}
+        </script>
         <meta name="description" content="View our 10kg clothing bales and place your order. Mixed men's, women's, and children's clothing including jackets, pants, shirts, dresses and more." />
         <meta name="robots" content="index, follow" />
         <meta name="keywords" content="order clothing bales, view clothing bales, mixed clothing items, secondhand clothing types, men's women's children's clothes, jacket pants shirts dresses" />
