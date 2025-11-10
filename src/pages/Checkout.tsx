@@ -31,6 +31,9 @@ const Checkout = () => {
   const [verificationMethod, setVerificationMethod] = useState<'email' | 'sms'>('email');
   const [verificationPhone, setVerificationPhone] = useState('');
   
+  const [deliveryMethod, setDeliveryMethod] = useState<'my_address' | 'paxi_location'>('my_address');
+  const [paxiLocation, setPaxiLocation] = useState('');
+  
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_email: '',
@@ -223,11 +226,31 @@ const Checkout = () => {
       return;
     }
 
+    if (deliveryMethod === 'paxi_location' && !paxiLocation) {
+      toast({
+        title: 'PAXI Location Required',
+        description: 'Please select a PAXI location and enter the details',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
+      // Prepare order data based on delivery method
+      const orderData = deliveryMethod === 'paxi_location' 
+        ? {
+            ...formData,
+            delivery_address: `PAXI Collection: ${paxiLocation}`,
+            delivery_city: 'PAXI',
+            delivery_province: 'N/A',
+            delivery_postal_code: '0000',
+          }
+        : formData;
+
       const { data, error } = await supabase.functions.invoke('create-order', {
         body: {
-          ...formData,
+          ...orderData,
           items: cart.map((item) => ({
             product_id: item.product_id,
             product_name: item.product_name,
@@ -642,78 +665,131 @@ const Checkout = () => {
                       </div>
                     </div>
                   </div>
+                  
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="business_name">Business Name / Complex Number and Name</Label>
-                      <Input
-                        id="business_name"
-                        name="business_name"
-                        value={formData.business_name}
-                        onChange={handleInputChange}
-                        placeholder="e.g. Fashion Hub or Unit 5, Sunset Complex"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Optional - helps courier find you
-                      </p>
+                      <Label>Delivery Method *</Label>
+                      <RadioGroup
+                        value={deliveryMethod}
+                        onValueChange={(value: 'my_address' | 'paxi_location') => setDeliveryMethod(value)}
+                      >
+                        <div className="flex items-center space-x-2 p-3 border rounded">
+                          <RadioGroupItem value="my_address" id="my-address" />
+                          <Label htmlFor="my-address" className="cursor-pointer">My Address</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 p-3 border rounded">
+                          <RadioGroupItem value="paxi_location" id="paxi-location" />
+                          <Label htmlFor="paxi-location" className="cursor-pointer">PAXI Collection Point (PEP Store)</Label>
+                        </div>
+                      </RadioGroup>
                     </div>
-                    <div>
-                      <Label htmlFor="delivery_address">Street Address *</Label>
-                      <Input
-                        id="delivery_address"
-                        name="delivery_address"
-                        value={formData.delivery_address}
-                        onChange={handleInputChange}
-                        placeholder="e.g. 123 Main Street"
-                        required
-                      />
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="delivery_city">City *</Label>
-                        <Input
-                          id="delivery_city"
-                          name="delivery_city"
-                          value={formData.delivery_city}
-                          onChange={handleInputChange}
-                          placeholder="e.g. Johannesburg"
-                          required
-                        />
+
+                    {deliveryMethod === 'my_address' ? (
+                      <>
+                        <div>
+                          <Label htmlFor="business_name">Business Name / Complex Number and Name</Label>
+                          <Input
+                            id="business_name"
+                            name="business_name"
+                            value={formData.business_name}
+                            onChange={handleInputChange}
+                            placeholder="e.g. Fashion Hub or Unit 5, Sunset Complex"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Optional - helps courier find you
+                          </p>
+                        </div>
+                        <div>
+                          <Label htmlFor="delivery_address">Street Address *</Label>
+                          <Input
+                            id="delivery_address"
+                            name="delivery_address"
+                            value={formData.delivery_address}
+                            onChange={handleInputChange}
+                            placeholder="e.g. 123 Main Street"
+                            required={deliveryMethod === 'my_address'}
+                          />
+                        </div>
+                        <div className="grid md:grid-cols-3 gap-4">
+                          <div>
+                            <Label htmlFor="delivery_city">City *</Label>
+                            <Input
+                              id="delivery_city"
+                              name="delivery_city"
+                              value={formData.delivery_city}
+                              onChange={handleInputChange}
+                              placeholder="e.g. Johannesburg"
+                              required={deliveryMethod === 'my_address'}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="delivery_province">Province *</Label>
+                            <Select
+                              value={formData.delivery_province}
+                              onValueChange={handleProvinceChange}
+                              required={deliveryMethod === 'my_address'}
+                            >
+                              <SelectTrigger id="delivery_province" className="w-full">
+                                <SelectValue placeholder="Select province" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-background z-50">
+                                <SelectItem value="Eastern Cape">Eastern Cape</SelectItem>
+                                <SelectItem value="Free State">Free State</SelectItem>
+                                <SelectItem value="Gauteng">Gauteng</SelectItem>
+                                <SelectItem value="KwaZulu-Natal">KwaZulu-Natal</SelectItem>
+                                <SelectItem value="Limpopo">Limpopo</SelectItem>
+                                <SelectItem value="Mpumalanga">Mpumalanga</SelectItem>
+                                <SelectItem value="Northern Cape">Northern Cape</SelectItem>
+                                <SelectItem value="North West">North West</SelectItem>
+                                <SelectItem value="Western Cape">Western Cape</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="delivery_postal_code">Postal Code *</Label>
+                            <Input
+                              id="delivery_postal_code"
+                              name="delivery_postal_code"
+                              value={formData.delivery_postal_code}
+                              onChange={handleInputChange}
+                              placeholder="e.g. 2000"
+                              required={deliveryMethod === 'my_address'}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="bg-muted/50 p-4 rounded-lg">
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Select a PAXI collection point from the map below. After selecting your preferred location, copy the store name and address and paste it in the field below.
+                          </p>
+                          <div className="border rounded overflow-hidden bg-background">
+                            <iframe 
+                              width="100%" 
+                              height="500" 
+                              src="https://map.paxi.co.za?size=l,m,s&status=1,3,4&maxordervalue=1000&output=nc" 
+                              frameBorder="0" 
+                              allow="geolocation"
+                              title="PAXI Location Finder"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="paxi_location">Selected PAXI Location *</Label>
+                          <Input
+                            id="paxi_location"
+                            value={paxiLocation}
+                            onChange={(e) => setPaxiLocation(e.target.value)}
+                            placeholder="e.g. PEP Sandton City, 83 Rivonia Road, Sandton"
+                            required={deliveryMethod === 'paxi_location'}
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Copy and paste the store name and address from the map above
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <Label htmlFor="delivery_province">Province *</Label>
-                        <Select
-                          value={formData.delivery_province}
-                          onValueChange={handleProvinceChange}
-                          required
-                        >
-                          <SelectTrigger id="delivery_province" className="w-full">
-                            <SelectValue placeholder="Select province" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-background z-50">
-                            <SelectItem value="Eastern Cape">Eastern Cape</SelectItem>
-                            <SelectItem value="Free State">Free State</SelectItem>
-                            <SelectItem value="Gauteng">Gauteng</SelectItem>
-                            <SelectItem value="KwaZulu-Natal">KwaZulu-Natal</SelectItem>
-                            <SelectItem value="Limpopo">Limpopo</SelectItem>
-                            <SelectItem value="Mpumalanga">Mpumalanga</SelectItem>
-                            <SelectItem value="Northern Cape">Northern Cape</SelectItem>
-                            <SelectItem value="North West">North West</SelectItem>
-                            <SelectItem value="Western Cape">Western Cape</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="delivery_postal_code">Postal Code *</Label>
-                        <Input
-                          id="delivery_postal_code"
-                          name="delivery_postal_code"
-                          value={formData.delivery_postal_code}
-                          onChange={handleInputChange}
-                          placeholder="e.g. 2000"
-                          required
-                        />
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
