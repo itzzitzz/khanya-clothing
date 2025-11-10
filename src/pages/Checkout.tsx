@@ -762,7 +762,7 @@ const Checkout = () => {
                       <div className="space-y-4">
                         <div className="bg-muted/50 p-4 rounded-lg">
                           <p className="text-sm text-muted-foreground mb-3">
-                            Select a PAXI collection point from the map below. After selecting your preferred location, copy the store name and address and paste it in the field below.
+                            Select a PAXI collection point from the list below. After selecting your preferred location, copy the P number and name into the Selected PAXI Location box at the bottom of the list.
                           </p>
                           <div className="border rounded overflow-hidden bg-background">
                             <iframe 
@@ -781,7 +781,7 @@ const Checkout = () => {
                             id="paxi_location"
                             value={paxiLocation}
                             onChange={(e) => setPaxiLocation(e.target.value)}
-                            placeholder="e.g. PEP Sandton City, 83 Rivonia Road, Sandton"
+                            placeholder="E.g. (P5772) PEPHOME BARBERTON STIMELA"
                             required={deliveryMethod === 'paxi_location'}
                           />
                           <p className="text-xs text-muted-foreground mt-1">
