@@ -255,7 +255,7 @@ const ViewOrderBales = () => {
               View & Order Bales
             </h1>
             <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto inline-flex items-center justify-center gap-2 flex-wrap">
-              <span>Start or grow your clothing business with bales of quality second-hand items—with FREE delivery anywhere in South Africa!</span>
+              <span>Start or grow your clothing business with bales of quality second-hand items—with FREE delivery to your address or any PAXI location (PEP store) nationwide!</span>
               <img src={saFlag} alt="South Africa flag" className="w-8 h-5 object-cover rounded-sm inline-block" />
             </p>
           </div>
@@ -383,7 +383,7 @@ const ViewOrderBales = () => {
           <div className="container mx-auto text-center">
             <h2 className="text-3xl font-extrabold mb-4">Ready to order?</h2>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Add bales to your cart and checkout with free delivery anywhere in South Africa.
+              Add bales to your cart and checkout with free delivery to your address or any PAXI location (PEP store) nationwide.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Button size="lg" onClick={async () => {
