@@ -87,19 +87,6 @@ const ViewOrderBales = () => {
     };
 
     fetchBales();
-
-    // Send page visit notification
-    const sendPageVisitNotification = async () => {
-      try {
-        await supabase.functions.invoke('send-sales-notification', {
-          body: { type: 'page_visit' }
-        });
-      } catch (err) {
-        console.error('Error sending page visit notification:', err);
-      }
-    };
-
-    sendPageVisitNotification();
   }, []);
 
   const getBalesByCategory = (categoryId: number) => {
