@@ -781,7 +781,7 @@ const Checkout = () => {
                             id="paxi_location"
                             value={paxiLocation}
                             onChange={(e) => setPaxiLocation(e.target.value)}
-                            placeholder="E.g. (P5772) PEPHOME BARBERTON STIMELA"
+                            placeholder="e.g. (P5772) PEPHOME BARBERTON STIMELA"
                             required={deliveryMethod === 'paxi_location'}
                           />
                           <p className="text-xs text-muted-foreground mt-1">
