@@ -31,22 +31,37 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Normalize phone number if provided
-    let normalizedPhone = phone;
+    // Normalize phone number if provided - create multiple format variations
+    let phoneFormats: string[] = [];
     if (phone) {
       // Remove all non-digits
       const digitsOnly = phone.replace(/\D/g, '');
       
-      // Convert 0828521112 to +27828521112 format
-      if (digitsOnly.startsWith('0')) {
-        normalizedPhone = '+27' + digitsOnly.substring(1);
-      } else if (digitsOnly.startsWith('27')) {
-        normalizedPhone = '+' + digitsOnly;
+      // Generate all possible formats to search
+      if (digitsOnly.startsWith('27')) {
+        const nationalNumber = digitsOnly.substring(2);
+        phoneFormats = [
+          `+${digitsOnly}`,           // +27721731393
+          digitsOnly,                  // 27721731393
+          `0${nationalNumber}`,        // 0721731393
+        ];
+      } else if (digitsOnly.startsWith('0')) {
+        const nationalNumber = digitsOnly.substring(1);
+        phoneFormats = [
+          `+27${nationalNumber}`,      // +27721731393
+          `27${nationalNumber}`,       // 27721731393
+          digitsOnly,                  // 0721731393
+        ];
       } else {
-        normalizedPhone = '+27' + digitsOnly;
+        // Assume it's a national number without 0
+        phoneFormats = [
+          `+27${digitsOnly}`,          // +27721731393
+          `27${digitsOnly}`,           // 27721731393
+          `0${digitsOnly}`,            // 0721731393
+        ];
       }
       
-      console.log(`Phone normalization: ${phone} -> ${normalizedPhone}`);
+      console.log(`Phone search formats: ${phoneFormats.join(', ')}`);
     }
 
     // Build query
@@ -63,11 +78,12 @@ const handler = async (req: Request): Promise<Response> => {
         )
       `);
 
-    // Filter by email or phone
+    // Filter by email or phone (with multiple format support)
     if (email) {
       query = query.eq("customer_email", email.toLowerCase());
-    } else if (normalizedPhone) {
-      query = query.eq("customer_phone", normalizedPhone);
+    } else if (phoneFormats.length > 0) {
+      // Search for any of the phone formats using OR condition
+      query = query.or(phoneFormats.map(format => `customer_phone.eq.${format}`).join(','));
     }
 
     // Filter by order number if provided
