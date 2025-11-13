@@ -82,8 +82,8 @@ const handler = async (req: Request): Promise<Response> => {
     if (email) {
       query = query.eq("customer_email", email.toLowerCase());
     } else if (phoneFormats.length > 0) {
-      // Search for any of the phone formats using OR condition
-      query = query.or(phoneFormats.map(format => `customer_phone.eq.${format}`).join(','));
+      // Search for orders where phone matches any of the formats
+      query = query.in("customer_phone", phoneFormats);
     }
 
     // Filter by order number if provided
