@@ -233,7 +233,13 @@ const handler = async (req: Request): Promise<Response> => {
                       <div style="background-color: #dcfce7; border-left: 4px solid #16a34a; padding: 20px; margin: 30px 0; border-radius: 8px;">
                         <p style="margin: 0; color: #166534; font-size: 15px; line-height: 1.6;">
                           <strong>📦 What happens next?</strong><br>
-                          Once your payment clears, we'll immediately pack your bales and arrange FREE delivery to your address or your nearest PAXI location (PEP store). You'll receive tracking details as soon as your order is dispatched!
+                          ${orderStatus === 'delivered' 
+                            ? 'Your order has been delivered! Once your outstanding payment clears, your account will be settled. Thank you for your business!' 
+                            : orderStatus === 'shipped'
+                            ? 'Your bales are on their way to you! Once your payment clears, everything will be settled. You can expect delivery soon!'
+                            : orderStatus === 'packing'
+                            ? 'Your bales are being packed right now! Once your payment clears, we\'ll dispatch them immediately with FREE delivery to your address or nearest PAXI location (PEP store).'
+                            : 'Once your payment clears, we\'ll immediately pack your bales and arrange FREE delivery to your address or your nearest PAXI location (PEP store). You\'ll receive tracking details as soon as your order is dispatched!'}
                         </p>
                       </div>
                       
