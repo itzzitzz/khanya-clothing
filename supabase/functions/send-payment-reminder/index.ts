@@ -291,7 +291,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Email failed: ${emailResponse.error.message}`);
     }
 
-    // Send SMS with dynamic message
+    // Send SMS with dynamic message (non-blocking - won't fail if SMS errors)
     const getSmsMessage = () => {
       const statusText = orderStatus === 'delivered' ? 'delivered' :
                          orderStatus === 'shipped' ? 'shipped' :
@@ -305,43 +305,54 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
     const smsBody = getSmsMessage();
-
     const toPhone = normalizeZaPhone(order.customer_phone);
     let smsData: any = null;
+    let smsSent = false;
+    let smsError = null;
 
-    const smsResponse = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": "Basic " + btoa(`${twilioAccountSid}:${twilioAuthToken}`),
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          To: toPhone,
-          From: twilioPhoneNumber!,
-          Body: smsBody,
-        }),
+    try {
+      const smsResponse = await fetch(
+        `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": "Basic " + btoa(`${twilioAccountSid}:${twilioAuthToken}`),
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            To: toPhone,
+            From: twilioPhoneNumber!,
+            Body: smsBody,
+          }),
+        }
+      );
+
+      if (!smsResponse.ok) {
+        const errorText = await smsResponse.text();
+        smsError = errorText;
+        console.warn("SMS sending failed (non-critical):", errorText);
+        console.warn("Note: If using Twilio trial account, verify the phone number at twilio.com/user/account/phone-numbers/verified");
+      } else {
+        smsData = await smsResponse.json();
+        smsSent = true;
+        console.log("Payment reminder SMS sent successfully:", smsData);
       }
-    );
-
-    if (!smsResponse.ok) {
-      const smsError = await smsResponse.text();
-      console.error("SMS sending failed:", smsError);
-      throw new Error(`SMS failed: ${smsError}`);
-    } else {
-      smsData = await smsResponse.json();
-      console.log("Payment reminder SMS sent successfully:", smsData);
+    } catch (smsErr: any) {
+      smsError = smsErr.message;
+      console.warn("SMS sending failed (non-critical):", smsErr);
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Payment reminder sent successfully",
+        message: smsSent 
+          ? "Payment reminder sent via email and SMS successfully"
+          : "Payment reminder sent via email (SMS failed - see warning)",
         email_sent: !!emailResponse,
-        sms_sent: smsResponse.ok,
+        sms_sent: smsSent,
         sms_sid: smsData?.sid,
         sms_status: smsData?.status,
+        sms_error: smsError,
         to_phone: toPhone
       }),
       {
