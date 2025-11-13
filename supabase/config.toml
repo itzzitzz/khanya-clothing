@@ -48,3 +48,12 @@ verify_jwt = false
 [functions.send-sales-notification]
 verify_jwt = false
 
+[functions.send-payment-reminder]
+verify_jwt = false
+
+[functions.track-bale-metric]
+verify_jwt = false
+
+[functions.reset-bale-metrics]
+verify_jwt = false
+
