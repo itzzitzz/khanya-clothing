@@ -178,16 +178,16 @@ const TrackOrder = () => {
     });
   };
 
-  const getPaymentStatusColor = (status: string) => {
+  const getPaymentTrackingColor = (status: string) => {
     switch (status) {
-      case 'paid':
-        return 'text-green-600';
-      case 'pending':
-        return 'text-yellow-600';
-      case 'failed':
-        return 'text-red-600';
+      case 'Fully Paid':
+        return 'text-green-600 bg-green-50 border-green-200';
+      case 'Partially Paid':
+        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'Awaiting payment':
+        return 'text-orange-600 bg-orange-50 border-orange-200';
       default:
-        return 'text-gray-600';
+        return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 
@@ -319,9 +319,27 @@ const TrackOrder = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold">R{order.total_amount.toFixed(2)}</p>
-                      <p className={`text-sm font-semibold ${getPaymentStatusColor(order.payment_status)}`}>
-                        {order.payment_status.toUpperCase()}
-                      </p>
+                    </div>
+                  </div>
+
+                  {/* Payment Status Section */}
+                  <div className={`mb-4 p-4 rounded border ${getPaymentTrackingColor(order.payment_tracking_status)}`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium opacity-70">Payment Status</p>
+                        <p className="font-bold">{order.payment_tracking_status}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium opacity-70">
+                          {order.payment_tracking_status === 'Fully Paid' ? 'Total Paid' : 'Amount Paid'}
+                        </p>
+                        <p className="font-bold">
+                          R{order.amount_paid?.toFixed(2) || '0.00'}
+                          {order.payment_tracking_status !== 'Fully Paid' && (
+                            <span className="text-sm font-normal opacity-70"> / R{order.total_amount.toFixed(2)}</span>
+                          )}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
