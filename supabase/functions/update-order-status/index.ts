@@ -355,7 +355,47 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
           `;
         } else if (new_status === 'packing') {
-          subject = `Payment Confirmed - We're Packing Your Order! ${order.order_number}`;
+          const totalAmount = Number(order.total_amount);
+          const amountPaid = Number(order.amount_paid || 0);
+          const amountOwing = totalAmount - amountPaid;
+          const paymentStatus = order.payment_tracking_status || 'Awaiting payment';
+          const isFullyPaid = paymentStatus === 'Fully Paid';
+          
+          // Dynamic subject and header based on payment status
+          const emailHeading = isFullyPaid 
+            ? '🎉 Payment Confirmed - We\'re Packing Your Order!'
+            : paymentStatus === 'Partially Paid'
+            ? '📦 Packing Your Order - Partial Payment Received'
+            : '📦 Packing Your Order - Payment Still Needed';
+          
+          subject = `${isFullyPaid ? 'Payment Confirmed - ' : ''}Order Being Packed! ${order.order_number}`;
+          
+          const paymentMessage = isFullyPaid
+            ? 'Great news! Your payment has been confirmed and we\'re now packing your order.'
+            : paymentStatus === 'Partially Paid'
+            ? `We've received R${amountPaid.toFixed(2)} of your payment and are packing your order. Please arrange payment for the remaining R${amountOwing.toFixed(2)} as soon as possible.`
+            : `We're packing your order! Please note there is still R${amountOwing.toFixed(2)} outstanding. Kindly complete your payment to avoid delays.`;
+          
+          const paymentBoxColor = isFullyPaid 
+            ? '#d1fae5' 
+            : paymentStatus === 'Partially Paid'
+            ? '#fef3c7'
+            : '#fee2e2';
+          const paymentBorderColor = isFullyPaid 
+            ? '#10b981' 
+            : paymentStatus === 'Partially Paid'
+            ? '#f59e0b'
+            : '#ef4444';
+          const paymentTextColor = isFullyPaid 
+            ? '#065f46' 
+            : paymentStatus === 'Partially Paid'
+            ? '#92400e'
+            : '#991b1b';
+          const paymentBadgeColor = isFullyPaid 
+            ? '#6ee7b7' 
+            : paymentStatus === 'Partially Paid'
+            ? '#fde68a'
+            : '#fecaca';
           
           const orderDate = new Date(order.created_at).toLocaleDateString('en-ZA', { 
             year: 'numeric', 
@@ -367,21 +407,36 @@ const handler = async (req: Request): Promise<Response> => {
             ${baseStyles}
             <div class="container">
               <div class="header">
-                <h1 style="margin: 0; font-size: 28px;">🎉 Payment Confirmed!</h1>
+                <h1 style="margin: 0; font-size: 28px;">${emailHeading}</h1>
               </div>
               <div class="content">
                 <p>Hello ${order.customer_name},</p>
-                <p>Great news! Your payment has been confirmed and we're now packing your order.</p>
+                <p>${paymentMessage}</p>
                 <div class="order-number">Order Number: ${order.order_number}</div>
                 <span class="status-badge status-packing">Packing in Progress</span>
-                <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 12px; margin: 15px 0; border-radius: 4px;">
-                  <p style="margin: 0; font-size: 14px; color: #065f46;">
-                    <strong>Payment Status:</strong> <span style="background: #6ee7b7; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${order.payment_tracking_status || 'Fully Paid'}</span>
+                <div style="background: ${paymentBoxColor}; border-left: 4px solid ${paymentBorderColor}; padding: 12px; margin: 15px 0; border-radius: 4px;">
+                  <p style="margin: 0; font-size: 14px; color: ${paymentTextColor};">
+                    <strong>Payment Status:</strong> <span style="background: ${paymentBadgeColor}; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${paymentStatus}</span>
                   </p>
-                  <p style="margin: 8px 0 0 0; font-size: 13px; color: #065f46;">
-                    Amount Paid: <strong>R${Number(order.amount_paid || order.total_amount).toFixed(2)}</strong> / Total: <strong>R${Number(order.total_amount).toFixed(2)}</strong>
+                  <p style="margin: 8px 0 0 0; font-size: 13px; color: ${paymentTextColor};">
+                    Amount Paid: <strong>R${amountPaid.toFixed(2)}</strong> / Total: <strong>R${totalAmount.toFixed(2)}</strong>
                   </p>
+                  ${!isFullyPaid ? `
+                    <p style="margin: 8px 0 0 0; font-size: 14px; font-weight: bold; color: ${paymentTextColor};">
+                      Amount Still Owing: <strong style="font-size: 16px;">R${amountOwing.toFixed(2)}</strong>
+                    </p>
+                  ` : ''}
                 </div>
+                ${!isFullyPaid ? `
+                  <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; color: #92400e;">Payment Details</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Bank:</strong> FNB</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Account:</strong> 63173001256</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Branch Code:</strong> 250655</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>E-Wallet:</strong> 083 305 4532</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #dc2626; font-weight: bold;"><strong>Reference:</strong> ${order.order_number}</p>
+                  </div>
+                ` : ''}
                 <div class="info-box">
                   <strong>What's happening now?</strong>
                   <p style="margin: 10px 0 0 0;">Our team is carefully preparing your bales for shipment. You'll receive another update once your order has been dispatched.</p>
@@ -408,7 +463,7 @@ const handler = async (req: Request): Promise<Response> => {
               <div style="text-align: right; margin-bottom: 20px;">
                 <p style="margin: 3px 0; font-size: 12px;"><strong>Invoice Number:</strong> ${order.order_number}</p>
                 <p style="margin: 3px 0; font-size: 12px;"><strong>Date:</strong> ${orderDate}</p>
-                <p style="margin: 3px 0; font-size: 12px;"><strong>Payment Status:</strong> PAID</p>
+                <p style="margin: 3px 0; font-size: 12px;"><strong>Payment Status:</strong> ${paymentStatus.toUpperCase()}</p>
               </div>
               
               <div style="margin-bottom: 20px; clear: both;">
@@ -486,6 +541,12 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
           `;
         } else if (new_status === 'shipped') {
+          const totalAmount = Number(order.total_amount);
+          const amountPaid = Number(order.amount_paid || 0);
+          const amountOwing = totalAmount - amountPaid;
+          const paymentStatus = order.payment_tracking_status || 'Awaiting payment';
+          const isFullyPaid = paymentStatus === 'Fully Paid';
+          
           subject = `Your Order is On Its Way! ${order.order_number}`;
           htmlBody = `
             ${baseStyles}
@@ -498,11 +559,29 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>Excellent news! Your order has been shipped and is on its way to you.</p>
                 <div class="order-number">Order Number: ${order.order_number}</div>
                 <span class="status-badge status-shipped">In Transit</span>
-                <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 12px; margin: 15px 0; border-radius: 4px;">
-                  <p style="margin: 0; font-size: 14px; color: #065f46;">
-                    <strong>Payment Status:</strong> <span style="background: #6ee7b7; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${order.payment_tracking_status || 'Fully Paid'}</span>
+                <div style="background: ${isFullyPaid ? '#d1fae5' : '#fee2e2'}; border-left: 4px solid ${isFullyPaid ? '#10b981' : '#ef4444'}; padding: 12px; margin: 15px 0; border-radius: 4px;">
+                  <p style="margin: 0; font-size: 14px; color: ${isFullyPaid ? '#065f46' : '#991b1b'};">
+                    <strong>Payment Status:</strong> <span style="background: ${isFullyPaid ? '#6ee7b7' : '#fecaca'}; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${paymentStatus}</span>
                   </p>
+                  <p style="margin: 8px 0 0 0; font-size: 13px; color: ${isFullyPaid ? '#065f46' : '#991b1b'};">
+                    Amount Paid: <strong>R${amountPaid.toFixed(2)}</strong> / Total: <strong>R${totalAmount.toFixed(2)}</strong>
+                  </p>
+                  ${!isFullyPaid ? `
+                    <p style="margin: 8px 0 0 0; font-size: 14px; font-weight: bold; color: #991b1b;">
+                      Amount Still Owing: <strong style="font-size: 16px;">R${amountOwing.toFixed(2)}</strong>
+                    </p>
+                  ` : ''}
                 </div>
+                ${!isFullyPaid ? `
+                  <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; color: #92400e;">⚠️ Payment Outstanding - Please Complete</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Bank:</strong> FNB</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Account:</strong> 63173001256</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Branch Code:</strong> 250655</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>E-Wallet:</strong> 083 305 4532</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #dc2626; font-weight: bold;"><strong>Reference:</strong> ${order.order_number}</p>
+                  </div>
+                ` : ''}
                 <div class="info-box">
                   <strong>Delivery Information</strong>
                   <p style="margin: 10px 0 0 0;"><strong>Shipping To:</strong><br>
@@ -519,6 +598,12 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
           `;
         } else if (new_status === 'delivered') {
+          const totalAmount = Number(order.total_amount);
+          const amountPaid = Number(order.amount_paid || 0);
+          const amountOwing = totalAmount - amountPaid;
+          const paymentStatus = order.payment_tracking_status || 'Awaiting payment';
+          const isFullyPaid = paymentStatus === 'Fully Paid';
+          
           subject = `Order Delivered Successfully! ${order.order_number}`;
           htmlBody = `
             ${baseStyles}
@@ -531,11 +616,30 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>Your order has been successfully delivered! We hope you're satisfied with your purchase.</p>
                 <div class="order-number">Order Number: ${order.order_number}</div>
                 <span class="status-badge status-delivered">Delivered</span>
-                <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 12px; margin: 15px 0; border-radius: 4px;">
-                  <p style="margin: 0; font-size: 14px; color: #065f46;">
-                    <strong>Payment Status:</strong> <span style="background: #6ee7b7; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${order.payment_tracking_status || 'Fully Paid'}</span>
+                <div style="background: ${isFullyPaid ? '#d1fae5' : '#fee2e2'}; border-left: 4px solid ${isFullyPaid ? '#10b981' : '#ef4444'}; padding: 12px; margin: 15px 0; border-radius: 4px;">
+                  <p style="margin: 0; font-size: 14px; color: ${isFullyPaid ? '#065f46' : '#991b1b'};">
+                    <strong>Payment Status:</strong> <span style="background: ${isFullyPaid ? '#6ee7b7' : '#fecaca'}; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${paymentStatus}</span>
                   </p>
+                  <p style="margin: 8px 0 0 0; font-size: 13px; color: ${isFullyPaid ? '#065f46' : '#991b1b'};">
+                    Amount Paid: <strong>R${amountPaid.toFixed(2)}</strong> / Total: <strong>R${totalAmount.toFixed(2)}</strong>
+                  </p>
+                  ${!isFullyPaid ? `
+                    <p style="margin: 8px 0 0 0; font-size: 14px; font-weight: bold; color: #991b1b;">
+                      Amount Still Owing: <strong style="font-size: 16px;">R${amountOwing.toFixed(2)}</strong>
+                    </p>
+                  ` : ''}
                 </div>
+                ${!isFullyPaid ? `
+                  <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; color: #92400e;">⚠️ Payment Outstanding - Please Complete Immediately</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;">Your order has been delivered but payment is still outstanding. Please settle the balance as soon as possible.</p>
+                    <p style="margin: 10px 0 5px 0; font-size: 13px; color: #92400e;"><strong>Bank:</strong> FNB</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Account:</strong> 63173001256</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Branch Code:</strong> 250655</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>E-Wallet:</strong> 083 305 4532</p>
+                    <p style="margin: 5px 0; font-size: 13px; color: #dc2626; font-weight: bold;"><strong>Reference:</strong> ${order.order_number}</p>
+                  </div>
+                ` : ''}
                 <div class="info-box">
                   <strong>Thank you for choosing Khanya!</strong>
                   <p style="margin: 10px 0 0 0;">We appreciate your business. If you have any questions or concerns about your order, please don't hesitate to reach out.</p>
