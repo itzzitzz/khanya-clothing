@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, RefreshCw, Printer, Trash2 } from 'lucide-react';
+import { Loader2, RefreshCw, Printer, Trash2, Send } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +33,7 @@ const OrderManager = () => {
   const [orderToDelete, setOrderToDelete] = useState<any>(null);
   const [deletePassword, setDeletePassword] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [sendingReminder, setSendingReminder] = useState<string | null>(null);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -161,6 +162,32 @@ const OrderManager = () => {
 
   const handlePrintPackingList = (orderId: string) => {
     window.open(`/packing-list?orderId=${orderId}`, '_blank');
+  };
+
+  const handleSendPaymentReminder = async (order: any) => {
+    setSendingReminder(order.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-payment-reminder', {
+        body: {
+          order_id: order.id,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: `Payment reminder sent to ${order.customer_name} via email and SMS`,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to send payment reminder',
+        variant: 'destructive',
+      });
+    } finally {
+      setSendingReminder(null);
+    }
   };
 
   const handleDeleteClick = (order: any) => {
@@ -298,6 +325,22 @@ const OrderManager = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="text-xl font-bold">{order.order_number}</h3>
+                    {order.payment_status === 'pending' && (
+                      <Button
+                        onClick={() => handleSendPaymentReminder(order)}
+                        variant="outline"
+                        size="sm"
+                        title="Send Payment Reminder"
+                        disabled={sendingReminder === order.id}
+                        className="text-accent hover:text-accent hover:bg-accent/10"
+                      >
+                        {sendingReminder === order.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Send className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
                     <Button
                       onClick={() => handlePrintPackingList(order.id)}
                       variant="outline"
