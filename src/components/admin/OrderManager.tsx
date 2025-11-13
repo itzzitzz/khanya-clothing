@@ -427,9 +427,6 @@ const OrderManager = () => {
                     <span className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(order.order_status)}`}>
                       {order.order_status.replace(/_/g, ' ').toUpperCase()}
                     </span>
-                    <span className={`px-3 py-1 rounded text-sm font-medium ${getPaymentColor(order.payment_status)}`}>
-                      {order.payment_status.toUpperCase()}
-                    </span>
                   </div>
                   <p className="text-2xl font-bold mb-4">R{order.total_amount.toFixed(2)}</p>
                   
