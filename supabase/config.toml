@@ -57,3 +57,6 @@ verify_jwt = false
 [functions.reset-bale-metrics]
 verify_jwt = false
 
+[functions.fix-order-payment]
+verify_jwt = false
+
