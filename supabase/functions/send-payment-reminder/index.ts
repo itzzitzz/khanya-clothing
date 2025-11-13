@@ -60,8 +60,54 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending payment reminder for order: ${order.order_number}`);
 
-    const amount = Number(order.total_amount).toFixed(2);
+    const totalAmount = Number(order.total_amount);
+    const amountPaid = Number(order.amount_paid || 0);
+    const amountOwing = totalAmount - amountPaid;
+    const paymentStatus = order.payment_tracking_status || 'Awaiting payment';
+    const orderStatus = order.order_status || 'new_order';
     const reference = order.order_number;
+
+    // Dynamic status messages
+    const getOrderStatusMessage = () => {
+      switch (orderStatus) {
+        case 'new_order':
+          return 'Your order is confirmed and ready to be packed';
+        case 'packing':
+          return 'Great news! Your order is currently being packed';
+        case 'shipped':
+          return 'Exciting! Your order has been shipped and is on its way';
+        case 'delivered':
+          return 'Your order has been delivered';
+        default:
+          return 'Your order is being processed';
+      }
+    };
+
+    const getPaymentMessage = () => {
+      if (paymentStatus === 'Fully Paid') {
+        return 'Thank you! Your payment has been received in full.';
+      } else if (paymentStatus === 'Partially Paid') {
+        return `We've received R${amountPaid.toFixed(2)} of your payment. There's still R${amountOwing.toFixed(2)} outstanding.`;
+      } else {
+        return `We're waiting for your payment of R${amountOwing.toFixed(2)} to process your order.`;
+      }
+    };
+
+    const getEmailIntro = () => {
+      if (orderStatus === 'delivered') {
+        return "We hope you're enjoying your bales! However, we notice there's still an outstanding payment.";
+      } else if (orderStatus === 'shipped') {
+        return "Your bales are on their way! To ensure smooth processing, please complete the outstanding payment.";
+      } else if (orderStatus === 'packing') {
+        return "Exciting news! We're packing your bales right now. To ensure quick dispatch, please complete the payment.";
+      } else {
+        return "Great news! We've got your bales ready to pack and ship. We're just waiting for your payment to clear so we can get them on their way to you! 🚚";
+      }
+    };
+
+    const statusEmoji = orderStatus === 'delivered' ? '✅' : 
+                        orderStatus === 'shipped' ? '🚚' :
+                        orderStatus === 'packing' ? '📦' : '🎉';
 
     // Prepare email HTML
     const emailHtml = `
@@ -78,40 +124,63 @@ const handler = async (req: Request): Promise<Response> => {
               <td align="center">
                 <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                   <!-- Header -->
-                  <tr>
-                    <td style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 40px 30px; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">
-                        🎉 Your Order is Almost Ready!
-                      </h1>
-                    </td>
-                  </tr>
-                  
-                  <!-- Content -->
-                  <tr>
-                    <td style="padding: 40px 30px;">
-                      <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
-                        Hi <strong>${order.customer_name}</strong>,
-                      </p>
-                      
-                      <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
-                        Great news! We've got your bales ready to pack and ship. We're just waiting for your payment to clear so we can get them on their way to you! 🚚
-                      </p>
-                      
-                      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 8px;">
-                        <h2 style="margin: 0 0 15px 0; color: #92400e; font-size: 20px; font-weight: bold;">
-                          Payment Details
-                        </h2>
-                        <table width="100%" cellpadding="8" cellspacing="0">
-                          <tr>
-                            <td style="color: #92400e; font-weight: 600; padding: 8px 0;">Order Number:</td>
-                            <td style="color: #92400e; font-weight: bold; padding: 8px 0;">${reference}</td>
-                          </tr>
-                          <tr>
-                            <td style="color: #92400e; font-weight: 600; padding: 8px 0;">Amount Due:</td>
-                            <td style="color: #92400e; font-weight: bold; font-size: 18px; padding: 8px 0;">R ${amount}</td>
-                          </tr>
-                        </table>
-                      </div>
+                   <tr>
+                     <td style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 40px 30px; text-align: center;">
+                       <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">
+                         ${statusEmoji} Payment Reminder - Order ${reference}
+                       </h1>
+                     </td>
+                   </tr>
+                   
+                   <!-- Content -->
+                   <tr>
+                     <td style="padding: 40px 30px;">
+                       <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                         Hi <strong>${order.customer_name}</strong>,
+                       </p>
+                       
+                       <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                         ${getEmailIntro()}
+                       </p>
+
+                       <!-- Order Status -->
+                       <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 30px 0; border-radius: 8px;">
+                         <h2 style="margin: 0 0 10px 0; color: #1e40af; font-size: 18px; font-weight: bold;">
+                           📋 Current Order Status
+                         </h2>
+                         <p style="margin: 0; color: #1e40af; font-size: 16px; font-weight: 600;">
+                           ${getOrderStatusMessage()}
+                         </p>
+                       </div>
+                       
+                       <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 8px;">
+                         <h2 style="margin: 0 0 15px 0; color: #92400e; font-size: 20px; font-weight: bold;">
+                           💰 Payment Status
+                         </h2>
+                         <p style="margin: 0 0 15px 0; color: #92400e; font-size: 15px;">
+                           ${getPaymentMessage()}
+                         </p>
+                         <table width="100%" cellpadding="8" cellspacing="0">
+                           <tr>
+                             <td style="color: #92400e; font-weight: 600; padding: 8px 0;">Order Number:</td>
+                             <td style="color: #92400e; font-weight: bold; padding: 8px 0;">${reference}</td>
+                           </tr>
+                           ${amountPaid > 0 ? `
+                           <tr>
+                             <td style="color: #92400e; font-weight: 600; padding: 8px 0;">Amount Paid:</td>
+                             <td style="color: #16a34a; font-weight: bold; padding: 8px 0;">R ${amountPaid.toFixed(2)}</td>
+                           </tr>
+                           ` : ''}
+                           <tr>
+                             <td style="color: #92400e; font-weight: 600; padding: 8px 0;">Amount ${amountPaid > 0 ? 'Still ' : ''}Owing:</td>
+                             <td style="color: #dc2626; font-weight: bold; font-size: 18px; padding: 8px 0;">R ${amountOwing.toFixed(2)}</td>
+                           </tr>
+                           <tr>
+                             <td style="color: #92400e; font-weight: 600; padding: 8px 0;">Total Amount:</td>
+                             <td style="color: #92400e; font-weight: bold; padding: 8px 0;">R ${totalAmount.toFixed(2)}</td>
+                           </tr>
+                         </table>
+                       </div>
                       
                       <h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 18px; font-weight: bold;">
                         💳 Payment Options:
@@ -200,10 +269,18 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     // Send email
+    const emailSubject = orderStatus === 'delivered' 
+      ? `Payment Outstanding - Order ${reference}`
+      : orderStatus === 'shipped'
+      ? `Payment Reminder - Order ${reference} Shipped! 🚚`
+      : orderStatus === 'packing'
+      ? `Payment Reminder - Order ${reference} Being Packed! 📦`
+      : `Payment Reminder - Order ${reference} Ready to Ship! 🎉`;
+
     const emailResponse = await resend.emails.send({
       from: "Khanya <noreply@mail.khanya.store>",
       to: [order.customer_email],
-      subject: `Payment Reminder - Order ${reference} Ready to Ship! 🎉`,
+      subject: emailSubject,
       html: emailHtml,
     });
 
@@ -214,8 +291,20 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Email failed: ${emailResponse.error.message}`);
     }
 
-    // Send SMS
-    const smsBody = `Hi ${order.customer_name}! Your bales are ready to ship! 🎉 Please complete payment of R${amount} for order ${reference}. EFT: FNB 63173001256 (Ref: ${reference}) OR FNB E-Wallet: 083 305 4532 (Ref: ${reference}). FREE delivery once paid! - Khanya Clothing`;
+    // Send SMS with dynamic message
+    const getSmsMessage = () => {
+      const statusText = orderStatus === 'delivered' ? 'delivered' :
+                         orderStatus === 'shipped' ? 'shipped' :
+                         orderStatus === 'packing' ? 'being packed' : 'ready';
+      
+      const paymentText = amountPaid > 0 
+        ? `R${amountPaid.toFixed(2)} received. Still owing: R${amountOwing.toFixed(2)}`
+        : `Payment needed: R${amountOwing.toFixed(2)}`;
+      
+      return `Hi ${order.customer_name}! Order ${reference} is ${statusText}. ${paymentText}. ${statusEmoji} Pay: FNB 63173001256 OR E-Wallet 083 305 4532 (Ref: ${reference}) - Khanya`;
+    };
+
+    const smsBody = getSmsMessage();
 
     const toPhone = normalizeZaPhone(order.customer_phone);
     let smsData: any = null;

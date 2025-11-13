@@ -370,7 +370,7 @@ const OrderManager = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="text-xl font-bold">{order.order_number}</h3>
-                    {order.payment_status === 'pending' && (
+                    {order.payment_tracking_status !== 'Fully Paid' && (
                       <Button
                         onClick={() => handleSendPaymentReminder(order)}
                         variant="outline"
