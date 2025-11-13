@@ -154,6 +154,15 @@ const handler = async (req: Request): Promise<Response> => {
               <p style="line-height: 1.6; color: #1f2e27;">Thank you for your order! We've received your order and will begin processing it once payment is confirmed.</p>
               <div style="font-size: 18px; font-weight: bold; color: #D6A220; margin: 10px 0;">Order Number: ${orderNumber}</div>
               
+              <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 15px 0; border-radius: 4px;">
+                <p style="margin: 0; font-size: 14px; color: #92400e;">
+                  <strong>Payment Status:</strong> <span style="background: #fde68a; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Awaiting payment</span>
+                </p>
+                <p style="margin: 8px 0 0 0; font-size: 13px; color: #92400e;">
+                  Amount Due: <strong>R${totalAmount.toFixed(2)}</strong>
+                </p>
+              </div>
+              
               <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
                 <thead>
                   <tr>

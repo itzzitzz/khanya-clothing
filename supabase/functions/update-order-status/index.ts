@@ -331,6 +331,14 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>Hello ${order.customer_name},</p>
                 <p>Thank you for your order! We've received your order and will begin processing it once payment is confirmed.</p>
                 <div class="order-number">Order Number: ${order.order_number}</div>
+                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 15px 0; border-radius: 4px;">
+                  <p style="margin: 0; font-size: 14px; color: #92400e;">
+                    <strong>Payment Status:</strong> <span style="background: #fde68a; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${order.payment_tracking_status || 'Awaiting payment'}</span>
+                  </p>
+                  <p style="margin: 8px 0 0 0; font-size: 13px; color: #92400e;">
+                    Amount Paid: <strong>R${Number(order.amount_paid || 0).toFixed(2)}</strong> / Total: <strong>R${Number(order.total_amount).toFixed(2)}</strong>
+                  </p>
+                </div>
                 <div class="info-box">
                   <strong>What happens next?</strong>
                   <p style="margin: 10px 0 0 0;">Once we confirm your payment, we'll start preparing your bales for shipment. You'll receive an email update at each step of the process.</p>
@@ -366,6 +374,14 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>Great news! Your payment has been confirmed and we're now packing your order.</p>
                 <div class="order-number">Order Number: ${order.order_number}</div>
                 <span class="status-badge status-packing">Packing in Progress</span>
+                <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 12px; margin: 15px 0; border-radius: 4px;">
+                  <p style="margin: 0; font-size: 14px; color: #065f46;">
+                    <strong>Payment Status:</strong> <span style="background: #6ee7b7; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${order.payment_tracking_status || 'Fully Paid'}</span>
+                  </p>
+                  <p style="margin: 8px 0 0 0; font-size: 13px; color: #065f46;">
+                    Amount Paid: <strong>R${Number(order.amount_paid || order.total_amount).toFixed(2)}</strong> / Total: <strong>R${Number(order.total_amount).toFixed(2)}</strong>
+                  </p>
+                </div>
                 <div class="info-box">
                   <strong>What's happening now?</strong>
                   <p style="margin: 10px 0 0 0;">Our team is carefully preparing your bales for shipment. You'll receive another update once your order has been dispatched.</p>
@@ -482,6 +498,11 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>Excellent news! Your order has been shipped and is on its way to you.</p>
                 <div class="order-number">Order Number: ${order.order_number}</div>
                 <span class="status-badge status-shipped">In Transit</span>
+                <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 12px; margin: 15px 0; border-radius: 4px;">
+                  <p style="margin: 0; font-size: 14px; color: #065f46;">
+                    <strong>Payment Status:</strong> <span style="background: #6ee7b7; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${order.payment_tracking_status || 'Fully Paid'}</span>
+                  </p>
+                </div>
                 <div class="info-box">
                   <strong>Delivery Information</strong>
                   <p style="margin: 10px 0 0 0;"><strong>Shipping To:</strong><br>
@@ -510,6 +531,11 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>Your order has been successfully delivered! We hope you're satisfied with your purchase.</p>
                 <div class="order-number">Order Number: ${order.order_number}</div>
                 <span class="status-badge status-delivered">Delivered</span>
+                <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 12px; margin: 15px 0; border-radius: 4px;">
+                  <p style="margin: 0; font-size: 14px; color: #065f46;">
+                    <strong>Payment Status:</strong> <span style="background: #6ee7b7; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${order.payment_tracking_status || 'Fully Paid'}</span>
+                  </p>
+                </div>
                 <div class="info-box">
                   <strong>Thank you for choosing Khanya!</strong>
                   <p style="margin: 10px 0 0 0;">We appreciate your business. If you have any questions or concerns about your order, please don't hesitate to reach out.</p>

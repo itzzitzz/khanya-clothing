@@ -34,6 +34,7 @@ const OrderManager = () => {
   const [deletePassword, setDeletePassword] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [sendingReminder, setSendingReminder] = useState<string | null>(null);
+  const [updatingPayment, setUpdatingPayment] = useState<string | null>(null);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -158,6 +159,50 @@ const OrderManager = () => {
       failed: 'bg-red-100 text-red-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getPaymentTrackingColor = (status: string) => {
+    const colors: Record<string, string> = {
+      'Awaiting payment': 'bg-yellow-100 text-yellow-800',
+      'Partially Paid': 'bg-blue-100 text-blue-800',
+      'Fully Paid': 'bg-green-100 text-green-800',
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const handlePaymentUpdate = async (orderId: string, paymentStatus: string, amountPaid?: number) => {
+    setUpdatingPayment(orderId);
+    try {
+      const updateData: any = {
+        payment_tracking_status: paymentStatus,
+      };
+
+      if (amountPaid !== undefined) {
+        updateData.amount_paid = amountPaid;
+      }
+
+      const { error } = await supabase
+        .from('orders')
+        .update(updateData)
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Payment status updated',
+      });
+
+      await fetchOrders();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingPayment(null);
+    }
   };
 
   const handlePrintPackingList = (orderId: string) => {
@@ -407,6 +452,46 @@ const OrderManager = () => {
                     </Select>
                     {updating === order.id && (
                       <p className="text-sm text-muted-foreground">Updating...</p>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2 mt-4 pt-4 border-t">
+                    <label className="text-sm font-medium">Payment Tracking:</label>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`px-3 py-1 rounded text-sm font-medium ${getPaymentTrackingColor(order.payment_tracking_status)}`}>
+                        {order.payment_tracking_status}
+                      </span>
+                      <span className="text-sm font-semibold">
+                        R{Number(order.amount_paid || 0).toFixed(2)} / R{Number(order.total_amount).toFixed(2)}
+                      </span>
+                    </div>
+                    <Select
+                      value={order.payment_tracking_status}
+                      onValueChange={(value) => {
+                        if (value === 'Fully Paid') {
+                          handlePaymentUpdate(order.id, value, order.total_amount);
+                        } else if (value === 'Partially Paid') {
+                          const amount = prompt(`Enter amount paid (Total: R${order.total_amount}):`, order.amount_paid || '0');
+                          if (amount !== null) {
+                            handlePaymentUpdate(order.id, value, parseFloat(amount));
+                          }
+                        } else {
+                          handlePaymentUpdate(order.id, value, 0);
+                        }
+                      }}
+                      disabled={updatingPayment === order.id}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Awaiting payment">Awaiting payment</SelectItem>
+                        <SelectItem value="Partially Paid">Partially Paid</SelectItem>
+                        <SelectItem value="Fully Paid">Fully Paid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {updatingPayment === order.id && (
+                      <p className="text-sm text-muted-foreground">Updating payment...</p>
                     )}
                   </div>
                 </div>

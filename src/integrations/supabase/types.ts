@@ -261,6 +261,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          amount_paid: number
           created_at: string
           customer_email: string
           customer_name: string
@@ -274,10 +275,12 @@ export type Database = {
           order_status: string
           payment_method: string
           payment_status: string
+          payment_tracking_status: string
           total_amount: number
           updated_at: string
         }
         Insert: {
+          amount_paid?: number
           created_at?: string
           customer_email: string
           customer_name: string
@@ -291,10 +294,12 @@ export type Database = {
           order_status?: string
           payment_method: string
           payment_status?: string
+          payment_tracking_status?: string
           total_amount: number
           updated_at?: string
         }
         Update: {
+          amount_paid?: number
           created_at?: string
           customer_email?: string
           customer_name?: string
@@ -308,6 +313,7 @@ export type Database = {
           order_status?: string
           payment_method?: string
           payment_status?: string
+          payment_tracking_status?: string
           total_amount?: number
           updated_at?: string
         }
