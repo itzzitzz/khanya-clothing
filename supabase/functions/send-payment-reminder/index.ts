@@ -187,13 +187,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "Khanya Clothing Bales <onboarding@resend.dev>",
+      from: "Khanya Clothing Bales <sales@khanya.store>",
       to: [order.customer_email],
       subject: `Payment Reminder - Order ${reference} Ready to Ship! 🎉`,
       html: emailHtml,
     });
 
     console.log("Payment reminder email sent:", emailResponse);
+    
+    if (emailResponse.error) {
+      console.error("Email sending failed:", emailResponse.error);
+      throw new Error(`Email failed: ${emailResponse.error.message}`);
+    }
 
     // Send SMS
     const smsBody = `Hi ${order.customer_name}! Your bales are ready to ship! 🎉 Please complete payment of R${amount} for order ${reference}. EFT: FNB 62XXXXXXXXXX (Ref: ${reference}) OR FNB E-Wallet: 083 305 4532 (Ref: ${reference}). FREE delivery once paid! - Khanya Clothing`;
@@ -217,8 +222,10 @@ const handler = async (req: Request): Promise<Response> => {
     if (!smsResponse.ok) {
       const smsError = await smsResponse.text();
       console.error("SMS sending failed:", smsError);
+      throw new Error(`SMS failed: ${smsError}`);
     } else {
-      console.log("Payment reminder SMS sent successfully");
+      const smsData = await smsResponse.json();
+      console.log("Payment reminder SMS sent successfully:", smsData);
     }
 
     return new Response(
