@@ -16,6 +16,20 @@ interface PaymentReminderRequest {
   order_id: string;
 }
 
+// Normalize South African phone numbers to E.164 (+27...)
+function normalizeZaPhone(phone: string): string {
+  const raw = String(phone || '').trim().replace(/[^0-9+]/g, '');
+  if (!raw) return raw;
+  if (raw.startsWith('+')) return raw; // assume already E.164
+  if (raw.startsWith('27')) return `+${raw}`;
+  if (raw.startsWith('0')) return `+27${raw.slice(1)}`;
+  // If 9-10 digits without prefix, assume ZA national number
+  if (/^\d{9,10}$/.test(raw)) {
+    return `+27${raw.replace(/^0/, '')}`;
+  }
+  return raw;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -203,6 +217,9 @@ const handler = async (req: Request): Promise<Response> => {
     // Send SMS
     const smsBody = `Hi ${order.customer_name}! Your bales are ready to ship! 🎉 Please complete payment of R${amount} for order ${reference}. EFT: FNB 63173001256 (Ref: ${reference}) OR FNB E-Wallet: 083 305 4532 (Ref: ${reference}). FREE delivery once paid! - Khanya Clothing`;
 
+    const toPhone = normalizeZaPhone(order.customer_phone);
+    let smsData: any = null;
+
     const smsResponse = await fetch(
       `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
       {
@@ -212,7 +229,7 @@ const handler = async (req: Request): Promise<Response> => {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
-          To: order.customer_phone,
+          To: toPhone,
           From: twilioPhoneNumber!,
           Body: smsBody,
         }),
@@ -224,7 +241,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("SMS sending failed:", smsError);
       throw new Error(`SMS failed: ${smsError}`);
     } else {
-      const smsData = await smsResponse.json();
+      smsData = await smsResponse.json();
       console.log("Payment reminder SMS sent successfully:", smsData);
     }
 
@@ -233,7 +250,10 @@ const handler = async (req: Request): Promise<Response> => {
         success: true, 
         message: "Payment reminder sent successfully",
         email_sent: !!emailResponse,
-        sms_sent: smsResponse.ok
+        sms_sent: smsResponse.ok,
+        sms_sid: smsData?.sid,
+        sms_status: smsData?.status,
+        to_phone: toPhone
       }),
       {
         status: 200,
