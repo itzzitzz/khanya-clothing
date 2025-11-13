@@ -118,7 +118,7 @@ const handler = async (req: Request): Promise<Response> => {
                           </tr>
                           <tr>
                             <td style="color: #4b5563; font-weight: 600;">Account Number:</td>
-                            <td style="color: #1f2937; font-weight: 500;">62XXXXXXXXXX</td>
+                            <td style="color: #1f2937; font-weight: 500;">63173001256</td>
                           </tr>
                           <tr>
                             <td style="color: #4b5563; font-weight: 600;">Branch Code:</td>
@@ -201,7 +201,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Send SMS
-    const smsBody = `Hi ${order.customer_name}! Your bales are ready to ship! 🎉 Please complete payment of R${amount} for order ${reference}. EFT: FNB 62XXXXXXXXXX (Ref: ${reference}) OR FNB E-Wallet: 083 305 4532 (Ref: ${reference}). FREE delivery once paid! - Khanya Clothing`;
+    const smsBody = `Hi ${order.customer_name}! Your bales are ready to ship! 🎉 Please complete payment of R${amount} for order ${reference}. EFT: FNB 63173001256 (Ref: ${reference}) OR FNB E-Wallet: 083 305 4532 (Ref: ${reference}). FREE delivery once paid! - Khanya Clothing`;
 
     const smsResponse = await fetch(
       `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
