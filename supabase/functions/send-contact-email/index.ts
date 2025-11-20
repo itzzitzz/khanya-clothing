@@ -10,9 +10,7 @@ interface ContactFormData {
   name: string;
   phone: string;
   email: string;
-  bales: string;
-  method: string; // 'delivery' | 'collect'
-  address?: string;
+  note: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -22,7 +20,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, phone, email, bales, method, address }: ContactFormData = await req.json();
+    const { name, phone, email, note }: ContactFormData = await req.json();
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (!resendApiKey) {
@@ -36,8 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
 Name: ${name}
 Phone: ${phone}
 Email: ${email}
-Number of bales: ${bales}
-Delivery or collect: ${method}${method === "delivery" ? `\nDelivery address: ${address ?? ""}` : ""}
+Message: ${note}
 
 ---
 This enquiry was submitted via the Khanya website contact form.
@@ -47,12 +44,10 @@ This enquiry was submitted via the Khanya website contact form.
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #222;">
         <h2 style="margin: 0 0 12px;">New Khanya website enquiry</h2>
         <table cellpadding="6" cellspacing="0" style="border-collapse: collapse;">
-          <tr><td><strong>Name</strong></td><td>${name}</td></tr>
-          <tr><td><strong>Phone</strong></td><td>${phone}</td></tr>
-          <tr><td><strong>Email</strong></td><td>${email}</td></tr>
-          <tr><td><strong>Number of bales</strong></td><td>${bales}</td></tr>
-          <tr><td><strong>Method</strong></td><td>${method}</td></tr>
-          ${method === "delivery" ? `<tr><td><strong>Delivery address</strong></td><td>${address ?? ""}</td></tr>` : ""}
+          <tr><td style="vertical-align: top;"><strong>Name</strong></td><td>${name}</td></tr>
+          <tr><td style="vertical-align: top;"><strong>Phone</strong></td><td>${phone}</td></tr>
+          <tr><td style="vertical-align: top;"><strong>Email</strong></td><td>${email}</td></tr>
+          <tr><td style="vertical-align: top;"><strong>Message</strong></td><td style="white-space: pre-wrap;">${note}</td></tr>
         </table>
         <p style="margin-top:16px; font-size: 13px; color: #666;">This enquiry was submitted via the Khanya website contact form.</p>
       </div>
