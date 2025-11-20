@@ -672,6 +672,63 @@ const handler = async (req: Request): Promise<Response> => {
         });
         
         console.log(`Status update email sent successfully to ${order.customer_email} for status: ${new_status}`);
+        
+        // Send SMS notification
+        try {
+          const twilioAccountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
+          const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");
+          const twilioPhoneNumber = Deno.env.get("TWILIO_PHONE_NUMBER");
+          
+          if (twilioAccountSid && twilioAuthToken && twilioPhoneNumber) {
+            const statusLabel = STATUS_LABELS[new_status] || new_status;
+            const paymentStatus = order.payment_tracking_status || 'Awaiting payment';
+            
+            // Create friendly SMS message based on status
+            let smsMessage = '';
+            
+            if (new_status === 'new_order') {
+              smsMessage = `🎉 Order ${order.order_number} confirmed!\n\nPayment: ${paymentStatus}\nStatus: Order Received\n\nWe'll start preparing your bales once payment is confirmed. Thanks for choosing Khanya! 🌟`;
+            } else if (new_status === 'packing') {
+              smsMessage = `📦 Great news! Order ${order.order_number} is being packed.\n\nPayment: ${paymentStatus}\nStatus: Packing\n\nYour bales will be shipped soon. We'll keep you updated! 🚀`;
+            } else if (new_status === 'shipped') {
+              smsMessage = `🚚 Your order is on the way! Order ${order.order_number}\n\nPayment: ${paymentStatus}\nStatus: In Transit\n\nExpected delivery: 3-5 business days. Exciting times ahead! 🎁`;
+            } else if (new_status === 'delivered') {
+              if (paymentStatus === 'Fully Paid') {
+                smsMessage = `✅ Order ${order.order_number} delivered!\n\nPayment: ${paymentStatus}\nStatus: Delivered\n\nThank you for your business! We hope you love your new stock. Come back soon! 💚`;
+              } else {
+                smsMessage = `📍 Order ${order.order_number} delivered!\n\nPayment: ${paymentStatus}\nStatus: Delivered\n\n⚠️ Please complete payment. EFT: FNB 63173001256 | E-Wallet: 083 305 4532 | Ref: ${order.order_number}`;
+              }
+            }
+            
+            const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
+            const twilioAuth = btoa(`${twilioAccountSid}:${twilioAuthToken}`);
+            
+            const smsBody = new URLSearchParams({
+              To: order.customer_phone,
+              From: twilioPhoneNumber,
+              Body: smsMessage
+            });
+            
+            const smsResponse = await fetch(twilioUrl, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Basic ${twilioAuth}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: smsBody.toString(),
+            });
+            
+            if (smsResponse.ok) {
+              console.log(`SMS notification sent successfully to ${order.customer_phone} for status: ${new_status}`);
+            } else {
+              const errorText = await smsResponse.text();
+              console.error('Twilio SMS error:', errorText);
+            }
+          }
+        } catch (smsError) {
+          console.error("Failed to send SMS notification:", smsError);
+          // Don't fail the status update if SMS fails
+        }
       } catch (emailError) {
         console.error("Failed to send status update email:", emailError);
         // Don't fail the status update if email fails
