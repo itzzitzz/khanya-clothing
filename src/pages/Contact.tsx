@@ -12,21 +12,18 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const { toast } = useToast();
-  const [method, setMethod] = useState<"delivery" | "collect">("delivery");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const formElement = e.currentTarget; // Store reference before async operation
+    const formElement = e.currentTarget;
     const form = new FormData(formElement);
     const name = String(form.get("name") || "");
     const phone = String(form.get("phone") || "");
     const email = String(form.get("email") || "");
-    const bales = String(form.get("bales") || "");
-    const fulfilment = String(form.get("method") || "");
-    const address = String(form.get("address") || "");
+    const note = String(form.get("note") || "");
 
     try {
       toast({
@@ -39,13 +36,10 @@ const Contact = () => {
           name,
           phone,
           email,
-          bales,
-          method: fulfilment,
-          address: fulfilment === "delivery" ? address : undefined,
+          note,
         },
       });
 
-      // Check for error in response body (handles non-2xx responses)
       if (error) {
         throw new Error(error.message || 'Failed to send email');
       }
@@ -63,9 +57,7 @@ const Contact = () => {
         description: "We'll get back to you as soon as possible.",
       });
 
-      // Reset form
       formElement.reset();
-      setMethod("delivery");
 
     } catch (error: any) {
       console.error('Error sending enquiry:', error);
@@ -123,36 +115,10 @@ const Contact = () => {
                   <Input id="email" name="email" type="email" required placeholder="you@example.com" />
                 </div>
               </div>
-              <div className="grid gap-2 md:grid-cols-2">
-                <div className="grid gap-2">
-                  <Label htmlFor="bales">Number of bales</Label>
-                  <Input id="bales" name="bales" type="number" min={1} step={1} required placeholder="e.g. 3" />
-                </div>
-                <div className="grid gap-2">
-                  <Label>Delivery or collect</Label>
-                  <RadioGroup
-                    name="method"
-                    value={method}
-                    onValueChange={(v) => setMethod(v as any)}
-                    className="flex items-center gap-6"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="delivery" id="delivery" />
-                      <Label htmlFor="delivery">Delivery</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="collect" id="collect" />
-                      <Label htmlFor="collect">Collect</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
+              <div className="grid gap-2">
+                <Label htmlFor="note">Your Message</Label>
+                <Textarea id="note" name="note" required placeholder="Tell us about your requirements, questions, or any other details..." rows={6} />
               </div>
-              {method === "delivery" && (
-                <div className="grid gap-2">
-                  <Label htmlFor="address">Delivery address</Label>
-                  <Textarea id="address" name="address" required placeholder="Street, suburb, city" />
-                </div>
-              )}
 
               <div className="pt-2">
                 <Button type="submit" variant="sun" disabled={isSubmitting}>
