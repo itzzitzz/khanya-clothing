@@ -431,28 +431,6 @@ const OrderManager = () => {
                   <p className="text-2xl font-bold mb-4">R{order.total_amount.toFixed(2)}</p>
                   
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Update Status:</label>
-                    <Select
-                      value={order.order_status}
-                      onValueChange={(value) => handleStatusUpdate(order.id, value)}
-                      disabled={updating === order.id}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="new_order">New Order</SelectItem>
-                        <SelectItem value="packing">Packing</SelectItem>
-                        <SelectItem value="shipped">Shipped</SelectItem>
-                        <SelectItem value="delivered">Delivered</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {updating === order.id && (
-                      <p className="text-sm text-muted-foreground">Updating...</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2 mt-4 pt-4 border-t">
                     <label className="text-sm font-medium">Payment Tracking:</label>
                     <div className="flex items-center gap-2 mb-2">
                       <span className={`px-3 py-1 rounded text-sm font-medium ${getPaymentTrackingColor(order.payment_tracking_status)}`}>
@@ -489,6 +467,28 @@ const OrderManager = () => {
                     </Select>
                     {updatingPayment === order.id && (
                       <p className="text-sm text-muted-foreground">Updating payment...</p>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2 mt-4 pt-4 border-t">
+                    <label className="text-sm font-medium">Update Status:</label>
+                    <Select
+                      value={order.order_status}
+                      onValueChange={(value) => handleStatusUpdate(order.id, value)}
+                      disabled={updating === order.id}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="new_order">New Order</SelectItem>
+                        <SelectItem value="packing">Packing</SelectItem>
+                        <SelectItem value="shipped">Shipped</SelectItem>
+                        <SelectItem value="delivered">Delivered</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {updating === order.id && (
+                      <p className="text-sm text-muted-foreground">Updating...</p>
                     )}
                   </div>
                 </div>
