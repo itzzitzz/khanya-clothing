@@ -134,7 +134,7 @@ const handler = async (req: Request): Promise<Response> => {
         messageLength: message.length
       });
 
-      // Use WinSMS JSON API
+      // Use WinSMS JSON API with correct endpoint and header format
       const requestBody = {
         message: message,
         recipients: [
@@ -144,11 +144,12 @@ const handler = async (req: Request): Promise<Response> => {
         ]
       };
 
-      const response = await fetch("https://api.winsms.co.za/api/v1/sms/outgoing/send", {
+      const response = await fetch("https://api.winsms.co.za/api/rest/v1/sms/outgoing/send", {
         method: "POST",
         headers: {
+          "Accept": "application/json",
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${winsmsApiKey}`
+          "AUTHORIZATION": winsmsApiKey
         },
         body: JSON.stringify(requestBody)
       });
