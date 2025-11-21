@@ -316,27 +316,35 @@ const handler = async (req: Request): Promise<Response> => {
     let smsError = null;
 
     try {
-      const smsResponse = await fetch(
-        `https://api.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
-          user: winsmsUsername!,
-          password: winsmsApiKey!,
-          message: smsBody,
-          numbers: toPhone.replace(/[\s\-\+\(\)]/g, ''),
-        }),
-        {
-          method: "GET",
-        }
-      );
+      const formattedPhone = toPhone.replace(/[\s\-\+\(\)]/g, '');
+      
+      const requestBody = {
+        message: smsBody,
+        recipients: [
+          {
+            mobileNumber: formattedPhone
+          }
+        ]
+      };
 
-      const smsResponseText = await smsResponse.text();
+      const smsResponse = await fetch("https://api.winsms.co.za/api/v1/sms/outgoing/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${winsmsApiKey}`
+        },
+        body: JSON.stringify(requestBody)
+      });
 
-      if (!smsResponse.ok || smsResponseText.startsWith('FAIL&')) {
-        smsError = smsResponseText;
-        console.warn("SMS sending failed (non-critical):", smsResponseText);
+      const smsResponseData = await smsResponse.json();
+
+      if (!smsResponse.ok) {
+        smsError = JSON.stringify(smsResponseData);
+        console.warn("SMS sending failed (non-critical):", smsResponseData);
       } else {
-        smsData = { response: smsResponseText };
+        smsData = smsResponseData;
         smsSent = true;
-        console.log("Payment reminder SMS sent successfully via WinSMS:", smsResponseText);
+        console.log("Payment reminder SMS sent successfully via WinSMS:", smsResponseData);
       }
     } catch (smsErr: any) {
       smsError = smsErr.message;
