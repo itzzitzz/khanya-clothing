@@ -373,11 +373,12 @@ const handler = async (req: Request): Promise<Response> => {
           ]
         };
 
-        const smsResponse = await fetch("https://api.winsms.co.za/api/v1/sms/outgoing/send", {
+        const smsResponse = await fetch("https://api.winsms.co.za/api/rest/v1/sms/outgoing/send", {
           method: "POST",
           headers: {
+            "Accept": "application/json",
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${winsmsApiKey}`
+            "AUTHORIZATION": winsmsApiKey
           },
           body: JSON.stringify(requestBody)
         });
