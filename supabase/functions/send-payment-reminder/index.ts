@@ -3,9 +3,8 @@ import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-const twilioAccountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
-const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");
-const twilioPhoneNumber = Deno.env.get("TWILIO_PHONE_NUMBER");
+const winsmsApiKey = Deno.env.get("WINSMS_API_KEY");
+const winsmsUsername = Deno.env.get("WINSMS_USERNAME");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -318,30 +317,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     try {
       const smsResponse = await fetch(
-        `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
+        `https://www.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
+          user: winsmsUsername!,
+          password: winsmsApiKey!,
+          message: smsBody,
+          numbers: toPhone,
+        }),
         {
-          method: "POST",
-          headers: {
-            "Authorization": "Basic " + btoa(`${twilioAccountSid}:${twilioAuthToken}`),
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            To: toPhone,
-            From: twilioPhoneNumber!,
-            Body: smsBody,
-          }),
+          method: "GET",
         }
       );
 
-      if (!smsResponse.ok) {
-        const errorText = await smsResponse.text();
-        smsError = errorText;
-        console.warn("SMS sending failed (non-critical):", errorText);
-        console.warn("Note: If using Twilio trial account, verify the phone number at twilio.com/user/account/phone-numbers/verified");
+      const smsResponseText = await smsResponse.text();
+
+      if (!smsResponse.ok || !smsResponseText.includes('OK')) {
+        smsError = smsResponseText;
+        console.warn("SMS sending failed (non-critical):", smsResponseText);
       } else {
-        smsData = await smsResponse.json();
+        smsData = { response: smsResponseText };
         smsSent = true;
-        console.log("Payment reminder SMS sent successfully:", smsData);
+        console.log("Payment reminder SMS sent successfully via WinSMS:", smsResponseText);
       }
     } catch (smsErr: any) {
       smsError = smsErr.message;

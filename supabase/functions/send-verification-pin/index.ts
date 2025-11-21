@@ -99,40 +99,35 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("PIN sent to email:", email);
     } else {
       // Send SMS verification via Twilio
-      const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
-      const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
-      const twilioPhone = Deno.env.get("TWILIO_PHONE_NUMBER");
+      const winsmsApiKey = Deno.env.get("WINSMS_API_KEY");
+      const winsmsUsername = Deno.env.get("WINSMS_USERNAME");
 
-      if (!accountSid || !authToken || !twilioPhone) {
-        throw new Error("Missing Twilio credentials");
+      if (!winsmsApiKey || !winsmsUsername) {
+        throw new Error("Missing WinSMS credentials");
       }
 
       const message = `Your Khanya verification code is: ${pinCode}. This code expires in 10 minutes.`;
 
       const response = await fetch(
-        `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+        `https://www.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
+          user: winsmsUsername,
+          password: winsmsApiKey,
+          message: message,
+          numbers: phone!,
+        }),
         {
-          method: "POST",
-          headers: {
-            "Authorization": `Basic ${btoa(`${accountSid}:${authToken}`)}`,
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            To: phone!,
-            From: twilioPhone,
-            Body: message,
-          }),
+          method: "GET",
         }
       );
 
-      if (!response.ok) {
-        const error = await response.text();
-        console.error("Twilio error:", error);
-        throw new Error(`Failed to send SMS: ${error}`);
+      const responseText = await response.text();
+
+      if (!response.ok || !responseText.includes('OK')) {
+        console.error("WinSMS error:", responseText);
+        throw new Error(`Failed to send SMS: ${responseText}`);
       }
 
-      const smsResponse = await response.json();
-      console.log("SMS sent successfully:", smsResponse);
+      console.log("SMS sent successfully via WinSMS:", responseText);
       console.log("PIN sent to phone:", phone);
     }
 
