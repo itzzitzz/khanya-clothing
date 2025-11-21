@@ -365,11 +365,11 @@ const handler = async (req: Request): Promise<Response> => {
         const smsMessage = `🎉 NEW ORDER!\n\nOrder: ${orderNumber}\nCustomer: ${orderData.customer_name}\nTotal: R${totalAmount.toFixed(2)}\nItems: ${orderData.items.map(i => `${i.quantity}x ${i.product_name}`).join(', ')}\nPayment: ${orderData.payment_method.toUpperCase()}`;
 
         const smsResponse = await fetch(
-          `https://www.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
+          `https://api.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
             user: winsmsUsername,
             password: winsmsApiKey,
             message: smsMessage,
-            numbers: "+27828521112",
+            numbers: "27828521112",
           }),
           {
             method: "GET",
@@ -378,7 +378,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         const smsResponseText = await smsResponse.text();
 
-        if (smsResponse.ok && smsResponseText.includes('OK')) {
+        if (smsResponse.ok && !smsResponseText.startsWith('FAIL&')) {
           console.log("SMS notification sent to sales team via WinSMS");
         } else {
           console.error("Failed to send SMS notification via WinSMS:", smsResponseText);
