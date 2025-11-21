@@ -700,29 +700,27 @@ const handler = async (req: Request): Promise<Response> => {
               }
             }
             
-            const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
-            const twilioAuth = btoa(`${twilioAccountSid}:${twilioAuthToken}`);
+            const winsmsApiKey = Deno.env.get("WINSMS_API_KEY");
+            const winsmsUsername = Deno.env.get("WINSMS_USERNAME");
             
-            const smsBody = new URLSearchParams({
-              To: order.customer_phone,
-              From: twilioPhoneNumber,
-              Body: smsMessage
-            });
+            const smsResponse = await fetch(
+              `https://www.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
+                user: winsmsUsername!,
+                password: winsmsApiKey!,
+                message: smsMessage,
+                numbers: order.customer_phone,
+              }),
+              {
+                method: "GET",
+              }
+            );
             
-            const smsResponse = await fetch(twilioUrl, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Basic ${twilioAuth}`,
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-              body: smsBody.toString(),
-            });
+            const smsResponseText = await smsResponse.text();
             
-            if (smsResponse.ok) {
-              console.log(`SMS notification sent successfully to ${order.customer_phone} for status: ${new_status}`);
+            if (smsResponse.ok && smsResponseText.includes('OK')) {
+              console.log(`SMS notification sent successfully via WinSMS to ${order.customer_phone} for status: ${new_status}`);
             } else {
-              const errorText = await smsResponse.text();
-              console.error('Twilio SMS error:', errorText);
+              console.error('WinSMS error:', smsResponseText);
             }
           }
         } catch (smsError) {
