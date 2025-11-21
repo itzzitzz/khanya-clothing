@@ -317,11 +317,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     try {
       const smsResponse = await fetch(
-        `https://www.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
+        `https://api.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
           user: winsmsUsername!,
           password: winsmsApiKey!,
           message: smsBody,
-          numbers: toPhone,
+          numbers: toPhone.replace(/[\s\-\+\(\)]/g, ''),
         }),
         {
           method: "GET",
@@ -330,7 +330,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       const smsResponseText = await smsResponse.text();
 
-      if (!smsResponse.ok || !smsResponseText.includes('OK')) {
+      if (!smsResponse.ok || smsResponseText.startsWith('FAIL&')) {
         smsError = smsResponseText;
         console.warn("SMS sending failed (non-critical):", smsResponseText);
       } else {

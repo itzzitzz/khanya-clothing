@@ -126,7 +126,8 @@ const handler = async (req: Request): Promise<Response> => {
 
       console.log("WinSMS Request - Username:", winsmsUsername, "Phone:", formattedPhone);
 
-      const winsmsUrl = `https://www.winsms.co.za/api/batchmessage.asp?user=${encodeURIComponent(winsmsUsername)}&password=${encodeURIComponent(winsmsApiKey)}&message=${encodeURIComponent(message)}&numbers=${formattedPhone}`;
+      // Use correct WinSMS API endpoint (api.winsms.co.za not www.winsms.co.za)
+      const winsmsUrl = `https://api.winsms.co.za/api/batchmessage.asp?user=${encodeURIComponent(winsmsUsername)}&password=${encodeURIComponent(winsmsApiKey)}&message=${encodeURIComponent(message)}&numbers=${formattedPhone}`;
 
       const response = await fetch(winsmsUrl, {
         method: "GET",
@@ -136,25 +137,29 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("WinSMS Full Response:", {
         status: response.status,
         statusText: response.statusText,
-        body: responseText,
-        headers: Object.fromEntries(response.headers.entries())
+        body: responseText
       });
 
-      // Parse WinSMS response - format is typically "STATUS&MESSAGE"
-      const responseParts = responseText.split('&');
-      const status = responseParts[0];
-      const details = responseParts.slice(1).join('&');
-
-      if (status !== 'OK') {
-        console.error("WinSMS API Error:", {
-          status,
-          details,
-          fullResponse: responseText
-        });
-        throw new Error(`WinSMS API error: ${status}. ${details || 'Please check your account credits and credentials.'}`);
+      // Parse WinSMS response - format is "number=status&" or "FAIL&"
+      if (responseText.startsWith('FAIL&')) {
+        throw new Error('Invalid WinSMS credentials');
       }
 
-      console.log("SMS sent successfully via WinSMS:", details);
+      // Check if the response contains an error for the number
+      const responseParts = responseText.split('&');
+      const numberResponse = responseParts[0]; // e.g., "27828521112=374" or "27828521112=INSUFFICIENT CREDITS"
+      
+      if (numberResponse && numberResponse.includes('=')) {
+        const [, status] = numberResponse.split('=');
+        
+        if (status !== undefined && isNaN(Number(status))) {
+          // Status is not a number, it's an error message
+          throw new Error(`WinSMS error: ${status}`);
+        }
+        
+        console.log("SMS sent successfully via WinSMS. Message ID:", status);
+      }
+
       console.log("PIN sent to phone:", phone);
     }
 
