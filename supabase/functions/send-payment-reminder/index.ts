@@ -300,13 +300,13 @@ const handler = async (req: Request): Promise<Response> => {
     const getSmsMessage = () => {
       const statusText = orderStatus === 'delivered' ? 'delivered' :
                          orderStatus === 'shipped' ? 'shipped' :
-                         orderStatus === 'packing' ? 'being packed' : 'ready';
+                         orderStatus === 'packing' ? 'packing' : 'ready';
       
-      const paymentText = amountPaid > 0 
-        ? `R${amountPaid.toFixed(2)} received. Still owing: R${amountOwing.toFixed(2)}`
-        : `Payment needed: R${amountOwing.toFixed(2)}`;
+      const amountText = amountPaid > 0 
+        ? `R${amountOwing.toFixed(0)} owing`
+        : `R${amountOwing.toFixed(0)} due`;
       
-      return `Hi ${order.customer_name}! Order ${reference} is ${statusText}. ${paymentText}. ${statusEmoji} Pay: FNB 63173001256 OR E-Wallet 083 305 4532 (Ref: ${reference}) - Khanya`;
+      return `Order ${reference} ${statusText}. ${amountText}. Pay FNB 63173001256 ref ${reference} - Khanya`;
     };
 
     const smsBody = getSmsMessage();
