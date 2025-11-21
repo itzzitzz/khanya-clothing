@@ -98,7 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Email sent successfully:", emailResponse);
       console.log("PIN sent to email:", email);
     } else {
-      // Send SMS verification via Twilio
+      // Send SMS verification via WinSMS
       const winsmsApiKey = Deno.env.get("WINSMS_API_KEY");
       const winsmsUsername = Deno.env.get("WINSMS_USERNAME");
 
@@ -106,14 +106,24 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error("Missing WinSMS credentials");
       }
 
+      // Format phone number for WinSMS (remove +, spaces, ensure it starts with 27)
+      let formattedPhone = phone!.replace(/[\s\-\+]/g, '');
+      if (formattedPhone.startsWith('0')) {
+        formattedPhone = '27' + formattedPhone.substring(1);
+      } else if (!formattedPhone.startsWith('27')) {
+        formattedPhone = '27' + formattedPhone;
+      }
+
       const message = `Your Khanya verification code is: ${pinCode}. This code expires in 10 minutes.`;
+
+      console.log("Sending SMS to:", formattedPhone);
 
       const response = await fetch(
         `https://www.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
           user: winsmsUsername,
           password: winsmsApiKey,
           message: message,
-          numbers: phone!,
+          numbers: formattedPhone,
         }),
         {
           method: "GET",
@@ -121,13 +131,14 @@ const handler = async (req: Request): Promise<Response> => {
       );
 
       const responseText = await response.text();
+      console.log("WinSMS response:", responseText);
 
       if (!response.ok || !responseText.includes('OK')) {
-        console.error("WinSMS error:", responseText);
+        console.error("WinSMS error - Status:", response.status, "Response:", responseText);
         throw new Error(`Failed to send SMS: ${responseText}`);
       }
 
-      console.log("SMS sent successfully via WinSMS:", responseText);
+      console.log("SMS sent successfully via WinSMS");
       console.log("PIN sent to phone:", phone);
     }
 
