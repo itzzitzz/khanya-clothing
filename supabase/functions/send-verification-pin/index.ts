@@ -106,39 +106,55 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error("Missing WinSMS credentials");
       }
 
-      // Format phone number for WinSMS (remove +, spaces, ensure it starts with 27)
-      let formattedPhone = phone!.replace(/[\s\-\+]/g, '');
+      // Validate and format phone number for WinSMS
+      let formattedPhone = phone!.replace(/[\s\-\+\(\)]/g, '');
+      
+      // Ensure it's a valid South African number
       if (formattedPhone.startsWith('0')) {
         formattedPhone = '27' + formattedPhone.substring(1);
       } else if (!formattedPhone.startsWith('27')) {
         formattedPhone = '27' + formattedPhone;
       }
 
-      const message = `Your Khanya verification code is: ${pinCode}. This code expires in 10 minutes.`;
-
-      console.log("Sending SMS to:", formattedPhone);
-
-      const response = await fetch(
-        `https://www.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
-          user: winsmsUsername,
-          password: winsmsApiKey,
-          message: message,
-          numbers: formattedPhone,
-        }),
-        {
-          method: "GET",
-        }
-      );
-
-      const responseText = await response.text();
-      console.log("WinSMS response:", responseText);
-
-      if (!response.ok || !responseText.includes('OK')) {
-        console.error("WinSMS error - Status:", response.status, "Response:", responseText);
-        throw new Error(`Failed to send SMS: ${responseText}`);
+      // Validate phone number length (SA numbers should be 11 digits with country code)
+      if (formattedPhone.length !== 11) {
+        console.error("Invalid phone number length:", formattedPhone);
+        throw new Error(`Invalid phone number format. Expected 11 digits, got ${formattedPhone.length}`);
       }
 
-      console.log("SMS sent successfully via WinSMS");
+      const message = `Your Khanya verification code is: ${pinCode}. This code expires in 10 minutes.`;
+
+      console.log("WinSMS Request - Username:", winsmsUsername, "Phone:", formattedPhone);
+
+      const winsmsUrl = `https://www.winsms.co.za/api/batchmessage.asp?user=${encodeURIComponent(winsmsUsername)}&password=${encodeURIComponent(winsmsApiKey)}&message=${encodeURIComponent(message)}&numbers=${formattedPhone}`;
+
+      const response = await fetch(winsmsUrl, {
+        method: "GET",
+      });
+
+      const responseText = await response.text();
+      console.log("WinSMS Full Response:", {
+        status: response.status,
+        statusText: response.statusText,
+        body: responseText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
+      // Parse WinSMS response - format is typically "STATUS&MESSAGE"
+      const responseParts = responseText.split('&');
+      const status = responseParts[0];
+      const details = responseParts.slice(1).join('&');
+
+      if (status !== 'OK') {
+        console.error("WinSMS API Error:", {
+          status,
+          details,
+          fullResponse: responseText
+        });
+        throw new Error(`WinSMS API error: ${status}. ${details || 'Please check your account credits and credentials.'}`);
+      }
+
+      console.log("SMS sent successfully via WinSMS:", details);
       console.log("PIN sent to phone:", phone);
     }
 
