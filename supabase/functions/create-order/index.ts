@@ -364,24 +364,30 @@ const handler = async (req: Request): Promise<Response> => {
       if (winsmsApiKey && winsmsUsername) {
         const smsMessage = `🎉 NEW ORDER!\n\nOrder: ${orderNumber}\nCustomer: ${orderData.customer_name}\nTotal: R${totalAmount.toFixed(2)}\nItems: ${orderData.items.map(i => `${i.quantity}x ${i.product_name}`).join(', ')}\nPayment: ${orderData.payment_method.toUpperCase()}`;
 
-        const smsResponse = await fetch(
-          `https://api.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
-            user: winsmsUsername,
-            password: winsmsApiKey,
-            message: smsMessage,
-            numbers: "27828521112",
-          }),
-          {
-            method: "GET",
-          }
-        );
+        const requestBody = {
+          message: smsMessage,
+          recipients: [
+            {
+              mobileNumber: "27828521112"
+            }
+          ]
+        };
 
-        const smsResponseText = await smsResponse.text();
+        const smsResponse = await fetch("https://api.winsms.co.za/api/v1/sms/outgoing/send", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${winsmsApiKey}`
+          },
+          body: JSON.stringify(requestBody)
+        });
 
-        if (smsResponse.ok && !smsResponseText.startsWith('FAIL&')) {
+        const smsResponseData = await smsResponse.json();
+
+        if (smsResponse.ok) {
           console.log("SMS notification sent to sales team via WinSMS");
         } else {
-          console.error("Failed to send SMS notification via WinSMS:", smsResponseText);
+          console.error("Failed to send SMS notification via WinSMS:", smsResponseData);
         }
       }
     } catch (smsError) {

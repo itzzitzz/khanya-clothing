@@ -98,14 +98,13 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Email sent successfully:", emailResponse);
       console.log("PIN sent to email:", email);
     } else {
-      // Send SMS verification via WinSMS
+      // Send SMS verification via WinSMS JSON API
       const winsmsApiKey = Deno.env.get("WINSMS_API_KEY");
       const winsmsUsername = Deno.env.get("WINSMS_USERNAME");
 
       console.log("WinSMS credentials check:", {
         hasApiKey: !!winsmsApiKey,
-        hasUsername: !!winsmsUsername,
-        username: winsmsUsername // Log username to verify it's correct
+        hasUsername: !!winsmsUsername
       });
 
       if (!winsmsApiKey || !winsmsUsername) {
@@ -130,56 +129,42 @@ const handler = async (req: Request): Promise<Response> => {
 
       const message = `Your Khanya verification code is: ${pinCode}. This code expires in 10 minutes.`;
 
-      console.log("Sending SMS via WinSMS:", {
+      console.log("Sending SMS via WinSMS JSON API:", {
         phone: formattedPhone,
         messageLength: message.length
       });
 
-      // Use correct WinSMS API endpoint
-      const winsmsUrl = `https://api.winsms.co.za/api/batchmessage.asp?user=${encodeURIComponent(winsmsUsername)}&password=${encodeURIComponent(winsmsApiKey)}&message=${encodeURIComponent(message)}&numbers=${formattedPhone}`;
+      // Use WinSMS JSON API
+      const requestBody = {
+        message: message,
+        recipients: [
+          {
+            mobileNumber: formattedPhone
+          }
+        ]
+      };
 
-      const response = await fetch(winsmsUrl, {
-        method: "GET",
+      const response = await fetch("https://api.winsms.co.za/api/v1/sms/outgoing/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${winsmsApiKey}`
+        },
+        body: JSON.stringify(requestBody)
       });
 
-      const responseText = await response.text();
+      const responseData = await response.json();
       console.log("WinSMS API Response:", {
         status: response.status,
         statusText: response.statusText,
-        body: responseText,
-        responseLength: responseText.length
+        body: responseData
       });
 
-      // Parse WinSMS response - format is "number=status&" or "FAIL&" or "Error=\"message\""
-      if (responseText.trim().startsWith('FAIL')) {
-        throw new Error(`WinSMS authentication failed. Please verify your API credentials in Supabase secrets. Response: ${responseText}`);
+      if (!response.ok) {
+        throw new Error(`WinSMS API error: ${responseData.message || JSON.stringify(responseData)}`);
       }
 
-      if (responseText.includes('Error=')) {
-        const errorMatch = responseText.match(/Error="([^"]+)"/);
-        const errorMsg = errorMatch ? errorMatch[1] : responseText;
-        throw new Error(`WinSMS error: ${errorMsg}`);
-      }
-
-      // Check if the response contains an error for the number
-      const responseParts = responseText.split('&').filter(p => p.length > 0);
-      console.log("Response parts:", responseParts);
-      
-      if (responseParts.length > 0) {
-        const numberResponse = responseParts[0]; // e.g., "27828521112=374" or "27828521112=INSUFFICIENT CREDITS"
-        
-        if (numberResponse.includes('=')) {
-          const [number, status] = numberResponse.split('=');
-          
-          // Check if status is an error message (not a numeric message ID)
-          if (status && isNaN(Number(status))) {
-            throw new Error(`WinSMS error for ${number}: ${status}`);
-          }
-          
-          console.log("SMS sent successfully. Message ID:", status);
-        }
-      }
-
+      console.log("SMS sent successfully via WinSMS");
       console.log("PIN sent to phone:", phone);
     }
 

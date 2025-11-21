@@ -703,24 +703,32 @@ const handler = async (req: Request): Promise<Response> => {
             const winsmsApiKey = Deno.env.get("WINSMS_API_KEY");
             const winsmsUsername = Deno.env.get("WINSMS_USERNAME");
             
-            const smsResponse = await fetch(
-              `https://api.winsms.co.za/api/batchmessage.asp?` + new URLSearchParams({
-                user: winsmsUsername!,
-                password: winsmsApiKey!,
-                message: smsMessage,
-                numbers: order.customer_phone.replace(/[\s\-\+\(\)]/g, ''),
-              }),
-              {
-                method: "GET",
-              }
-            );
+            const formattedPhone = order.customer_phone.replace(/[\s\-\+\(\)]/g, '');
             
-            const smsResponseText = await smsResponse.text();
+            const requestBody = {
+              message: smsMessage,
+              recipients: [
+                {
+                  mobileNumber: formattedPhone
+                }
+              ]
+            };
             
-            if (smsResponse.ok && !smsResponseText.startsWith('FAIL&')) {
+            const smsResponse = await fetch("https://api.winsms.co.za/api/v1/sms/outgoing/send", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${winsmsApiKey}`
+              },
+              body: JSON.stringify(requestBody)
+            });
+            
+            const smsResponseData = await smsResponse.json();
+            
+            if (smsResponse.ok) {
               console.log(`SMS notification sent successfully via WinSMS to ${order.customer_phone} for status: ${new_status}`);
             } else {
-              console.error('WinSMS error:', smsResponseText);
+              console.error('WinSMS error:', smsResponseData);
             }
           }
         } catch (smsError) {
