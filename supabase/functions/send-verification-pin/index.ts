@@ -127,7 +127,7 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error(`Invalid phone number format. Expected 11 digits, got ${formattedPhone.length}`);
       }
 
-      const message = `Your Khanya verification code is: ${pinCode}. This code expires in 10 minutes.`;
+      const message = `Khanya code: ${pinCode}. Expires in 10 min.`;
 
       console.log("Sending SMS via WinSMS JSON API:", {
         phone: formattedPhone,

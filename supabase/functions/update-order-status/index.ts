@@ -683,20 +683,20 @@ const handler = async (req: Request): Promise<Response> => {
             const statusLabel = STATUS_LABELS[new_status] || new_status;
             const paymentStatus = order.payment_tracking_status || 'Awaiting payment';
             
-            // Create friendly SMS message based on status
+            // Create friendly SMS message based on status (max 150 chars)
             let smsMessage = '';
             
             if (new_status === 'new_order') {
-              smsMessage = `🎉 Order ${order.order_number} confirmed!\n\nPayment: ${paymentStatus}\nStatus: Order Received\n\nWe'll start preparing your bales once payment is confirmed. Thanks for choosing Khanya! 🌟`;
+              smsMessage = `Order ${order.order_number} confirmed! ${paymentStatus}. We'll pack once payment clears. Thanks! - Khanya`;
             } else if (new_status === 'packing') {
-              smsMessage = `📦 Great news! Order ${order.order_number} is being packed.\n\nPayment: ${paymentStatus}\nStatus: Packing\n\nYour bales will be shipped soon. We'll keep you updated! 🚀`;
+              smsMessage = `Order ${order.order_number} being packed! ${paymentStatus}. Ships soon! - Khanya`;
             } else if (new_status === 'shipped') {
-              smsMessage = `🚚 Your order is on the way! Order ${order.order_number}\n\nPayment: ${paymentStatus}\nStatus: In Transit\n\nExpected delivery: 3-5 business days. Exciting times ahead! 🎁`;
+              smsMessage = `Order ${order.order_number} shipped! ${paymentStatus}. Arrives 3-5 days. - Khanya`;
             } else if (new_status === 'delivered') {
               if (paymentStatus === 'Fully Paid') {
-                smsMessage = `✅ Order ${order.order_number} delivered!\n\nPayment: ${paymentStatus}\nStatus: Delivered\n\nThank you for your business! We hope you love your new stock. Come back soon! 💚`;
+                smsMessage = `Order ${order.order_number} delivered! ${paymentStatus}. Thanks for your business! - Khanya`;
               } else {
-                smsMessage = `📍 Order ${order.order_number} delivered!\n\nPayment: ${paymentStatus}\nStatus: Delivered\n\n⚠️ Please complete payment. EFT: FNB 63173001256 | E-Wallet: 083 305 4532 | Ref: ${order.order_number}`;
+                smsMessage = `Order ${order.order_number} delivered! ${paymentStatus}. Pay: FNB 63173001256, Ref: ${order.order_number} - Khanya`;
               }
             }
             

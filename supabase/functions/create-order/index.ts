@@ -362,7 +362,7 @@ const handler = async (req: Request): Promise<Response> => {
       const winsmsUsername = Deno.env.get("WINSMS_USERNAME");
 
       if (winsmsApiKey && winsmsUsername) {
-        const smsMessage = `🎉 NEW ORDER!\n\nOrder: ${orderNumber}\nCustomer: ${orderData.customer_name}\nTotal: R${totalAmount.toFixed(2)}\nItems: ${orderData.items.map(i => `${i.quantity}x ${i.product_name}`).join(', ')}\nPayment: ${orderData.payment_method.toUpperCase()}`;
+        const smsMessage = `NEW ORDER ${orderNumber}! ${orderData.customer_name}, R${totalAmount.toFixed(2)}, ${orderData.payment_method.toUpperCase()}`;
 
         const requestBody = {
           message: smsMessage,
