@@ -99,7 +99,7 @@ const Contact = () => {
             </p>
           </header>
 
-          <div className="grid lg:grid-cols-2 gap-10 items-start pb-16">
+          <div className="grid lg:grid-cols-2 gap-10 items-start pb-10">
             <form onSubmit={onSubmit} className="bg-card border rounded-xl p-6 space-y-5">
               <div className="grid gap-2">
                 <Label htmlFor="name">Name</Label>
@@ -140,6 +140,36 @@ const Contact = () => {
               </div>
             </aside>
           </div>
+
+          <section className="bg-gradient-to-br from-accent/20 via-background to-primary/5 border-2 border-primary/20 rounded-2xl p-8 mb-16 shadow-lg">
+            <div className="max-w-3xl mx-auto text-center space-y-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              
+              <h2 className="text-3xl md:text-4xl font-bold">Online Business Only</h2>
+              
+              <div className="space-y-4 text-lg text-muted-foreground">
+                <p className="leading-relaxed">
+                  Khanya is an <span className="font-semibold text-foreground">online-only business</span>. We do not have a physical store where customers can visit or collect orders.
+                </p>
+                <p className="leading-relaxed">
+                  All orders are dispatched from <span className="font-semibold text-foreground">Midrand, Gauteng</span> and delivered directly to your doorstep or nearest PAXI collection point.
+                </p>
+                <p className="leading-relaxed">
+                  To place an order, simply browse our available bales online, add them to your cart, and complete the checkout process. We'll handle the rest!
+                </p>
+              </div>
+
+              <div className="pt-4">
+                <Button variant="hero" size="xl" asChild className="text-lg">
+                  <a href="/view-order-bales">Order Now</a>
+                </Button>
+              </div>
+            </div>
+          </section>
         </section>
       </main>
     </div>
