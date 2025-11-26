@@ -260,24 +260,6 @@ const PrintOrder = () => {
                   </div>
                 )}
               </div>
-
-              {/* Footer */}
-              <div className="mt-8 pt-4 border-t border-gray-300">
-                <div className="text-center mb-4">
-                  <p className="text-sm text-gray-600 mb-2">Quality clothing at great prices</p>
-                  <div className="flex items-center justify-center gap-6 text-sm font-semibold">
-                    <span className="text-blue-600">📱 WhatsApp Us</span>
-                    <span className="text-gray-400">|</span>
-                    <span className="text-blue-600">🌐 www.khanya.store</span>
-                    <span className="text-gray-400">|</span>
-                    <span className="text-blue-600">📧 sales@khanya.store</span>
-                  </div>
-                </div>
-                <div className="bg-gray-800 text-white text-center py-3 rounded-b">
-                  <p className="font-bold text-lg">Thank you for choosing Khanya!</p>
-                  <p className="text-sm">Visit www.khanya.store for more great deals</p>
-                </div>
-              </div>
             </div>
           </div>
         ))}
@@ -378,9 +360,21 @@ const PrintOrder = () => {
             )}
 
             {/* Footer */}
-            <div className="text-center text-sm text-gray-600">
-              <p className="mb-2">Thank you for your business!</p>
-              <p>🌐 www.khanya.store | 📧 sales@khanya.store | 📱 083 305 4532</p>
+            <div className="mt-8 pt-4 border-t border-gray-300">
+              <div className="text-center mb-4">
+                <p className="text-sm text-gray-600 mb-2">Quality clothing at great prices</p>
+                <div className="flex items-center justify-center gap-6 text-sm font-semibold">
+                  <span className="text-blue-600">📱 WhatsApp Us</span>
+                  <span className="text-gray-400">|</span>
+                  <span className="text-blue-600">🌐 www.khanya.store</span>
+                  <span className="text-gray-400">|</span>
+                  <span className="text-blue-600">📧 sales@khanya.store</span>
+                </div>
+              </div>
+              <div className="bg-gray-800 text-white text-center py-3 rounded-b">
+                <p className="font-bold text-lg">Thank you for choosing Khanya!</p>
+                <p className="text-sm">Visit www.khanya.store for more great deals</p>
+              </div>
             </div>
           </div>
         </div>
