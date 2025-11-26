@@ -488,6 +488,14 @@ const OrderManager = () => {
                     <p className="text-sm">
                       <strong>Payment:</strong> {order.payment_method.replace(/_/g, ' ').toUpperCase()}
                     </p>
+                    <div className="mt-3 pt-3 border-t">
+                      <p className="text-sm font-semibold mb-1">Delivery Address:</p>
+                      <p className="text-sm text-muted-foreground">
+                        {order.delivery_address}<br />
+                        {order.delivery_city}, {order.delivery_province}<br />
+                        {order.delivery_postal_code}
+                      </p>
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -625,15 +633,6 @@ const OrderManager = () => {
                     </div>
                   ))}
                 </div>
-              </div>
-
-              <div className="border-t pt-4 mt-4">
-                <h4 className="font-semibold mb-2">Delivery Address:</h4>
-                <p className="text-sm">
-                  {order.delivery_address}<br />
-                  {order.delivery_city}, {order.delivery_province}<br />
-                  {order.delivery_postal_code}
-                </p>
               </div>
             </div>
           ))}
