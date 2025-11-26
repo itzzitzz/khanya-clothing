@@ -32,20 +32,27 @@ const PrintOrder = () => {
             )
           `)
           .eq('id', orderId)
-          .single();
+          .maybeSingle();
 
-        if (orderError) throw orderError;
+        if (orderError) {
+          console.error('Order fetch error:', orderError);
+          throw orderError;
+        }
+        
         if (!orderData) {
-          console.error('No order found');
+          console.error('No order found with ID:', orderId);
           setLoading(false);
           return;
         }
 
+        console.log('Order fetched successfully:', orderData);
         setOrder(orderData);
 
         // Fetch bale details for each order item
         const balePromises = orderData.order_items.map(async (item: any) => {
-          const { data: baleData } = await supabase
+          console.log(`Fetching bale for item ${item.product_name} (ID: ${item.product_id})`);
+          
+          const { data: baleData, error: baleError } = await supabase
             .from('bales')
             .select(`
               id,
@@ -68,11 +75,20 @@ const PrintOrder = () => {
             .eq('id', item.product_id)
             .maybeSingle();
 
+          if (baleError) {
+            console.error(`Error fetching bale ${item.product_id}:`, baleError);
+          }
+          
+          console.log(`Bale ${item.product_id} result:`, baleData ? 'Found' : 'NULL');
+
           return { item, bale: baleData };
         });
 
         const baleResults = await Promise.all(balePromises);
-        setBales(baleResults.filter(b => b.bale));
+        const validBales = baleResults.filter(b => b.bale);
+        
+        console.log(`Found ${validBales.length} valid bales out of ${baleResults.length} total`);
+        setBales(validBales);
 
         console.log('Order and bales fetched successfully');
       } catch (error: any) {
