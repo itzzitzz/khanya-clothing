@@ -209,16 +209,25 @@ const OrderManager = () => {
     // Open separate packing list for each bale that exists
     const validItems = order.order_items?.filter((item: any) => item.bale_details) || [];
     
-    validItems.forEach((item: any, index: number) => {
-      setTimeout(() => {
-        window.open(`/bale-packing-list?baleId=${item.product_id}`, '_blank');
-      }, index * 200); // Stagger opening to prevent browser blocking
+    console.log('Print button clicked for order:', order.order_number);
+    console.log('Valid items with bale_details:', validItems.length);
+    console.log('Valid items:', validItems.map((item: any) => ({ 
+      product_id: item.product_id, 
+      product_name: item.product_name,
+      has_bale_details: !!item.bale_details 
+    })));
+    
+    // Open all windows immediately to avoid popup blocking
+    validItems.forEach((item: any) => {
+      const url = `/bale-packing-list?baleId=${item.product_id}`;
+      console.log('Opening bale packing list:', url);
+      window.open(url, '_blank');
     });
     
-    // Open invoice after packing lists
-    setTimeout(() => {
-      window.open(`/invoice?orderId=${order.id}`, '_blank');
-    }, validItems.length * 200 + 200);
+    // Open invoice
+    const invoiceUrl = `/invoice?orderId=${order.id}`;
+    console.log('Opening invoice:', invoiceUrl);
+    window.open(invoiceUrl, '_blank');
   };
 
   const handleSendPaymentReminder = async (order: any) => {
