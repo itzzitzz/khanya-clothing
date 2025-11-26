@@ -205,8 +205,18 @@ const OrderManager = () => {
     }
   };
 
-  const handlePrintPackingList = (orderId: string) => {
-    window.open(`/packing-list?orderId=${orderId}`, '_blank');
+  const handlePrintPackingList = (order: any) => {
+    // Open separate packing list for each bale
+    order.order_items?.forEach((item: any, index: number) => {
+      setTimeout(() => {
+        window.open(`/bale-packing-list?baleId=${item.product_id}`, '_blank');
+      }, index * 200); // Stagger opening to prevent browser blocking
+    });
+    
+    // Open invoice after packing lists
+    setTimeout(() => {
+      window.open(`/invoice?orderId=${order.id}`, '_blank');
+    }, (order.order_items?.length || 0) * 200 + 200);
   };
 
   const handleSendPaymentReminder = async (order: any) => {
@@ -387,10 +397,10 @@ const OrderManager = () => {
                       </Button>
                     )}
                     <Button
-                      onClick={() => handlePrintPackingList(order.id)}
+                      onClick={() => handlePrintPackingList(order)}
                       variant="outline"
                       size="sm"
-                      title="Print Packing List"
+                      title="Print Packing Lists & Invoice"
                     >
                       <Printer className="h-4 w-4" />
                     </Button>
