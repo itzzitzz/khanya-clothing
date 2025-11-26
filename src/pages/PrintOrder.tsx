@@ -154,9 +154,22 @@ const PrintOrder = () => {
               page-break-after: always;
               break-after: page;
             }
+            .no-print {
+              display: none !important;
+            }
           }
         `}
       </style>
+
+      {/* Back to Admin Button - Hidden during print */}
+      <div className="no-print fixed top-4 right-4 z-50">
+        <button
+          onClick={() => window.location.href = '/admin'}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold"
+        >
+          ← Back to Admin
+        </button>
+      </div>
 
       <div className="print-container">
         {/* Packing Lists - One per bale */}
