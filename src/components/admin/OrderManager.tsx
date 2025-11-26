@@ -214,67 +214,10 @@ const OrderManager = () => {
   };
 
   const handlePrintPackingList = (order: any) => {
-    // Open separate packing list for each bale that exists
-    const validItems = order.order_items?.filter((item: any) => item.bale_details) || [];
-    
-    console.log('Print button clicked for order:', order.order_number);
-    console.log('Total order items:', order.order_items?.length);
-    console.log('Valid items with bale_details:', validItems.length);
-    console.log('All items:', order.order_items?.map((item: any) => ({ 
-      product_id: item.product_id, 
-      product_name: item.product_name,
-      has_bale_details: !!item.bale_details,
-      bale_details_preview: item.bale_details ? 'exists' : 'null'
-    })));
-    
-    if (validItems.length === 0) {
-      toast({
-        title: 'No Valid Bales',
-        description: 'No bale data found for this order',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Warn about popup blocker
-    toast({
-      title: 'Opening Print Windows',
-      description: `Opening ${validItems.length} packing lists + 1 invoice. Please allow popups if prompted.`,
-    });
-    
-    // Open all windows immediately to avoid popup blocking
-    const windows: (Window | null)[] = [];
-    
-    validItems.forEach((item: any) => {
-      const url = `/bale-packing-list?baleId=${item.product_id}`;
-      console.log('Opening bale packing list:', url);
-      const win = window.open(url, '_blank');
-      windows.push(win);
-      if (!win) {
-        console.error('Failed to open window for bale:', item.product_id);
-      }
-    });
-    
-    // Open invoice
-    const invoiceUrl = `/invoice?orderId=${order.id}`;
-    console.log('Opening invoice:', invoiceUrl);
-    const invoiceWin = window.open(invoiceUrl, '_blank');
-    windows.push(invoiceWin);
-    if (!invoiceWin) {
-      console.error('Failed to open invoice window');
-    }
-    
-    // Check if any windows failed to open
-    const blockedCount = windows.filter(w => !w).length;
-    if (blockedCount > 0) {
-      setTimeout(() => {
-        toast({
-          title: 'Popup Blocker Detected',
-          description: `${blockedCount} windows were blocked. Please allow popups for this site and try again.`,
-          variant: 'destructive',
-        });
-      }, 500);
-    }
+    // Open single combined print page with all packing lists and invoice
+    const url = `/print-order?orderId=${order.id}`;
+    console.log('Opening combined print page:', url);
+    window.open(url, '_blank');
   };
 
   const handleSendPaymentReminder = async (order: any) => {
