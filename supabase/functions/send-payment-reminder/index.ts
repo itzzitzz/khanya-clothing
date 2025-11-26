@@ -59,6 +59,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending payment reminder for order: ${order.order_number}`);
 
+    // Validate customer email
+    const customerEmail = (order.customer_email || '').trim();
+    const hasValidEmail = customerEmail && customerEmail.includes('@') && customerEmail.includes('.');
+
     const totalAmount = Number(order.total_amount);
     const amountPaid = Number(order.amount_paid || 0);
     const amountOwing = totalAmount - amountPaid;
@@ -273,27 +277,38 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    // Send email
-    const emailSubject = orderStatus === 'delivered' 
-      ? `Payment Outstanding - Order ${reference}`
-      : orderStatus === 'shipped'
-      ? `Payment Reminder - Order ${reference} Shipped! 🚚`
-      : orderStatus === 'packing'
-      ? `Payment Reminder - Order ${reference} Being Packed! 📦`
-      : `Payment Reminder - Order ${reference} Ready to Ship! 🎉`;
+    // Send email only if valid email address exists
+    let emailResponse: any = null;
+    let emailSent = false;
+    let emailError = null;
 
-    const emailResponse = await resend.emails.send({
-      from: "Khanya <noreply@mail.khanya.store>",
-      to: [order.customer_email],
-      subject: emailSubject,
-      html: emailHtml,
-    });
+    if (hasValidEmail) {
+      const emailSubject = orderStatus === 'delivered' 
+        ? `Payment Outstanding - Order ${reference}`
+        : orderStatus === 'shipped'
+        ? `Payment Reminder - Order ${reference} Shipped! 🚚`
+        : orderStatus === 'packing'
+        ? `Payment Reminder - Order ${reference} Being Packed! 📦`
+        : `Payment Reminder - Order ${reference} Ready to Ship! 🎉`;
 
-    console.log("Payment reminder email sent:", emailResponse);
-    
-    if (emailResponse.error) {
-      console.error("Email sending failed:", emailResponse.error);
-      throw new Error(`Email failed: ${emailResponse.error.message}`);
+      emailResponse = await resend.emails.send({
+        from: "Khanya <noreply@mail.khanya.store>",
+        to: [customerEmail],
+        subject: emailSubject,
+        html: emailHtml,
+      });
+
+      console.log("Payment reminder email sent:", emailResponse);
+      
+      if (emailResponse.error) {
+        emailError = emailResponse.error.message;
+        console.error("Email sending failed:", emailResponse.error);
+      } else {
+        emailSent = true;
+      }
+    } else {
+      emailError = 'No valid email address on file';
+      console.warn(`Skipping email for order ${reference} - no valid email address: "${order.customer_email}"`);
     }
 
     // Send SMS with dynamic message (non-blocking - won't fail if SMS errors)
@@ -352,21 +367,31 @@ const handler = async (req: Request): Promise<Response> => {
       console.warn("SMS sending failed (non-critical):", smsErr);
     }
 
+    // Determine response message based on what was sent
+    let responseMessage = '';
+    if (emailSent && smsSent) {
+      responseMessage = "Payment reminder sent via email and SMS successfully";
+    } else if (emailSent && !smsSent) {
+      responseMessage = "Payment reminder sent via email (SMS failed)";
+    } else if (!emailSent && smsSent) {
+      responseMessage = "Payment reminder sent via SMS only (no valid email on file)";
+    } else {
+      responseMessage = "Failed to send payment reminder - no valid email and SMS failed";
+    }
+
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        message: smsSent 
-          ? "Payment reminder sent via email and SMS successfully"
-          : "Payment reminder sent via email (SMS failed - see warning)",
-        email_sent: !!emailResponse,
+        success: emailSent || smsSent,
+        message: responseMessage,
+        email_sent: emailSent,
+        email_error: emailError,
         sms_sent: smsSent,
-        sms_sid: smsData?.sid,
-        sms_status: smsData?.status,
         sms_error: smsError,
+        customer_email: order.customer_email,
         to_phone: toPhone
       }),
       {
-        status: 200,
+        status: emailSent || smsSent ? 200 : 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
