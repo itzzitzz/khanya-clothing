@@ -80,7 +80,7 @@ const OrderManager = () => {
                   )
                 `)
                 .eq('id', item.product_id)
-                .single();
+                .maybeSingle();
 
               return {
                 ...item,
