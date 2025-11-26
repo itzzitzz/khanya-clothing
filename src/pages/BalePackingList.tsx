@@ -123,36 +123,25 @@ const BalePackingList = () => {
       <div className="print-container">
         {/* Header with Branding */}
         <div className="border-b-2 border-gray-800 pb-6 mb-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-start gap-4">
-              <img src={khanyaLogo} alt="Khanya Logo" className="w-24 h-24 object-contain" />
-              <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">Khanya</h1>
-                <p className="text-lg text-gray-600 mb-3">Quality Clothing Bales</p>
-                <div className="space-y-1 text-sm">
-                  <p className="flex items-center gap-2">
-                    <span className="font-semibold">🌐 Website:</span>
-                    <span className="text-blue-600">www.khanya.store</span>
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <span className="font-semibold">📧 Email:</span>
-                    <span>sales@khanya.store</span>
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <span className="font-semibold">📱 WhatsApp:</span>
-                    <span>083 305 4532</span>
-                  </p>
-                </div>
+          <div className="flex items-start gap-4">
+            <img src={khanyaLogo} alt="Khanya Logo" className="w-24 h-24 object-contain" />
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">Khanya</h1>
+              <p className="text-lg text-gray-600 mb-3">Quality Clothing Bales</p>
+              <div className="space-y-1 text-sm">
+                <p className="flex items-center gap-2">
+                  <span className="font-semibold">🌐 Website:</span>
+                  <span className="text-blue-600">www.khanya.store</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="font-semibold">📧 Email:</span>
+                  <span>sales@khanya.store</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="font-semibold">📱 WhatsApp:</span>
+                  <span>083 305 4532</span>
+                </p>
               </div>
-            </div>
-            <div className="text-right">
-              <h2 className="text-2xl font-bold mb-3">BALE CONTENTS</h2>
-              {bale.bale_number && (
-                <div className="text-sm">
-                  <p className="font-semibold">Bale Number:</p>
-                  <p className="text-lg font-mono">{bale.bale_number}</p>
-                </div>
-              )}
             </div>
           </div>
         </div>
