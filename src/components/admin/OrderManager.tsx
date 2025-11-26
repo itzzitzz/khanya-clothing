@@ -56,8 +56,10 @@ const OrderManager = () => {
         (data || []).map(async (order) => {
           const itemsWithBaleDetails = await Promise.all(
             (order.order_items || []).map(async (item: any) => {
+              console.log(`Fetching bale details for product_id: ${item.product_id}, product_name: ${item.product_name}`);
+              
               // Fetch bale with its stock items and bale number
-              const { data: baleData } = await supabase
+              const { data: baleData, error: baleError } = await supabase
                 .from('bales')
                 .select(`
                   id,
@@ -81,6 +83,12 @@ const OrderManager = () => {
                 `)
                 .eq('id', item.product_id)
                 .maybeSingle();
+
+              if (baleError) {
+                console.error(`Error fetching bale ${item.product_id}:`, baleError);
+              }
+              
+              console.log(`Bale data for product_id ${item.product_id}:`, baleData ? 'Found' : 'NULL');
 
               return {
                 ...item,
