@@ -20,13 +20,6 @@ const BalePackingList = () => {
 
       try {
         console.log('Fetching bale with ID:', baleId);
-        
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          console.error('No active session');
-          setLoading(false);
-          return;
-        }
 
         const { data: baleData, error: baleError } = await supabase
           .from('bales')
