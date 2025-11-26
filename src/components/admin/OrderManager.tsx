@@ -214,10 +214,10 @@ const OrderManager = () => {
   };
 
   const handlePrintPackingList = (order: any) => {
-    // Open single combined print page with all packing lists and invoice
+    // Open single combined print page with all packing lists and invoice in same window
     const url = `/print-order?orderId=${order.id}`;
-    console.log('Opening combined print page:', url);
-    window.open(url, '_blank');
+    console.log('Navigating to combined print page:', url);
+    window.location.href = url;
   };
 
   const handleSendPaymentReminder = async (order: any) => {
