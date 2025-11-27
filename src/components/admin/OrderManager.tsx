@@ -29,6 +29,7 @@ const OrderManager = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
+  const [selectedPaymentFilter, setSelectedPaymentFilter] = useState<string>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<any>(null);
   const [deletePassword, setDeletePassword] = useState('');
@@ -390,9 +391,9 @@ const OrderManager = () => {
     );
   }
 
-  const filteredOrders = selectedStatusFilter === 'all' 
-    ? orders 
-    : orders.filter(order => order.order_status === selectedStatusFilter);
+  const filteredOrders = orders
+    .filter(order => selectedStatusFilter === 'all' || order.order_status === selectedStatusFilter)
+    .filter(order => selectedPaymentFilter === 'all' || order.payment_tracking_status === selectedPaymentFilter);
 
   return (
     <div className="space-y-6">
@@ -423,7 +424,23 @@ const OrderManager = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Order Management</h2>
         <div className="flex items-center gap-2">
-          <div className="w-64">
+          <div className="w-52">
+            <Select 
+              value={selectedPaymentFilter} 
+              onValueChange={(v) => setSelectedPaymentFilter(v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by payment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Payments</SelectItem>
+                <SelectItem value="Awaiting payment">Awaiting Payment</SelectItem>
+                <SelectItem value="Partially Paid">Partially Paid</SelectItem>
+                <SelectItem value="Fully Paid">Fully Paid</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-52">
             <Select 
               value={selectedStatusFilter} 
               onValueChange={(v) => setSelectedStatusFilter(v)}
@@ -450,7 +467,7 @@ const OrderManager = () => {
       {filteredOrders.length === 0 ? (
         <div className="text-center p-12 border rounded-lg">
           <p className="text-muted-foreground">
-            {orders.length === 0 ? 'No orders yet' : 'No orders found with selected status'}
+            {orders.length === 0 ? 'No orders yet' : 'No orders found with selected filters'}
           </p>
         </div>
       ) : (
