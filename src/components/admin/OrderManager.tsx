@@ -36,6 +36,62 @@ const OrderManager = () => {
   const [sendingReminder, setSendingReminder] = useState<string | null>(null);
   const [updatingPayment, setUpdatingPayment] = useState<string | null>(null);
 
+  // Calculate sales statistics
+  const calculateStats = () => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    
+    // Financial year starts March 1st
+    const financialYearStart = currentMonth >= 2 
+      ? new Date(currentYear, 2, 1) // March 1st this year
+      : new Date(currentYear - 1, 2, 1); // March 1st last year
+    
+    const thisMonthStart = new Date(currentYear, currentMonth, 1);
+    const lastMonthStart = new Date(currentYear, currentMonth - 1, 1);
+    const lastMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59);
+
+    let allTimeSales = 0;
+    let financialYearSales = 0;
+    let thisMonthSales = 0;
+    let lastMonthSales = 0;
+    let outstandingPayments = 0;
+
+    orders.forEach(order => {
+      const orderDate = new Date(order.created_at);
+      const totalAmount = Number(order.total_amount);
+      const amountPaid = Number(order.amount_paid || 0);
+
+      allTimeSales += totalAmount;
+
+      if (orderDate >= financialYearStart) {
+        financialYearSales += totalAmount;
+      }
+
+      if (orderDate >= thisMonthStart) {
+        thisMonthSales += totalAmount;
+      }
+
+      if (orderDate >= lastMonthStart && orderDate <= lastMonthEnd) {
+        lastMonthSales += totalAmount;
+      }
+
+      if (order.payment_tracking_status !== 'Fully Paid') {
+        outstandingPayments += (totalAmount - amountPaid);
+      }
+    });
+
+    return {
+      allTimeSales,
+      financialYearSales,
+      thisMonthSales,
+      lastMonthSales,
+      outstandingPayments,
+    };
+  };
+
+  const stats = calculateStats();
+
   const fetchOrders = async () => {
     setLoading(true);
     try {
@@ -340,6 +396,30 @@ const OrderManager = () => {
 
   return (
     <div className="space-y-6">
+      {/* Sales Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="border rounded-lg p-4 bg-card">
+          <p className="text-sm text-muted-foreground mb-1">All Time Sales</p>
+          <p className="text-2xl font-bold">R{stats.allTimeSales.toFixed(2)}</p>
+        </div>
+        <div className="border rounded-lg p-4 bg-card">
+          <p className="text-sm text-muted-foreground mb-1">Financial Year to Date</p>
+          <p className="text-2xl font-bold">R{stats.financialYearSales.toFixed(2)}</p>
+        </div>
+        <div className="border rounded-lg p-4 bg-card">
+          <p className="text-sm text-muted-foreground mb-1">Sales This Month</p>
+          <p className="text-2xl font-bold">R{stats.thisMonthSales.toFixed(2)}</p>
+        </div>
+        <div className="border rounded-lg p-4 bg-card">
+          <p className="text-sm text-muted-foreground mb-1">Sales Last Month</p>
+          <p className="text-2xl font-bold">R{stats.lastMonthSales.toFixed(2)}</p>
+        </div>
+        <div className="border rounded-lg p-4 bg-card">
+          <p className="text-sm text-muted-foreground mb-1">Outstanding Payments</p>
+          <p className="text-2xl font-bold text-yellow-600">R{stats.outstandingPayments.toFixed(2)}</p>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Order Management</h2>
         <div className="flex items-center gap-2">
