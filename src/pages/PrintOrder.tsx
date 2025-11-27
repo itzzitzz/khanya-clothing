@@ -374,7 +374,7 @@ const PrintOrder = () => {
               <div className="text-center mb-4">
                 <p className="text-sm text-gray-600 mb-2">Quality clothing at great prices</p>
                 <div className="flex items-center justify-center gap-6 text-sm font-semibold">
-                  <span className="text-blue-600">📱 WhatsApp Us</span>
+                  <span className="text-blue-600">📱 083 305 4532</span>
                   <span className="text-gray-400">|</span>
                   <span className="text-blue-600">🌐 www.khanya.store</span>
                   <span className="text-gray-400">|</span>
