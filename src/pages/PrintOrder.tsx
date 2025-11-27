@@ -176,39 +176,49 @@ const PrintOrder = () => {
         {bales.map(({ item, bale }, index) => (
           <div key={bale.id} className={index < bales.length ? 'page-break' : ''}>
             <div className="max-w-4xl mx-auto p-8">
-              {/* Header with Branding */}
+              {/* Header with Branding and Customer Info */}
               <div className="border-b-2 border-gray-800 pb-6 mb-6">
-                <div className="flex items-start gap-4">
-                  <img src={khanyaLogo} alt="Khanya Logo" className="w-24 h-24 object-contain" />
-                  <div>
-                    <h1 className="text-4xl font-bold text-gray-900 mb-2">Khanya</h1>
-                    <p className="text-lg text-gray-600 mb-3">Quality Clothing Bales</p>
-                    <div className="space-y-1 text-sm">
-                      <p className="flex items-center gap-2">
-                        <span className="font-semibold">🌐 Website:</span>
-                        <span className="text-blue-600">www.khanya.store</span>
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <span className="font-semibold">📧 Email:</span>
-                        <span>sales@khanya.store</span>
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <span className="font-semibold">📱 WhatsApp:</span>
-                        <span>083 305 4532</span>
-                      </p>
+                <div className="flex items-start justify-between gap-8">
+                  <div className="flex items-start gap-4">
+                    <img src={khanyaLogo} alt="Khanya Logo" className="w-24 h-24 object-contain" />
+                    <div>
+                      <h1 className="text-4xl font-bold text-gray-900 mb-2">Khanya</h1>
+                      <p className="text-lg text-gray-600 mb-3">Quality Clothing Bales</p>
+                      <div className="space-y-1 text-sm">
+                        <p className="flex items-center gap-2">
+                          <span className="font-semibold">🌐 Website:</span>
+                          <span className="text-blue-600">www.khanya.store</span>
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <span className="font-semibold">📧 Email:</span>
+                          <span>sales@khanya.store</span>
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <span className="font-semibold">📱 WhatsApp:</span>
+                          <span>083 305 4532</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right text-sm">
+                    <h3 className="font-bold text-lg mb-2">Customer Information</h3>
+                    <p className="font-semibold">{order.customer_name}</p>
+                    <p>{order.customer_email}</p>
+                    <p>{order.customer_phone}</p>
+                    <div className="mt-3 pt-3 border-t border-gray-300">
+                      <p className="font-semibold mb-1">Delivery Address:</p>
+                      <p>{order.delivery_address}</p>
+                      <p>{order.delivery_city}, {order.delivery_province}</p>
+                      <p>{order.delivery_postal_code}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Bale Information */}
-              <div className="mb-6 bg-gray-50 p-4 rounded">
-                <h3 className="text-lg font-bold mb-2">
-                  {bale.product_categories?.name || item.product_name}
-                </h3>
-                {bale.description && (
-                  <p className="text-sm text-gray-600">{bale.description}</p>
-                )}
+              {/* Packing List Title and Bale Name */}
+              <div className="mb-6 flex items-center justify-between">
+                <h3 className="text-lg font-bold">Packing List</h3>
+                <h3 className="text-lg font-bold">{item.product_name}</h3>
               </div>
 
               {/* Bale Contents Table */}
