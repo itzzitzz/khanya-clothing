@@ -996,8 +996,8 @@ const Checkout = () => {
                     onValueChange={handlePaymentMethodChange}
                     className="space-y-3"
                   >
-                    {/* Card Payment via Paystack - HIDDEN until business verification is complete */}
-                    <div className={`hidden flex items-start space-x-3 border rounded-lg p-4 cursor-pointer transition-all ${formData.payment_method === 'card' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}>
+                    {/* Card Payment via Paystack */}
+                    <div className={`flex items-start space-x-3 border rounded-lg p-4 cursor-pointer transition-all ${formData.payment_method === 'card' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}>
                       <RadioGroupItem value="card" id="card" className="mt-1" />
                       <div className="flex-1">
                         <Label htmlFor="card" className="cursor-pointer font-semibold flex items-center gap-2 flex-wrap">
