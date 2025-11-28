@@ -19,8 +19,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Paystack public key
-const PAYSTACK_PUBLIC_KEY = 'pk_test_5b63f33f3b1f8469fb86353a194ebaa43199141d';
+// Paystack public key (live)
+const PAYSTACK_PUBLIC_KEY = 'pk_live_a9e097397e7343977324962520f62dac58fba826';
 
 declare global {
   interface Window {
