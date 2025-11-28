@@ -87,6 +87,10 @@ const FAQ = () => {
         {
           question: "How do I track my order?",
           answer: "You can track your order using the 'Track Order' page on our website. Enter your order number and email address to see the current status of your delivery."
+        },
+        {
+          question: "Do you deliver to other countries?",
+          answer: "No, we only deliver within South Africa. We do not offer international shipping at this time."
         }
       ]
     },
