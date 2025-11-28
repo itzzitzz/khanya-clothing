@@ -4,17 +4,21 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Header from '@/components/Header';
-import { CheckCircle2, Mail, MessageCircle } from 'lucide-react';
+import { CheckCircle2, Mail, MessageCircle, CreditCard, Package, Truck } from 'lucide-react';
 
 const OrderConfirmation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [paymentCancelled, setPaymentCancelled] = useState(false);
 
   useEffect(() => {
     // Get order details from navigation state
     if (location.state?.orderDetails) {
       setOrderDetails(location.state.orderDetails);
+      setPaymentSuccess(location.state?.paymentSuccess || false);
+      setPaymentCancelled(location.state?.paymentCancelled || false);
     } else {
       // If no order details, redirect to home
       navigate('/');
@@ -25,6 +29,102 @@ const OrderConfirmation = () => {
     return null;
   }
 
+  // Payment was successful via card
+  if (paymentSuccess) {
+    return (
+      <>
+        <Helmet>
+          <title>Payment Successful - {orderDetails.order_number} | Khanya</title>
+          <meta name="description" content={`Your payment for order ${orderDetails.order_number} has been confirmed. Your bales are being prepared for dispatch.`} />
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        
+        <div className="min-h-screen bg-background">
+          <Header />
+          
+          <div className="container mx-auto px-4 py-12 max-w-3xl">
+            <div className="text-center mb-8">
+              <div className="relative inline-block">
+                <CheckCircle2 className="w-20 h-20 mx-auto text-green-600 mb-4" />
+                <CreditCard className="w-8 h-8 absolute -bottom-1 -right-1 text-green-600 bg-background rounded-full p-1" />
+              </div>
+              <h1 className="text-3xl font-bold mb-2 text-green-600">Payment Successful!</h1>
+              <p className="text-xl text-muted-foreground">
+                Order Number: <span className="font-mono font-semibold text-foreground">{orderDetails.order_number}</span>
+              </p>
+            </div>
+
+            <Card className="p-6 space-y-6 border-green-200 bg-green-50/50">
+              <div className="text-center">
+                <p className="text-lg mb-2">
+                  Thank you for your payment of <strong className="text-green-600">R{orderDetails.total_amount?.toFixed(2)}</strong>
+                </p>
+                <p className="text-muted-foreground">
+                  Your order has been confirmed and is being prepared for dispatch.
+                </p>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-green-200">
+                <h3 className="font-semibold text-lg">What happens next?</h3>
+                
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <Package className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Your bales are being packed</p>
+                    <p className="text-sm text-muted-foreground">
+                      Our team is preparing your order for shipment
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <Truck className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium">We'll courier your order</p>
+                    <p className="text-sm text-muted-foreground">
+                      You'll receive tracking details via email and SMS
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Stay updated</p>
+                    <p className="text-sm text-muted-foreground">
+                      We'll keep you informed at every step of the way
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <div className="mt-8 text-center space-y-3">
+              <p className="text-sm text-muted-foreground">
+                A confirmation email has been sent to your email address.
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Button variant="outline" onClick={() => navigate('/')}>
+                  Continue Shopping
+                </Button>
+                <Button onClick={() => navigate('/track-order')}>
+                  Track Your Order
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Payment was cancelled or needs EFT/E-Wallet payment
   return (
     <>
       <Helmet>
@@ -43,6 +143,11 @@ const OrderConfirmation = () => {
             <p className="text-xl text-muted-foreground">
               Order Number: <span className="font-mono font-semibold text-foreground">{orderDetails.order_number}</span>
             </p>
+            {paymentCancelled && (
+              <p className="mt-2 text-amber-600 text-sm">
+                Card payment was cancelled. Please complete payment using one of the options below.
+              </p>
+            )}
           </div>
 
           <Card className="p-6 space-y-6">
