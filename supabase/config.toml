@@ -60,3 +60,8 @@ verify_jwt = false
 [functions.fix-order-payment]
 verify_jwt = false
 
+[functions.initialize-paystack-payment]
+verify_jwt = false
+
+[functions.verify-paystack-payment]
+verify_jwt = false
