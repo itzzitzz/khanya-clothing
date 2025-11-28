@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
-import { Loader2, Mail, MessageCircle, CheckCircle2, Package, Truck, ShieldCheck, MapPin, User } from 'lucide-react';
+import { Loader2, Mail, MessageCircle, CheckCircle2, Package, Truck, ShieldCheck, MapPin, User, CreditCard, Banknote, Wallet } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+
+// Paystack public key
+const PAYSTACK_PUBLIC_KEY = 'pk_test_5b63f33f3b1f8469fb86353a194ebaa43199141d';
+
+declare global {
+  interface Window {
+    PaystackPop: any;
+  }
+}
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -30,6 +39,7 @@ const Checkout = () => {
   const [verifyingPin, setVerifyingPin] = useState(false);
   const [verificationMethod, setVerificationMethod] = useState<'email' | 'sms'>('email');
   const [verificationPhone, setVerificationPhone] = useState('');
+  const [paystackLoaded, setPaystackLoaded] = useState(false);
   
   const [deliveryMethod, setDeliveryMethod] = useState<'my_address' | 'paxi_location'>('my_address');
   const [paxiLocation, setPaxiLocation] = useState('');
@@ -50,12 +60,29 @@ const Checkout = () => {
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
+  // Load Paystack script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.async = true;
+    script.onload = () => setPaystackLoaded(true);
+    document.body.appendChild(script);
+    
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleProvinceChange = (value: string) => {
     setFormData({ ...formData, delivery_province: value });
+  };
+
+  const handlePaymentMethodChange = (value: string) => {
+    setFormData({ ...formData, payment_method: value });
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,6 +232,99 @@ const Checkout = () => {
     }
   };
 
+  const handlePaystackPayment = async (orderData: any) => {
+    if (!paystackLoaded || !window.PaystackPop) {
+      toast({
+        title: 'Error',
+        description: 'Payment service is loading. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // First create the order
+    const { data: order, error: orderError } = await supabase.functions.invoke('create-order', {
+      body: {
+        ...orderData,
+        items: cart.map((item) => ({
+          product_id: item.product_id,
+          product_name: item.product_name,
+          product_image: item.product_image,
+          quantity: item.quantity,
+          price_per_unit: item.price_per_unit,
+        })),
+      },
+    });
+
+    if (orderError) throw orderError;
+
+    const handler = window.PaystackPop.setup({
+      key: PAYSTACK_PUBLIC_KEY,
+      email: formData.customer_email,
+      amount: Math.round(cartTotal * 100), // Convert to kobo
+      currency: 'ZAR',
+      ref: order.order_number,
+      metadata: {
+        order_number: order.order_number,
+        customer_name: formData.customer_name,
+      },
+      onClose: () => {
+        toast({
+          title: 'Payment Cancelled',
+          description: 'Your order has been created. You can pay later via EFT or E-Wallet.',
+        });
+        clearCart();
+        navigate('/order-confirmation', { 
+          state: { 
+            orderDetails: order,
+            paymentCancelled: true
+          } 
+        });
+      },
+      callback: async (response: any) => {
+        // Verify payment on backend
+        try {
+          const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-paystack-payment', {
+            body: { reference: response.reference },
+          });
+
+          if (verifyError) throw verifyError;
+
+          if (verifyData?.payment_verified) {
+            toast({
+              title: 'Payment Successful!',
+              description: 'Your payment has been confirmed.',
+            });
+            clearCart();
+            navigate('/order-confirmation', { 
+              state: { 
+                orderDetails: { ...order, payment_status: 'paid', payment_tracking_status: 'Fully Paid' },
+                paymentSuccess: true
+              } 
+            });
+          } else {
+            throw new Error('Payment verification failed');
+          }
+        } catch (err: any) {
+          console.error('Payment verification error:', err);
+          toast({
+            title: 'Payment Verification Issue',
+            description: 'Your payment may have been processed. Please contact support if needed.',
+            variant: 'destructive',
+          });
+          clearCart();
+          navigate('/order-confirmation', { 
+            state: { 
+              orderDetails: order 
+            } 
+          });
+        }
+      },
+    });
+
+    handler.openIframe();
+  };
+
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -248,6 +368,13 @@ const Checkout = () => {
           }
         : formData;
 
+      // If Paystack payment method selected, handle differently
+      if (formData.payment_method === 'card') {
+        await handlePaystackPayment(orderData);
+        return;
+      }
+
+      // For EFT or E-Wallet, create order normally
       const { data, error } = await supabase.functions.invoke('create-order', {
         body: {
           ...orderData,
@@ -479,146 +606,184 @@ const Checkout = () => {
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-primary" />
-                      Make sure we send your goodies to the right place
+                      Confirm your delivery details
                     </li>
                   </ul>
                 </div>
               </div>
-              <div className="space-y-4">
-                <div>
-                  <Label>How would you like to receive your verification code? *</Label>
-                  <RadioGroup
-                    value={verificationMethod}
-                    onValueChange={(value: 'email' | 'sms') => {
-                      setVerificationMethod(value);
-                      setPinSent(false);
-                      setPin('');
-                    }}
-                    disabled={pinVerified}
-                  >
-                    <div className="flex items-center space-x-2 p-3 border rounded">
-                      <RadioGroupItem value="email" id="verify-email" />
-                      <Label htmlFor="verify-email">Email</Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-3 border rounded">
-                      <RadioGroupItem value="sms" id="verify-sms" />
-                      <Label htmlFor="verify-sms">SMS (South Africa only)</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
 
-                {verificationMethod === 'email' && (
-                  <div>
-                    <Label htmlFor="customer_email">Email Address *</Label>
-                    <Input
-                      id="customer_email"
-                      name="customer_email"
-                      type="email"
-                      value={formData.customer_email}
-                      onChange={handleInputChange}
-                      required
-                      disabled={pinVerified}
-                    />
+              {!pinVerified ? (
+                <div className="space-y-6">
+                  {/* Verification Method Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Choose verification method:</Label>
+                    <RadioGroup
+                      value={verificationMethod}
+                      onValueChange={(value: 'email' | 'sms') => setVerificationMethod(value)}
+                      className="grid grid-cols-2 gap-4"
+                    >
+                      <div className={`flex items-center space-x-3 border rounded-lg p-4 cursor-pointer transition-all ${verificationMethod === 'email' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}>
+                        <RadioGroupItem value="email" id="verify-email" />
+                        <Label htmlFor="verify-email" className="cursor-pointer flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          Email
+                        </Label>
+                      </div>
+                      <div className={`flex items-center space-x-3 border rounded-lg p-4 cursor-pointer transition-all ${verificationMethod === 'sms' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}>
+                        <RadioGroupItem value="sms" id="verify-sms" />
+                        <Label htmlFor="verify-sms" className="cursor-pointer flex items-center gap-2">
+                          <MessageCircle className="h-4 w-4" />
+                          SMS
+                        </Label>
+                      </div>
+                    </RadioGroup>
                   </div>
-                )}
 
-                {verificationMethod === 'sms' && (
-                  <div>
-                    <Label htmlFor="verification_phone">Phone Number *</Label>
-                    <Input
-                      id="verification_phone"
-                      value={verificationPhone}
-                      onChange={handlePhoneChange}
-                      placeholder="+27 XX XXX XXXX"
-                      disabled={pinVerified}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      South African numbers only. Format: +27 XX XXX XXXX
-                    </p>
-                  </div>
-                )}
-
-                {!pinSent && (
-                  <Button
-                    type="button"
-                    onClick={handleSendPin}
-                    disabled={loading || (verificationMethod === 'email' && !formData.customer_email) || (verificationMethod === 'sms' && !verificationPhone)}
-                  >
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Send Verification PIN
-                  </Button>
-                )}
-                {pinSent && !pinVerified && (
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="pin">Enter 6-Digit PIN</Label>
+                  {/* Email/Phone Input */}
+                  {verificationMethod === 'email' ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="customer_email">Email Address *</Label>
                       <Input
-                        id="pin"
-                        value={pin}
-                        onChange={(e) => setPin(e.target.value)}
-                        maxLength={6}
-                        placeholder="000000"
+                        id="customer_email"
+                        name="customer_email"
+                        type="email"
+                        value={formData.customer_email}
+                        onChange={handleInputChange}
+                        placeholder="your@email.com"
+                        required
+                        disabled={pinSent}
                       />
                     </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="verification_phone">Phone Number *</Label>
+                      <Input
+                        id="verification_phone"
+                        value={verificationPhone}
+                        onChange={handlePhoneChange}
+                        placeholder="+27 XX XXX XXXX"
+                        required
+                        disabled={pinSent}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Enter your South African mobile number
+                      </p>
+                    </div>
+                  )}
+
+                  {!pinSent ? (
                     <Button
                       type="button"
-                      onClick={handleVerifyPin}
-                      disabled={verifyingPin}
+                      onClick={handleSendPin}
+                      disabled={loading}
+                      className="w-full"
                     >
-                      {verifyingPin && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Verify PIN
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending PIN...
+                        </>
+                      ) : (
+                        <>Send Verification PIN</>
+                      )}
                     </Button>
-                  </div>
-                )}
-                {pinVerified && (
-                  <p className="text-green-600 font-semibold">
-                    ✓ {verificationMethod === 'email' ? 'Email' : 'Phone'} verified
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Success Message */}
-            {pinVerified && (
-              <div className="border rounded-lg p-6 bg-primary/5 border-primary/20 animate-fade-in">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-8 w-8 text-primary" />
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="pin">Enter 6-digit PIN</Label>
+                        <Input
+                          id="pin"
+                          value={pin}
+                          onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          placeholder="000000"
+                          maxLength={6}
+                          className="text-center text-2xl tracking-widest"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={handleVerifyPin}
+                        disabled={verifyingPin || pin.length !== 6}
+                        className="w-full"
+                      >
+                        {verifyingPin ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Verifying...
+                          </>
+                        ) : (
+                          <>Verify PIN</>
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          setPinSent(false);
+                          setPin('');
+                        }}
+                        className="w-full"
+                      >
+                        Resend PIN
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 p-4 bg-primary/10 rounded-lg">
+                  <CheckCircle2 className="h-6 w-6 text-primary" />
                   <div>
-                    <h3 className="font-bold text-lg">Awesome! You're Verified! ✨</h3>
+                    <p className="font-semibold text-primary">Verified!</p>
                     <p className="text-sm text-muted-foreground">
-                      Now let's get your details so we can deliver your quality bales
+                      {verificationMethod === 'email' ? formData.customer_email : verificationPhone}
                     </p>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
-            {/* Customer Details */}
+            {/* Rest of form only shown after verification */}
             {pinVerified && (
               <>
+                {/* Customer Details */}
                 <div className="border rounded-lg p-6 bg-card shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="bg-primary/10 p-3 rounded-full">
                       <User className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold mb-2">Tell Us About You 👋</h2>
+                      <h2 className="text-2xl font-bold mb-2">Your Details</h2>
                       <p className="text-muted-foreground text-sm">
-                        Just the basics so we can keep in touch about your order
+                        Tell us who you are so we can address your package correctly
                       </p>
                     </div>
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="customer_name">Full Name *</Label>
-                      <Input
-                        id="customer_name"
-                        name="customer_name"
-                        value={formData.customer_name}
-                        onChange={handleInputChange}
-                        required
-                      />
+                  
+                  <div className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="customer_name">Full Name *</Label>
+                        <Input
+                          id="customer_name"
+                          name="customer_name"
+                          value={formData.customer_name}
+                          onChange={handleInputChange}
+                          placeholder="e.g. John Doe"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="business_name">Business Name (Optional)</Label>
+                        <Input
+                          id="business_name"
+                          name="business_name"
+                          value={formData.business_name}
+                          onChange={handleInputChange}
+                          placeholder="e.g. John's Clothing Store"
+                        />
+                      </div>
                     </div>
+                    
                     {verificationMethod === 'email' && (
                       <div>
                         <Label htmlFor="customer_phone">Phone Number *</Label>
@@ -628,23 +793,26 @@ const Checkout = () => {
                           type="tel"
                           value={formData.customer_phone}
                           onChange={handleInputChange}
-                          placeholder="+27 XX XXX XXXX"
+                          placeholder="e.g. 083 123 4567"
                           required
                         />
                       </div>
                     )}
+                    
                     {verificationMethod === 'sms' && (
                       <div>
-                        <Label htmlFor="customer_phone">Phone Number *</Label>
+                        <Label htmlFor="customer_email_after">Email Address *</Label>
                         <Input
-                          id="customer_phone"
-                          name="customer_phone"
-                          value={formData.customer_phone}
-                          disabled
-                          className="bg-muted"
+                          id="customer_email_after"
+                          name="customer_email"
+                          type="email"
+                          value={formData.customer_email}
+                          onChange={handleInputChange}
+                          placeholder="your@email.com"
+                          required
                         />
                         <p className="text-xs text-muted-foreground mt-1">
-                          Using verified phone number
+                          We'll send your order confirmation and updates here
                         </p>
                       </div>
                     )}
@@ -657,46 +825,51 @@ const Checkout = () => {
                     <div className="bg-primary/10 p-3 rounded-full">
                       <MapPin className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="flex-1">
-                      <h2 className="text-2xl font-bold mb-2">Where Should We Send Your Goodies? 📦</h2>
-                      <div className="flex items-center gap-2 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-4 py-2 rounded-lg">
-                        <Truck className="h-5 w-5" />
-                        <span className="font-semibold">FREE delivery anywhere in South Africa!</span>
-                      </div>
+                    <div>
+                      <h2 className="text-2xl font-bold mb-2">Delivery</h2>
+                      <p className="text-muted-foreground text-sm">
+                        Choose where you want your bales delivered
+                      </p>
                     </div>
                   </div>
                   
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Delivery Method *</Label>
-                      <RadioGroup
-                        value={deliveryMethod}
-                        onValueChange={(value: 'my_address' | 'paxi_location') => setDeliveryMethod(value)}
-                      >
-                        <div className="flex items-center space-x-2 p-3 border rounded">
-                          <RadioGroupItem value="my_address" id="my-address" />
-                          <Label htmlFor="my-address" className="cursor-pointer">My Address</Label>
+                  <div className="space-y-6">
+                    {/* Delivery Method Selection */}
+                    <RadioGroup
+                      value={deliveryMethod}
+                      onValueChange={(value: 'my_address' | 'paxi_location') => setDeliveryMethod(value)}
+                      className="grid md:grid-cols-2 gap-4"
+                    >
+                      <div className={`flex items-start space-x-3 border rounded-lg p-4 cursor-pointer transition-all ${deliveryMethod === 'my_address' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}>
+                        <RadioGroupItem value="my_address" id="my_address" className="mt-1" />
+                        <div>
+                          <Label htmlFor="my_address" className="cursor-pointer font-semibold">
+                            Deliver to my address
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            We'll courier your bales directly to you
+                          </p>
                         </div>
-                        <div className="flex items-center space-x-2 p-3 border rounded">
-                          <RadioGroupItem value="paxi_location" id="paxi-location" />
-                          <Label htmlFor="paxi-location" className="cursor-pointer">PAXI Collection Point (PEP Store)</Label>
+                      </div>
+                      <div className={`flex items-start space-x-3 border rounded-lg p-4 cursor-pointer transition-all ${deliveryMethod === 'paxi_location' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}>
+                        <RadioGroupItem value="paxi_location" id="paxi_location" className="mt-1" />
+                        <div>
+                          <Label htmlFor="paxi_location" className="cursor-pointer font-semibold">
+                            Collect from PAXI (FREE)
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Pick up from any PEP store near you - FREE!
+                          </p>
                         </div>
-                      </RadioGroup>
-                    </div>
+                      </div>
+                    </RadioGroup>
 
+                    {/* Address Fields or PAXI Selection */}
                     {deliveryMethod === 'my_address' ? (
                       <>
-                        <div>
-                          <Label htmlFor="business_name">Business Name / Complex Number and Name</Label>
-                          <Input
-                            id="business_name"
-                            name="business_name"
-                            value={formData.business_name}
-                            onChange={handleInputChange}
-                            placeholder="e.g. Fashion Hub or Unit 5, Sunset Complex"
-                          />
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Optional - helps courier find you
+                        <div className="bg-muted/50 p-3 rounded-lg">
+                          <p className="text-sm text-muted-foreground">
+                            <strong>Note:</strong> Courier fees will be calculated and communicated after order placement.
                           </p>
                         </div>
                         <div>
@@ -797,33 +970,93 @@ const Checkout = () => {
                 <div className="border rounded-lg p-6 bg-card shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="bg-primary/10 p-3 rounded-full">
-                      <Package className="h-6 w-6 text-primary" />
+                      <CreditCard className="h-6 w-6 text-primary" />
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold mb-2">Payment Method</h2>
                       <p className="text-muted-foreground text-sm">
-                        We accept payment via EFT (Electronic Funds Transfer) or by FNB E-Wallet to 083 305 4532
+                        Choose how you'd like to pay for your order
                       </p>
                     </div>
                   </div>
                   
-                  <div className="bg-muted p-4 rounded-lg space-y-4">
-                    <div>
-                      <h3 className="font-semibold mb-2">Banking Details</h3>
-                      <div className="space-y-1 text-sm">
-                        <p><strong>Bank:</strong> First National Bank (FNB)</p>
-                        <p><strong>Branch Code:</strong> 250655</p>
-                        <p><strong>Account Number:</strong> 63173001256</p>
-                        <p><strong>Account Name:</strong> Khanya</p>
+                  <RadioGroup
+                    value={formData.payment_method}
+                    onValueChange={handlePaymentMethodChange}
+                    className="space-y-3"
+                  >
+                    {/* Card Payment via Paystack */}
+                    <div className={`flex items-start space-x-3 border rounded-lg p-4 cursor-pointer transition-all ${formData.payment_method === 'card' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}>
+                      <RadioGroupItem value="card" id="card" className="mt-1" />
+                      <div className="flex-1">
+                        <Label htmlFor="card" className="cursor-pointer font-semibold flex items-center gap-2">
+                          <CreditCard className="h-4 w-4" />
+                          Card / Apple Pay / Google Pay
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Instant</span>
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Pay instantly with your card, Apple Pay, or Google Pay via Paystack
+                        </p>
                       </div>
                     </div>
-                    
-                    <div className="pt-3 border-t">
+
+                    {/* EFT */}
+                    <div className={`flex items-start space-x-3 border rounded-lg p-4 cursor-pointer transition-all ${formData.payment_method === 'eft' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}>
+                      <RadioGroupItem value="eft" id="eft" className="mt-1" />
+                      <div className="flex-1">
+                        <Label htmlFor="eft" className="cursor-pointer font-semibold flex items-center gap-2">
+                          <Banknote className="h-4 w-4" />
+                          EFT (Bank Transfer)
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Pay via bank transfer to our FNB account
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* E-Wallet */}
+                    <div className={`flex items-start space-x-3 border rounded-lg p-4 cursor-pointer transition-all ${formData.payment_method === 'fnb_ewallet' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}>
+                      <RadioGroupItem value="fnb_ewallet" id="fnb_ewallet" className="mt-1" />
+                      <div className="flex-1">
+                        <Label htmlFor="fnb_ewallet" className="cursor-pointer font-semibold flex items-center gap-2">
+                          <Wallet className="h-4 w-4" />
+                          FNB E-Wallet
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Send payment to 083 305 4532
+                        </p>
+                      </div>
+                    </div>
+                  </RadioGroup>
+
+                  {/* Banking details for EFT */}
+                  {formData.payment_method === 'eft' && (
+                    <div className="mt-4 bg-muted p-4 rounded-lg space-y-4">
+                      <div>
+                        <h3 className="font-semibold mb-2">Banking Details</h3>
+                        <div className="space-y-1 text-sm">
+                          <p><strong>Bank:</strong> First National Bank (FNB)</p>
+                          <p><strong>Branch Code:</strong> 250655</p>
+                          <p><strong>Account Number:</strong> 63173001256</p>
+                          <p><strong>Account Name:</strong> Khanya</p>
+                        </div>
+                      </div>
+                      
+                      <div className="pt-3 border-t">
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Important:</strong> Please use your order number as the payment reference. After payment, send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>083 305 4532</strong>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.payment_method === 'fnb_ewallet' && (
+                    <div className="mt-4 bg-muted p-4 rounded-lg">
                       <p className="text-sm text-muted-foreground">
-                        <strong>Important:</strong> Please use your order number as the payment reference. After payment, send proof of payment to <strong>sales@khanya.store</strong> or WhatsApp it to <strong>083 305 4532</strong>
+                        <strong>Important:</strong> After placing your order, send the E-Wallet payment to <strong>083 305 4532</strong> using your order number as reference.
                       </p>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Order Summary */}
@@ -853,6 +1086,11 @@ const Checkout = () => {
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Processing Your Order...
+                    </>
+                  ) : formData.payment_method === 'card' ? (
+                    <>
+                      <CreditCard className="mr-2 h-5 w-5" />
+                      Pay R{cartTotal.toFixed(2)} Now
                     </>
                   ) : (
                     <>
