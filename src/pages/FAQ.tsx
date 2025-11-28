@@ -78,7 +78,7 @@ const FAQ = () => {
         },
         {
           question: "How long does delivery take?",
-          answer: "Delivery times vary depending on your location and courier availability. Typically, orders are delivered within 3-7 business days. You'll receive email and SMS updates on your order status."
+          answer: "Delivery times vary depending on your location and courier availability. Typically, orders are delivered within 3-7 business days. If you're in Midrand, you can expect to receive your goods either the same day or next day! You'll receive email and SMS updates on your order status."
         },
         {
           question: "Can I collect my order from your premises?",
