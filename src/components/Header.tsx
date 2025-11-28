@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import { useNavigate } from "react-router-dom";
 
-export type ActiveKey = "business" | "gallery" | "contact" | "location" | "brand" | "bales" | "track" | undefined;
+export type ActiveKey = "business" | "gallery" | "contact" | "location" | "brand" | "bales" | "track" | "faq" | undefined;
 
 const Header = ({ active }: { active?: ActiveKey }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -17,6 +17,7 @@ const Header = ({ active }: { active?: ActiveKey }) => {
     { key: "brand" as const, label: "Khanya Brand", href: "/brand" },
     { key: "bales" as const, label: "View & Order Bales", href: "/view-order-bales" },
     { key: "track" as const, label: "Track Order", href: "/track-order" },
+    { key: "faq" as const, label: "FAQ", href: "/faq" },
     { key: "contact" as const, label: "Contact", href: "/contact" },
   ];
 
