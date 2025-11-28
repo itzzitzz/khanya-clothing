@@ -889,9 +889,9 @@ const Checkout = () => {
                     {/* Address Fields or PAXI Selection */}
                     {deliveryMethod === 'my_address' ? (
                       <>
-                        <div className="bg-muted/50 p-3 rounded-lg">
-                          <p className="text-sm text-muted-foreground">
-                            <strong>Note:</strong> Courier fees will be calculated and communicated after order placement.
+                        <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+                          <p className="text-sm text-green-700">
+                            <strong>FREE Delivery!</strong> We deliver nationwide at no extra cost.
                           </p>
                         </div>
                         <div>
