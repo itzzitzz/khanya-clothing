@@ -7,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from "@/components/ui/table";
-import { Pencil, Trash2, Upload, ArrowUp, ArrowDown } from "lucide-react";
+import { Pencil, Trash2, Upload, ArrowUp, ArrowDown, FileDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { GenerateSingleImage } from "./GenerateSingleImage";
-
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 interface StockItem {
   id: number;
   stock_category_id: number;
@@ -187,6 +188,110 @@ export const StockItemManager = () => {
       stock_on_hand: 0,
       active: true
     });
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Add branding header
+    doc.setFillColor(0, 0, 0);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(28);
+    doc.setFont('helvetica', 'bold');
+    doc.text('KHANYA', pageWidth / 2, 18, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Quality Second-Hand Clothing', pageWidth / 2, 26, { align: 'center' });
+    
+    // Reset text color for content
+    doc.setTextColor(0, 0, 0);
+    
+    // Add report title
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Stock Items Report', 14, 48);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated: ${new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })}`, 14, 55);
+    
+    let yPosition = 65;
+    
+    // Group items by category for the PDF
+    Object.entries(groupedItems).forEach(([categoryId, items]) => {
+      const category = categories.find(c => c.id === parseInt(categoryId));
+      
+      // Category header
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(80, 80, 80);
+      doc.text(category?.name || 'Unknown Category', 14, yPosition);
+      yPosition += 5;
+      
+      // Table data for this category
+      const tableData = items.map(item => [
+        item.name,
+        item.age_range || '-',
+        `R${item.cost_price.toFixed(2)}`,
+        `R${item.selling_price.toFixed(2)}`,
+        `${item.margin_percentage.toFixed(1)}%`,
+        item.stock_on_hand.toString(),
+        item.active ? 'Yes' : 'No'
+      ]);
+      
+      autoTable(doc, {
+        startY: yPosition,
+        head: [['Name', 'Age Range', 'Cost', 'Selling', 'Margin', 'Stock', 'Active']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { 
+          fillColor: [50, 50, 50],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        styles: { 
+          fontSize: 9,
+          cellPadding: 3
+        },
+        columnStyles: {
+          0: { cellWidth: 50 },
+          1: { cellWidth: 25 },
+          2: { cellWidth: 22 },
+          3: { cellWidth: 22 },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 18 },
+          6: { cellWidth: 18 }
+        },
+        margin: { left: 14, right: 14 }
+      });
+      
+      yPosition = (doc as any).lastAutoTable.finalY + 10;
+      
+      // Check if we need a new page
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 20;
+      }
+    });
+    
+    // Add footer with totals
+    const totalItems = stockItems.length;
+    const totalStock = stockItems.reduce((sum, item) => sum + item.stock_on_hand, 0);
+    const totalValue = stockItems.reduce((sum, item) => sum + (item.selling_price * item.stock_on_hand), 0);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Total Items: ${totalItems}  |  Total Stock: ${totalStock}  |  Total Value: R${totalValue.toFixed(2)}`, 14, yPosition + 5);
+    
+    // Save the PDF
+    doc.save(`khanya-stock-items-${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    toast({ title: "Success", description: "Stock items exported to PDF" });
   };
 
   const moveStockItem = async (id: number, direction: 'up' | 'down', categoryId: number) => {
@@ -546,9 +651,13 @@ export const StockItemManager = () => {
       </Card>
 
       <Card className="p-6">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <h3 className="text-lg font-semibold">Stock Items</h3>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={exportToPDF}>
+              <FileDown className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
             <Label>Filter:</Label>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-[200px]">
