@@ -981,7 +981,7 @@ const Checkout = () => {
                 <div className="border rounded-lg p-6 bg-card shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="bg-primary/10 p-3 rounded-full">
-                      <CreditCard className="h-6 w-6 text-primary" />
+                      <Wallet className="h-6 w-6 text-primary" />
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold mb-2">Payment Method</h2>
