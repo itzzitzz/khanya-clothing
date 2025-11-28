@@ -268,7 +268,7 @@ const Checkout = () => {
         order_number: order.order_number,
         customer_name: formData.customer_name,
       },
-      onClose: () => {
+      onClose: function() {
         toast({
           title: 'Payment Cancelled',
           description: 'Your order has been created. You can pay later via EFT or E-Wallet.',
@@ -281,14 +281,26 @@ const Checkout = () => {
           } 
         });
       },
-      callback: async (response: any) => {
+      callback: function(response: any) {
         // Verify payment on backend
-        try {
-          const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-paystack-payment', {
-            body: { reference: response.reference },
-          });
-
-          if (verifyError) throw verifyError;
+        supabase.functions.invoke('verify-paystack-payment', {
+          body: { reference: response.reference },
+        }).then(({ data: verifyData, error: verifyError }) => {
+          if (verifyError) {
+            console.error('Payment verification error:', verifyError);
+            toast({
+              title: 'Payment Verification Issue',
+              description: 'Your payment may have been processed. Please contact support if needed.',
+              variant: 'destructive',
+            });
+            clearCart();
+            navigate('/order-confirmation', { 
+              state: { 
+                orderDetails: order 
+              } 
+            });
+            return;
+          }
 
           if (verifyData?.payment_verified) {
             toast({
@@ -303,9 +315,19 @@ const Checkout = () => {
               } 
             });
           } else {
-            throw new Error('Payment verification failed');
+            toast({
+              title: 'Payment Verification Issue',
+              description: 'Your payment may have been processed. Please contact support if needed.',
+              variant: 'destructive',
+            });
+            clearCart();
+            navigate('/order-confirmation', { 
+              state: { 
+                orderDetails: order 
+              } 
+            });
           }
-        } catch (err: any) {
+        }).catch((err: any) => {
           console.error('Payment verification error:', err);
           toast({
             title: 'Payment Verification Issue',
@@ -318,7 +340,7 @@ const Checkout = () => {
               orderDetails: order 
             } 
           });
-        }
+        });
       },
     });
 
