@@ -66,4 +66,12 @@
     <priority>0.4</priority>
   </url>
 
+  <!-- FAQ Page -->
+  <url>
+    <loc>https://khanya.store/faq</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
 </urlset>
