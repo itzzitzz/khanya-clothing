@@ -24,6 +24,8 @@ interface CreateOrderRequest {
   delivery_postal_code: string;
   payment_method: string;
   items: OrderItem[];
+  is_paid?: boolean; // Flag for card payments that are already paid
+  paystack_reference?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -55,6 +57,11 @@ const handler = async (req: Request): Promise<Response> => {
       0
     );
 
+    // Determine payment status based on is_paid flag (for card payments)
+    const isPaid = orderData.is_paid === true;
+    const paymentTrackingStatus = isPaid ? 'Fully Paid' : 'Awaiting payment';
+    const amountPaid = isPaid ? totalAmount : 0;
+
     // Create order
     const { data: order, error: orderError } = await supabase
       .from("orders")
@@ -69,6 +76,9 @@ const handler = async (req: Request): Promise<Response> => {
         delivery_postal_code: orderData.delivery_postal_code,
         payment_method: orderData.payment_method,
         total_amount: totalAmount,
+        payment_tracking_status: paymentTrackingStatus,
+        amount_paid: amountPaid,
+        payment_status: isPaid ? 'paid' : 'pending',
       })
       .select()
       .single();
@@ -143,25 +153,40 @@ const handler = async (req: Request): Promise<Response> => {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (resendApiKey) {
       try {
-        // Customer confirmation email
+        // Customer confirmation email - different content based on payment status
+        const paymentStatusHtml = isPaid 
+          ? `<div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 12px; margin: 15px 0; border-radius: 4px;">
+              <p style="margin: 0; font-size: 14px; color: #065f46;">
+                <strong>Payment Status:</strong> <span style="background: #a7f3d0; padding: 4px 8px; border-radius: 4px; font-weight: bold;">✓ Fully Paid</span>
+              </p>
+              <p style="margin: 8px 0 0 0; font-size: 13px; color: #065f46;">
+                Amount Paid: <strong>R${totalAmount.toFixed(2)}</strong>
+              </p>
+            </div>`
+          : `<div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 15px 0; border-radius: 4px;">
+              <p style="margin: 0; font-size: 14px; color: #92400e;">
+                <strong>Payment Status:</strong> <span style="background: #fde68a; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Awaiting payment</span>
+              </p>
+              <p style="margin: 8px 0 0 0; font-size: 13px; color: #92400e;">
+                Amount Due: <strong>R${totalAmount.toFixed(2)}</strong>
+              </p>
+            </div>`;
+
+        const introText = isPaid
+          ? `Thank you for your order and payment! We've received everything and will start preparing your bales for shipment right away.`
+          : `Thank you for your order! We've received your order and will begin processing it once payment is confirmed.`;
+
         const customerHtml = `
           <div style="max-width: 600px; margin: 0 auto; padding: 20px; background: #faf9f6; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;">
             <div style="background: linear-gradient(135deg, #2E4D38 0%, #234130 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-              <h1 style="margin: 0; font-size: 28px;">Order Confirmed!</h1>
+              <h1 style="margin: 0; font-size: 28px;">${isPaid ? 'Order Confirmed & Paid!' : 'Order Confirmed!'}</h1>
             </div>
             <div style="background: #ffffff; padding: 30px 20px; border: 1px solid #d9ded6; border-top: none;">
               <p style="line-height: 1.6; color: #1f2e27;">Hello ${orderData.customer_name},</p>
-              <p style="line-height: 1.6; color: #1f2e27;">Thank you for your order! We've received your order and will begin processing it once payment is confirmed.</p>
+              <p style="line-height: 1.6; color: #1f2e27;">${introText}</p>
               <div style="font-size: 18px; font-weight: bold; color: #D6A220; margin: 10px 0;">Order Number: ${orderNumber}</div>
               
-              <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 15px 0; border-radius: 4px;">
-                <p style="margin: 0; font-size: 14px; color: #92400e;">
-                  <strong>Payment Status:</strong> <span style="background: #fde68a; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Awaiting payment</span>
-                </p>
-                <p style="margin: 8px 0 0 0; font-size: 13px; color: #92400e;">
-                  Amount Due: <strong>R${totalAmount.toFixed(2)}</strong>
-                </p>
-              </div>
+              ${paymentStatusHtml}
               
               <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
                 <thead>
@@ -188,7 +213,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </tbody>
               </table>
               
-              ${orderData.payment_method === 'eft' ? `
+              ${!isPaid && orderData.payment_method === 'eft' ? `
                 <div style="background: #fef9e7; border-left: 4px solid #D6A220; padding: 15px; margin: 20px 0; border-radius: 4px;">
                   <h3 style="margin-top: 0; color: #2E4D38;">EFT Payment Details</h3>
                   <p style="line-height: 1.6; color: #1f2e27;">Please deposit <strong>R${totalAmount.toFixed(2)}</strong> into the following account and send proof of payment to <strong>sales@khanya.store</strong>:</p>
@@ -202,7 +227,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </div>
               ` : ''}
               
-              ${orderData.payment_method === 'fnb_ewallet' ? `
+              ${!isPaid && orderData.payment_method === 'fnb_ewallet' ? `
                 <div style="background: #fef9e7; border-left: 4px solid #D6A220; padding: 15px; margin: 20px 0; border-radius: 4px;">
                   <h3 style="margin-top: 0; color: #2E4D38;">FNB E-Wallet Payment Details</h3>
                   <p style="line-height: 1.6; color: #1f2e27;">Please send <strong>R${totalAmount.toFixed(2)}</strong> via FNB E-Wallet to:</p>
@@ -214,7 +239,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <div style="background: #f4f7f5; border-left: 4px solid #2E4D38; padding: 15px; margin: 20px 0; border-radius: 4px;">
                 <strong>What happens next?</strong>
-                <p style="margin: 10px 0 0 0; line-height: 1.6; color: #1f2e27;">Once we confirm your payment, we'll start preparing your bales for shipment. You'll receive email updates at each step of the process.</p>
+                <p style="margin: 10px 0 0 0; line-height: 1.6; color: #1f2e27;">${isPaid ? `We'll start preparing your bales for shipment right away. You'll receive email updates at each step of the process.` : `Once we confirm your payment, we'll start preparing your bales for shipment. You'll receive email updates at each step of the process.`}</p>
               </div>
               
               <p style="line-height: 1.6; color: #1f2e27;"><strong>Delivery Address:</strong><br>
@@ -301,7 +326,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <div style="background: #f4f7f5; border-left: 4px solid #2E4D38; padding: 15px; margin: 20px 0; border-radius: 4px;">
                 <strong>Payment Method:</strong> ${orderData.payment_method.replace(/_/g, " ").toUpperCase()}<br>
-                <strong>Payment Status:</strong> Pending
+                <strong>Payment Status:</strong> ${isPaid ? '✅ PAID' : 'Pending'}
               </div>
               
               <h3>Delivery Address</h3>

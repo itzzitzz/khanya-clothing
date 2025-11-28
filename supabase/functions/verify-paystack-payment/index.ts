@@ -8,6 +8,7 @@ const corsHeaders = {
 
 interface VerifyPaymentRequest {
   reference: string;
+  skip_order_update?: boolean; // For card payments where order doesn't exist yet
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -16,9 +17,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { reference }: VerifyPaymentRequest = await req.json();
+    const { reference, skip_order_update }: VerifyPaymentRequest = await req.json();
     
-    console.log(`Verifying Paystack payment for reference: ${reference}`);
+    console.log(`Verifying Paystack payment for reference: ${reference}, skip_order_update: ${skip_order_update}`);
 
     if (!reference) {
       return new Response(
@@ -52,6 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(
         JSON.stringify({ 
           success: false, 
+          payment_verified: false,
           error: paystackData.message || "Payment verification failed",
           status: paystackData.data?.status || "unknown"
         }),
@@ -59,12 +61,28 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Payment successful - update order in database
+    const amountPaid = paystackData.data.amount / 100; // Convert from kobo to Rands
+
+    // If skip_order_update is true, just return the verification result without updating any order
+    // (for card payments where order will be created after payment verification)
+    if (skip_order_update) {
+      console.log(`Payment verified for reference ${reference}, amount: R${amountPaid} - skipping order update`);
+      return new Response(
+        JSON.stringify({
+          success: true,
+          payment_verified: true,
+          amount: amountPaid,
+          reference: reference,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // For existing orders (legacy flow), update the order in database
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const amountPaid = paystackData.data.amount / 100; // Convert from kobo to Rands
     const orderNumber = paystackData.data.reference;
 
     // Update order payment status

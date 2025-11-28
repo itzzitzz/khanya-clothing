@@ -242,105 +242,91 @@ const Checkout = () => {
       return;
     }
 
-    // First create the order
-    const { data: order, error: orderError } = await supabase.functions.invoke('create-order', {
-      body: {
-        ...orderData,
-        items: cart.map((item) => ({
-          product_id: item.product_id,
-          product_name: item.product_name,
-          product_image: item.product_image,
-          quantity: item.quantity,
-          price_per_unit: item.price_per_unit,
-        })),
-      },
-    });
-
-    if (orderError) throw orderError;
+    // Generate a temporary reference for Paystack (order will only be created after successful payment)
+    const tempReference = `PAY-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: formData.customer_email,
       amount: Math.round(cartTotal * 100), // Convert to kobo
       currency: 'ZAR',
-      ref: order.order_number,
+      ref: tempReference,
       metadata: {
-        order_number: order.order_number,
         customer_name: formData.customer_name,
+        temp_reference: tempReference,
       },
       onClose: function() {
         toast({
           title: 'Payment Cancelled',
-          description: 'Your order has been created. You can pay later via EFT or E-Wallet.',
+          description: 'No order was placed. You can try again when ready.',
         });
-        clearCart();
-        navigate('/order-confirmation', { 
-          state: { 
-            orderDetails: order,
-            paymentCancelled: true
-          } 
-        });
+        setLoading(false);
       },
-      callback: function(response: any) {
-        // Verify payment on backend
-        supabase.functions.invoke('verify-paystack-payment', {
-          body: { reference: response.reference },
-        }).then(({ data: verifyData, error: verifyError }) => {
-          if (verifyError) {
-            console.error('Payment verification error:', verifyError);
+      callback: async function(response: any) {
+        try {
+          // Verify payment with Paystack
+          const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-paystack-payment', {
+            body: { reference: response.reference, skip_order_update: true },
+          });
+
+          if (verifyError || !verifyData?.payment_verified) {
+            console.error('Payment verification error:', verifyError || verifyData);
             toast({
-              title: 'Payment Verification Issue',
-              description: 'Your payment may have been processed. Please contact support if needed.',
+              title: 'Payment Verification Failed',
+              description: 'Your payment could not be verified. Please contact support.',
               variant: 'destructive',
             });
-            clearCart();
-            navigate('/order-confirmation', { 
-              state: { 
-                orderDetails: order 
-              } 
-            });
+            setLoading(false);
             return;
           }
 
-          if (verifyData?.payment_verified) {
+          // Payment successful - now create the order with is_paid flag
+          const { data: order, error: orderError } = await supabase.functions.invoke('create-order', {
+            body: {
+              ...orderData,
+              is_paid: true, // Flag to indicate payment already received
+              paystack_reference: response.reference,
+              items: cart.map((item) => ({
+                product_id: item.product_id,
+                product_name: item.product_name,
+                product_image: item.product_image,
+                quantity: item.quantity,
+                price_per_unit: item.price_per_unit,
+              })),
+            },
+          });
+
+          if (orderError) {
+            console.error('Order creation error after payment:', orderError);
             toast({
-              title: 'Payment Successful!',
-              description: 'Your payment has been confirmed.',
-            });
-            clearCart();
-            navigate('/order-confirmation', { 
-              state: { 
-                orderDetails: { ...order, payment_status: 'paid', payment_tracking_status: 'Fully Paid' },
-                paymentSuccess: true
-              } 
-            });
-          } else {
-            toast({
-              title: 'Payment Verification Issue',
-              description: 'Your payment may have been processed. Please contact support if needed.',
+              title: 'Order Creation Issue',
+              description: 'Your payment was successful but order creation failed. Please contact support with reference: ' + response.reference,
               variant: 'destructive',
             });
-            clearCart();
-            navigate('/order-confirmation', { 
-              state: { 
-                orderDetails: order 
-              } 
-            });
+            setLoading(false);
+            return;
           }
-        }).catch((err: any) => {
-          console.error('Payment verification error:', err);
+
           toast({
-            title: 'Payment Verification Issue',
-            description: 'Your payment may have been processed. Please contact support if needed.',
-            variant: 'destructive',
+            title: 'Payment Successful!',
+            description: 'Your payment has been confirmed and order placed.',
           });
           clearCart();
           navigate('/order-confirmation', { 
             state: { 
-              orderDetails: order 
+              orderDetails: { ...order, payment_status: 'paid', payment_tracking_status: 'Fully Paid', amount_paid: order.total_amount },
+              paymentSuccess: true
             } 
           });
-        });
+        } catch (err: any) {
+          console.error('Payment callback error:', err);
+          toast({
+            title: 'Error',
+            description: 'Something went wrong. Please contact support.',
+            variant: 'destructive',
+          });
+          setLoading(false);
+        }
       },
     });
 
