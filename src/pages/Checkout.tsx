@@ -262,71 +262,74 @@ const Checkout = () => {
         });
         setLoading(false);
       },
-      callback: async function(response: any) {
-        try {
-          // Verify payment with Paystack
-          const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-paystack-payment', {
-            body: { reference: response.reference, skip_order_update: true },
-          });
+      callback: function(response: any) {
+        // Handle async operations inside regular callback
+        (async () => {
+          try {
+            // Verify payment with Paystack
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-paystack-payment', {
+              body: { reference: response.reference, skip_order_update: true },
+            });
 
-          if (verifyError || !verifyData?.payment_verified) {
-            console.error('Payment verification error:', verifyError || verifyData);
+            if (verifyError || !verifyData?.payment_verified) {
+              console.error('Payment verification error:', verifyError || verifyData);
+              toast({
+                title: 'Payment Verification Failed',
+                description: 'Your payment could not be verified. Please contact support.',
+                variant: 'destructive',
+              });
+              setLoading(false);
+              return;
+            }
+
+            // Payment successful - now create the order with is_paid flag
+            const { data: order, error: orderError } = await supabase.functions.invoke('create-order', {
+              body: {
+                ...orderData,
+                is_paid: true, // Flag to indicate payment already received
+                paystack_reference: response.reference,
+                items: cart.map((item) => ({
+                  product_id: item.product_id,
+                  product_name: item.product_name,
+                  product_image: item.product_image,
+                  quantity: item.quantity,
+                  price_per_unit: item.price_per_unit,
+                })),
+              },
+            });
+
+            if (orderError) {
+              console.error('Order creation error after payment:', orderError);
+              toast({
+                title: 'Order Creation Issue',
+                description: 'Your payment was successful but order creation failed. Please contact support with reference: ' + response.reference,
+                variant: 'destructive',
+              });
+              setLoading(false);
+              return;
+            }
+
             toast({
-              title: 'Payment Verification Failed',
-              description: 'Your payment could not be verified. Please contact support.',
+              title: 'Payment Successful!',
+              description: 'Your payment has been confirmed and order placed.',
+            });
+            clearCart();
+            navigate('/order-confirmation', { 
+              state: { 
+                orderDetails: { ...order, payment_status: 'paid', payment_tracking_status: 'Fully Paid', amount_paid: order.total_amount },
+                paymentSuccess: true
+              } 
+            });
+          } catch (err: any) {
+            console.error('Payment callback error:', err);
+            toast({
+              title: 'Error',
+              description: 'Something went wrong. Please contact support.',
               variant: 'destructive',
             });
             setLoading(false);
-            return;
           }
-
-          // Payment successful - now create the order with is_paid flag
-          const { data: order, error: orderError } = await supabase.functions.invoke('create-order', {
-            body: {
-              ...orderData,
-              is_paid: true, // Flag to indicate payment already received
-              paystack_reference: response.reference,
-              items: cart.map((item) => ({
-                product_id: item.product_id,
-                product_name: item.product_name,
-                product_image: item.product_image,
-                quantity: item.quantity,
-                price_per_unit: item.price_per_unit,
-              })),
-            },
-          });
-
-          if (orderError) {
-            console.error('Order creation error after payment:', orderError);
-            toast({
-              title: 'Order Creation Issue',
-              description: 'Your payment was successful but order creation failed. Please contact support with reference: ' + response.reference,
-              variant: 'destructive',
-            });
-            setLoading(false);
-            return;
-          }
-
-          toast({
-            title: 'Payment Successful!',
-            description: 'Your payment has been confirmed and order placed.',
-          });
-          clearCart();
-          navigate('/order-confirmation', { 
-            state: { 
-              orderDetails: { ...order, payment_status: 'paid', payment_tracking_status: 'Fully Paid', amount_paid: order.total_amount },
-              paymentSuccess: true
-            } 
-          });
-        } catch (err: any) {
-          console.error('Payment callback error:', err);
-          toast({
-            title: 'Error',
-            description: 'Something went wrong. Please contact support.',
-            variant: 'destructive',
-          });
-          setLoading(false);
-        }
+        })();
       },
     });
 
