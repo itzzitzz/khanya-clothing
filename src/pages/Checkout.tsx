@@ -53,7 +53,7 @@ const Checkout = () => {
     delivery_city: '',
     delivery_province: '',
     delivery_postal_code: '',
-    payment_method: 'eft',
+    payment_method: 'card',
   });
   
   const [pin, setPin] = useState('');
@@ -1005,9 +1005,9 @@ const Checkout = () => {
                           Card / Apple Pay / Google Pay
                           <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Instant</span>
                         </Label>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-xs font-bold bg-[#1A1F71] text-white px-2 py-1 rounded">VISA</span>
-                          <span className="text-xs font-bold bg-gradient-to-r from-[#EB001B] to-[#F79E1B] text-white px-2 py-1 rounded">Mastercard</span>
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                          <svg viewBox="0 0 48 32" className="h-7 w-auto"><rect width="48" height="32" rx="4" fill="#1A1F71"/><text x="24" y="20" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold" fontFamily="Arial, sans-serif" fontStyle="italic">VISA</text></svg>
+                          <svg viewBox="0 0 48 32" className="h-7 w-auto"><rect width="48" height="32" rx="4" fill="#f5f5f5"/><circle cx="18" cy="16" r="10" fill="#EB001B"/><circle cx="30" cy="16" r="10" fill="#F79E1B"/><path d="M24 8.5a10 10 0 000 15" fill="#FF5F00"/></svg>
                           <span className="text-xs font-bold bg-black text-white px-2 py-1 rounded flex items-center gap-1">
                             <svg viewBox="0 0 24 24" className="w-3 h-3 fill-current"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
                             Pay
