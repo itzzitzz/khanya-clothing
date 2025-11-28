@@ -65,7 +65,7 @@ const TermsOfService = () => {
           <section className="mb-8">
             <h2 className="text-xl font-bold mb-4">4. Pricing and Payment</h2>
             <p className="text-muted-foreground mb-4">
-              All prices displayed on our website are in South African Rand (ZAR) and include VAT where applicable. We accept the following payment methods:
+              All prices displayed on our website are in South African Rand (ZAR). We accept the following payment methods:
             </p>
             <ul className="list-disc pl-6 text-muted-foreground mb-4 space-y-2">
               <li><strong>Card payments:</strong> Visa, Mastercard, Apple Pay, and Google Pay processed securely by Paystack</li>
