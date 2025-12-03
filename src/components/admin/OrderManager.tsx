@@ -238,24 +238,30 @@ const OrderManager = () => {
   const handlePaymentUpdate = async (orderId: string, paymentStatus: string, amountPaid?: number) => {
     setUpdatingPayment(orderId);
     try {
-      const updateData: any = {
-        payment_tracking_status: paymentStatus,
-      };
-
-      if (amountPaid !== undefined) {
-        updateData.amount_paid = amountPaid;
-      }
-
-      const { error } = await supabase
-        .from('orders')
-        .update(updateData)
-        .eq('id', orderId);
+      // Call edge function to update payment status and send notifications
+      const { data, error } = await supabase.functions.invoke('update-payment-status', {
+        body: {
+          order_id: orderId,
+          new_payment_status: paymentStatus,
+          amount_paid: amountPaid,
+        },
+      });
 
       if (error) throw error;
 
+      const notificationInfo = data?.emailSent && data?.smsSent 
+        ? 'Customer notified via email and SMS'
+        : data?.emailSent 
+        ? 'Customer notified via email'
+        : data?.smsSent 
+        ? 'Customer notified via SMS'
+        : '';
+
       toast({
         title: 'Success',
-        description: 'Payment status updated',
+        description: notificationInfo 
+          ? `Payment status updated. ${notificationInfo}` 
+          : 'Payment status updated',
       });
 
       await fetchOrders();

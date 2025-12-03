@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.verify-paystack-payment]
 verify_jwt = false
+
+[functions.update-payment-status]
+verify_jwt = false
