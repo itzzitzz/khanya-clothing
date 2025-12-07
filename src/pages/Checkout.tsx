@@ -630,7 +630,11 @@ const Checkout = () => {
                     <Label className="text-base font-semibold">Choose verification method:</Label>
                     <RadioGroup
                       value={verificationMethod}
-                      onValueChange={(value: 'email' | 'sms') => setVerificationMethod(value)}
+                      onValueChange={(value: 'email' | 'sms') => {
+                        setVerificationMethod(value);
+                        setPinSent(false);
+                        setPin('');
+                      }}
                       className="grid grid-cols-2 gap-4"
                     >
                       <div className={`flex items-center space-x-3 border rounded-lg p-4 cursor-pointer transition-all ${verificationMethod === 'email' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}>
