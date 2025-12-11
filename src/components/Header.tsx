@@ -28,7 +28,7 @@ const Header = ({ active }: { active?: ActiveKey }) => {
 
   const learnMoreItems = [
     { key: "faq" as const, label: "FAQ", href: "/faq" },
-    { key: "blog" as const, label: "Blog", href: "/blog" },
+    { key: "blog" as const, label: "How to start a clothing business", href: "/blog" },
   ];
 
   const isLearnMoreActive = active === "faq" || active === "blog";

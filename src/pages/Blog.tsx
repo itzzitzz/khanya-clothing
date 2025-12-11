@@ -17,7 +17,7 @@ const Blog = () => {
         <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/blog` : "/blog"} />
         <meta property="og:type" content="article" />
         <meta property="og:title" content="How to Start Selling Clothes in South Africa | Easy Guide" />
-        <meta property="og:description" content="Learn how to start selling second hand clothes. Easy guide for beginners. Start with R1,000 and make R3,000+ profit." />
+        <meta property="og:description" content="Learn how to start selling second hand clothes. Easy guide for beginners. Start with R1,000 and make R1,000 to R2,000 profit." />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -113,7 +113,7 @@ const Blog = () => {
               </p>
               <div className="bg-accent/10 border border-accent/30 rounded-xl p-6 my-6">
                 <p className="text-lg font-semibold text-accent">
-                  💡 Start with just R1,000 and make R2,000 to R3,000 profit!
+                  💡 Start with just R1,000 and make R1,000 to R2,000 profit!
                 </p>
               </div>
             </section>
