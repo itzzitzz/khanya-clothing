@@ -49,6 +49,7 @@ const Checkout = () => {
     customer_email: '',
     customer_phone: '',
     business_name: '',
+    delivery_complex: '',
     delivery_address: '',
     delivery_city: '',
     delivery_province: '',
@@ -886,6 +887,16 @@ const Checkout = () => {
                           <p className="text-sm text-green-700">
                             <strong>FREE Delivery!</strong> We deliver nationwide at no extra cost.
                           </p>
+                        </div>
+                        <div>
+                          <Label htmlFor="delivery_complex">Complex / Company / Office Park Name (Optional)</Label>
+                          <Input
+                            id="delivery_complex"
+                            name="delivery_complex"
+                            value={formData.delivery_complex}
+                            onChange={handleInputChange}
+                            placeholder="e.g. Sunset Estate Unit 5 / ABC Trading / Greenside Business Park"
+                          />
                         </div>
                         <div>
                           <Label htmlFor="delivery_address">Street Address *</Label>

@@ -18,6 +18,7 @@ interface CreateOrderRequest {
   customer_email: string;
   customer_name: string;
   customer_phone: string;
+  delivery_complex?: string;
   delivery_address: string;
   delivery_city: string;
   delivery_province: string;
@@ -70,6 +71,7 @@ const handler = async (req: Request): Promise<Response> => {
         customer_email: orderData.customer_email.toLowerCase(),
         customer_name: orderData.customer_name,
         customer_phone: orderData.customer_phone,
+        delivery_complex: orderData.delivery_complex || null,
         delivery_address: orderData.delivery_address,
         delivery_city: orderData.delivery_city,
         delivery_province: orderData.delivery_province,
@@ -243,7 +245,7 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
               
               <p style="line-height: 1.6; color: #1f2e27;"><strong>Delivery Address:</strong><br>
-              ${orderData.delivery_address}<br>
+              ${orderData.delivery_complex ? `${orderData.delivery_complex}<br>` : ''}${orderData.delivery_address}<br>
               ${orderData.delivery_city}, ${orderData.delivery_province} ${orderData.delivery_postal_code}</p>
               
               <p style="color: #059669; font-weight: bold; line-height: 1.6;">✓ FREE delivery to anywhere in South Africa!</p>
@@ -330,7 +332,7 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
               
               <h3>Delivery Address</h3>
-              <p style="line-height: 1.6; color: #1f2e27;">${orderData.delivery_address}<br>
+              <p style="line-height: 1.6; color: #1f2e27;">${orderData.delivery_complex ? `${orderData.delivery_complex}<br>` : ''}${orderData.delivery_address}<br>
               ${orderData.delivery_city}, ${orderData.delivery_province} ${orderData.delivery_postal_code}</p>
             </div>
             <div style="text-align: center; color: #6b7b73; font-size: 12px; margin-top: 30px; padding: 20px; border-top: 1px solid #d9ded6;">

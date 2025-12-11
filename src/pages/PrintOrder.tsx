@@ -207,6 +207,7 @@ const PrintOrder = () => {
                     <p>{order.customer_phone}</p>
                     <div className="mt-3 pt-3 border-t border-gray-300">
                       <p className="font-semibold mb-1">Delivery Address:</p>
+                      {order.delivery_complex && <p>{order.delivery_complex}</p>}
                       <p>{order.delivery_address}</p>
                       <p>{order.delivery_city}, {order.delivery_province}</p>
                       <p>{order.delivery_postal_code}</p>
@@ -307,6 +308,7 @@ const PrintOrder = () => {
               </div>
               <div>
                 <h3 className="font-bold text-lg mb-2">Ship To:</h3>
+                {order.delivery_complex && <p className="text-sm">{order.delivery_complex}</p>}
                 <p className="text-sm">{order.delivery_address}</p>
                 <p className="text-sm">{order.delivery_city}, {order.delivery_province}</p>
                 <p className="text-sm">{order.delivery_postal_code}</p>

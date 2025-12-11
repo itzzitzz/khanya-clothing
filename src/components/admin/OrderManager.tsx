@@ -537,6 +537,7 @@ const OrderManager = () => {
                     <div className="mt-3 pt-3 border-t">
                       <p className="text-sm font-semibold mb-1">Delivery Address:</p>
                       <p className="text-sm text-muted-foreground">
+                        {order.delivery_complex && <>{order.delivery_complex}<br /></>}
                         {order.delivery_address}<br />
                         {order.delivery_city}, {order.delivery_province}<br />
                         {order.delivery_postal_code}

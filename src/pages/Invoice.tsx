@@ -205,6 +205,7 @@ const Invoice = () => {
         {/* Delivery Address */}
         <div className="mb-8 bg-gray-50 p-4 rounded">
           <h3 className="text-base font-bold mb-3 text-gray-900">DELIVERY ADDRESS:</h3>
+          {order.delivery_complex && <p className="text-sm">{order.delivery_complex}</p>}
           <p className="text-sm">{order.delivery_address}</p>
           <p className="text-sm">{order.delivery_city}, {order.delivery_province} {order.delivery_postal_code}</p>
         </div>
