@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, ShoppingCart } from "lucide-react";
+import { Menu, ShoppingCart, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-export type ActiveKey = "business" | "gallery" | "contact" | "location" | "brand" | "bales" | "track" | "faq" | undefined;
+export type ActiveKey = "business" | "gallery" | "contact" | "location" | "brand" | "bales" | "track" | "faq" | "blog" | undefined;
 
 const Header = ({ active }: { active?: ActiveKey }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -17,9 +23,15 @@ const Header = ({ active }: { active?: ActiveKey }) => {
     { key: "brand" as const, label: "Khanya Brand", href: "/brand" },
     { key: "bales" as const, label: "View & Order Bales", href: "/view-order-bales" },
     { key: "track" as const, label: "Track Order", href: "/track-order" },
-    { key: "faq" as const, label: "FAQ", href: "/faq" },
     { key: "contact" as const, label: "Contact", href: "/contact" },
   ];
+
+  const learnMoreItems = [
+    { key: "faq" as const, label: "FAQ", href: "/faq" },
+    { key: "blog" as const, label: "Blog", href: "/blog" },
+  ];
+
+  const isLearnMoreActive = active === "faq" || active === "blog";
 
   const LinkItem = ({ href, label, isActive }: { href: string; label: string; isActive: boolean }) => (
     <a
@@ -47,9 +59,42 @@ const Header = ({ active }: { active?: ActiveKey }) => {
           <span className="font-extrabold text-xl md:text-2xl tracking-wide">Khanya</span>
         </a>
         <div className="hidden md:flex items-center gap-4">
-          {navItems.map((item) => (
+          {navItems.slice(0, 4).map((item) => (
             <LinkItem key={item.key} href={item.href} label={item.label} isActive={active === item.key} />
           ))}
+          
+          {/* Learn More Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={cn(
+                  "text-sm px-1 py-2 relative hover:underline inline-flex items-center gap-1",
+                  isLearnMoreActive && "after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-full after:bg-accent after:rounded-full"
+                )}
+              >
+                Learn More
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-background border z-50">
+              {learnMoreItems.map((item) => (
+                <DropdownMenuItem key={item.key} asChild>
+                  <a
+                    href={item.href}
+                    className={cn(
+                      "cursor-pointer",
+                      active === item.key && "font-semibold"
+                    )}
+                  >
+                    {item.label}
+                  </a>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <LinkItem href="/contact" label="Contact" isActive={active === "contact"} />
+          
           <Button
             variant="outline"
             size="sm"
@@ -91,12 +136,23 @@ const Header = ({ active }: { active?: ActiveKey }) => {
       {menuOpen && (
         <div className="md:hidden border-t bg-background">
           <div className="container mx-auto py-2 flex flex-col">
-            {navItems.map((item) => (
+            {navItems.slice(0, 4).map((item) => (
               <a key={item.key} href={item.href} className={cn("px-1 py-2 hover:underline", active === item.key && "font-semibold")}
                  aria-current={active === item.key ? "page" : undefined}>
                 {item.label}
               </a>
             ))}
+            <div className="px-1 py-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">Learn More</div>
+            {learnMoreItems.map((item) => (
+              <a key={item.key} href={item.href} className={cn("px-3 py-2 hover:underline", active === item.key && "font-semibold")}
+                 aria-current={active === item.key ? "page" : undefined}>
+                {item.label}
+              </a>
+            ))}
+            <a href="/contact" className={cn("px-1 py-2 hover:underline", active === "contact" && "font-semibold")}
+               aria-current={active === "contact" ? "page" : undefined}>
+              Contact
+            </a>
           </div>
         </div>
       )}

@@ -72,7 +72,7 @@ const Blog = () => {
         </script>
       </Helmet>
       
-      <Header />
+      <Header active="blog" />
 
       <main className="pb-16">
         {/* Hero Section */}
