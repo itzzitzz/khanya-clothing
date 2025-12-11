@@ -21,6 +21,7 @@ import Invoice from "./pages/Invoice";
 import PrintOrder from "./pages/PrintOrder";
 import TermsOfService from "./pages/TermsOfService";
 import FAQ from "./pages/FAQ";
+import Blog from "./pages/Blog";
 import { HelmetProvider } from "react-helmet-async";
 import { CartProvider } from "./contexts/CartContext";
 
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/print-order" element={<PrintOrder />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/blog" element={<Blog />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
