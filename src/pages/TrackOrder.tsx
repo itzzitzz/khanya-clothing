@@ -410,6 +410,7 @@ const TrackOrder = () => {
                   <div className="border-t pt-4">
                     <h4 className="font-semibold mb-2">Delivery Address:</h4>
                     <p className="text-sm">
+                      {order.delivery_complex && <>{order.delivery_complex}<br /></>}
                       {order.delivery_address}<br />
                       {order.delivery_city}, {order.delivery_province}<br />
                       {order.delivery_postal_code}

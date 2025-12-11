@@ -268,6 +268,7 @@ export type Database = {
           customer_phone: string
           delivery_address: string
           delivery_city: string
+          delivery_complex: string | null
           delivery_postal_code: string
           delivery_province: string
           id: string
@@ -287,6 +288,7 @@ export type Database = {
           customer_phone: string
           delivery_address: string
           delivery_city: string
+          delivery_complex?: string | null
           delivery_postal_code: string
           delivery_province: string
           id?: string
@@ -306,6 +308,7 @@ export type Database = {
           customer_phone?: string
           delivery_address?: string
           delivery_city?: string
+          delivery_complex?: string | null
           delivery_postal_code?: string
           delivery_province?: string
           id?: string

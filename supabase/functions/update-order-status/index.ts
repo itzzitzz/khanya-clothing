@@ -88,6 +88,7 @@ function generateInvoiceHTML(order: any): string {
 
       <div class="delivery">
         <h3>DELIVERY ADDRESS:</h3>
+        ${order.delivery_complex ? `<p>${order.delivery_complex}</p>` : ''}
         <p>${order.delivery_address}</p>
         <p>${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}</p>
       </div>
@@ -345,7 +346,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </div>
                 <p><strong>Order Total:</strong> R${Number(order.total_amount).toFixed(2)}</p>
                 <p><strong>Delivery Address:</strong><br>
-                ${order.delivery_address}<br>
+                ${order.delivery_complex ? `${order.delivery_complex}<br>` : ''}${order.delivery_address}<br>
                 ${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}</p>
               </div>
               <div class="footer">
@@ -475,6 +476,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <div style="margin-bottom: 30px;">
                 <h3 style="font-size: 14px; margin: 0 0 10px 0; font-weight: bold; color: #2E4D38;">DELIVERY ADDRESS:</h3>
+                ${order.delivery_complex ? `<p style="margin: 3px 0; font-size: 12px;">${order.delivery_complex}</p>` : ''}
                 <p style="margin: 3px 0; font-size: 12px;">${order.delivery_address}</p>
                 <p style="margin: 3px 0; font-size: 12px;">${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}</p>
               </div>
@@ -585,7 +587,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <div class="info-box">
                   <strong>Delivery Information</strong>
                   <p style="margin: 10px 0 0 0;"><strong>Shipping To:</strong><br>
-                  ${order.delivery_address}<br>
+                  ${order.delivery_complex ? `${order.delivery_complex}<br>` : ''}${order.delivery_address}<br>
                   ${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}</p>
                   <p style="margin: 10px 0 0 0;"><strong>Estimated Delivery:</strong> 3-5 business days</p>
                 </div>
