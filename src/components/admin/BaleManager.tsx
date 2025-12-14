@@ -467,9 +467,11 @@ export const BaleManager = () => {
         <div className="space-y-1 text-sm">
           {(() => {
             const totalItems = bale.bale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-            // Calculate weighted average using stock item selling prices (not line_item_price which may be outdated)
+            // Calculate total value using stock item selling prices (source of truth)
             const totalValue = bale.bale_items?.reduce((sum, item) => sum + ((item.stock_items?.selling_price || 0) * item.quantity), 0) || 0;
             const stockItemUnitPrice = totalItems > 0 ? totalValue / totalItems : 0;
+            // Recommended price = sum of (selling_price * quantity) for all items
+            const recommendedPrice = totalValue;
             return (
               <>
                 <div className="flex justify-between">
@@ -482,7 +484,7 @@ export const BaleManager = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">= Recommended price:</span>
-                  <span>R{bale.recommended_sale_price.toFixed(2)}</span>
+                  <span>R{recommendedPrice.toFixed(2)}</span>
                 </div>
               </>
             );
