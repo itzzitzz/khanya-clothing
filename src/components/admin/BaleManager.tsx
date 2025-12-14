@@ -497,9 +497,10 @@ export const BaleManager = () => {
                 type="number"
                 min="0"
                 step="0.01"
-                value={bale.actual_selling_price}
-                onChange={async (e) => {
+                defaultValue={bale.actual_selling_price}
+                onBlur={async (e) => {
                   const newPrice = parseFloat(e.target.value) || 0;
+                  if (newPrice === bale.actual_selling_price) return;
                   const newProfit = newPrice - bale.total_cost_price;
                   const newMargin = bale.total_cost_price > 0 ? (newProfit / bale.total_cost_price) * 100 : 0;
                   try {
