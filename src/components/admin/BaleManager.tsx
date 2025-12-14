@@ -502,12 +502,48 @@ export const BaleManager = () => {
             <span>R{bale.total_cost_price.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Selling Price:</span>
-            <span className="font-semibold">R{bale.actual_selling_price.toFixed(2)}</span>
+            <span className="text-muted-foreground">Recommended:</span>
+            <span>R{bale.recommended_sale_price.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center gap-2">
+            <span className="text-muted-foreground">Actual Price:</span>
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">R</span>
+              <Input 
+                type="number"
+                min="0"
+                step="0.01"
+                value={bale.actual_selling_price}
+                onChange={async (e) => {
+                  const newPrice = parseFloat(e.target.value) || 0;
+                  const newProfit = newPrice - bale.total_cost_price;
+                  const newMargin = bale.total_cost_price > 0 ? (newProfit / bale.total_cost_price) * 100 : 0;
+                  try {
+                    const { error } = await supabase
+                      .from('bales')
+                      .update({ 
+                        actual_selling_price: newPrice,
+                        bale_profit: newProfit,
+                        bale_margin_percentage: newMargin
+                      })
+                      .eq('id', bale.id);
+                    
+                    if (error) throw error;
+                    
+                    await loadData();
+                    toast({ title: "Success", description: "Price updated" });
+                  } catch (error: any) {
+                    toast({ title: "Error", description: error.message, variant: "destructive" });
+                  }
+                }}
+                className="w-24 h-7 text-sm font-semibold"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Profit:</span>
-            <span className={bale.bale_profit >= 0 ? 'text-green-600' : 'text-red-600'}>
+            <span className="text-muted-foreground">Profit (Margin):</span>
+            <span className={bale.bale_profit >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
               R{bale.bale_profit.toFixed(2)} ({bale.bale_margin_percentage.toFixed(1)}%)
             </span>
           </div>
