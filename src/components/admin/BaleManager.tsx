@@ -474,7 +474,7 @@ export const BaleManager = () => {
               <>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground"># items in bale:</span>
-                  <span className="font-medium">{totalItems}</span>
+                  <span>{totalItems}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">x Item Price:</span>
