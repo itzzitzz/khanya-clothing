@@ -515,7 +515,12 @@ export const BaleManager = () => {
                     
                     if (error) throw error;
                     
-                    await loadData();
+                    // Update local state instead of reloading to prevent card shuffle
+                    setBales(prev => prev.map(b => 
+                      b.id === bale.id 
+                        ? { ...b, actual_selling_price: newPrice, bale_profit: newProfit, bale_margin_percentage: newMargin }
+                        : b
+                    ));
                     toast({ title: "Success", description: "Price updated" });
                   } catch (error: any) {
                     toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -539,9 +544,10 @@ export const BaleManager = () => {
               <Input 
                 type="number"
                 min="0"
-                value={bale.quantity_in_stock}
-                onChange={async (e) => {
+                defaultValue={bale.quantity_in_stock}
+                onBlur={async (e) => {
                   const newQty = parseInt(e.target.value) || 0;
+                  if (newQty === bale.quantity_in_stock) return;
                   try {
                     const { error } = await supabase
                       .from('bales')
@@ -550,7 +556,10 @@ export const BaleManager = () => {
                     
                     if (error) throw error;
                     
-                    await loadData();
+                    // Update local state instead of reloading to prevent card shuffle
+                    setBales(prev => prev.map(b => 
+                      b.id === bale.id ? { ...b, quantity_in_stock: newQty } : b
+                    ));
                     toast({ title: "Success", description: "Quantity updated" });
                   } catch (error: any) {
                     toast({ title: "Error", description: error.message, variant: "destructive" });
