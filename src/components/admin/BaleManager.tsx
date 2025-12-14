@@ -467,7 +467,9 @@ export const BaleManager = () => {
         <div className="space-y-1 text-sm">
           {(() => {
             const totalItems = bale.bale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-            const unitPrice = totalItems > 0 ? bale.actual_selling_price / totalItems : 0;
+            // Calculate weighted average of stock item selling prices
+            const totalLineItemValue = bale.bale_items?.reduce((sum, item) => sum + (item.line_item_price || 0), 0) || 0;
+            const stockItemUnitPrice = totalItems > 0 ? totalLineItemValue / totalItems : 0;
             return (
               <>
                 <div className="flex justify-between">
@@ -475,8 +477,8 @@ export const BaleManager = () => {
                   <span className="font-medium">{totalItems}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Unit Price:</span>
-                  <span>R{unitPrice.toFixed(2)}</span>
+                  <span className="text-muted-foreground">Item Price:</span>
+                  <span>R{stockItemUnitPrice.toFixed(2)}</span>
                 </div>
               </>
             );
