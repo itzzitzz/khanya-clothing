@@ -467,9 +467,9 @@ export const BaleManager = () => {
         <div className="space-y-1 text-sm">
           {(() => {
             const totalItems = bale.bale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-            // Calculate weighted average of stock item selling prices
-            const totalLineItemValue = bale.bale_items?.reduce((sum, item) => sum + (item.line_item_price || 0), 0) || 0;
-            const stockItemUnitPrice = totalItems > 0 ? totalLineItemValue / totalItems : 0;
+            // Calculate weighted average using stock item selling prices (not line_item_price which may be outdated)
+            const totalValue = bale.bale_items?.reduce((sum, item) => sum + ((item.stock_items?.selling_price || 0) * item.quantity), 0) || 0;
+            const stockItemUnitPrice = totalItems > 0 ? totalValue / totalItems : 0;
             return (
               <>
                 <div className="flex justify-between">
