@@ -480,43 +480,13 @@ export const BaleManager = () => {
                   <span className="text-muted-foreground">Item Price:</span>
                   <span>R{stockItemUnitPrice.toFixed(2)}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">= Recommended price:</span>
+                  <span>R{bale.recommended_sale_price.toFixed(2)}</span>
+                </div>
               </>
             );
           })()}
-          <div className="flex justify-between items-center gap-2">
-            <span className="text-muted-foreground">Qty in Stock:</span>
-            <Input 
-              type="number"
-              min="0"
-              value={bale.quantity_in_stock}
-              onChange={async (e) => {
-                const newQty = parseInt(e.target.value) || 0;
-                try {
-                  const { error } = await supabase
-                    .from('bales')
-                    .update({ quantity_in_stock: newQty })
-                    .eq('id', bale.id);
-                  
-                  if (error) throw error;
-                  
-                  await loadData();
-                  toast({ title: "Success", description: "Quantity updated" });
-                } catch (error: any) {
-                  toast({ title: "Error", description: error.message, variant: "destructive" });
-                }
-              }}
-              className="w-20 h-7 text-sm"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Cost Price:</span>
-            <span>R{bale.total_cost_price.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Recommended:</span>
-            <span>R{bale.recommended_sale_price.toFixed(2)}</span>
-          </div>
           <div className="flex justify-between items-center gap-2">
             <span className="text-muted-foreground">Actual Price:</span>
             <div className="flex items-center gap-1">
@@ -558,6 +528,35 @@ export const BaleManager = () => {
             <span className={bale.bale_profit >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
               R{bale.bale_profit.toFixed(2)} ({bale.bale_margin_percentage.toFixed(1)}%)
             </span>
+          </div>
+          
+          <div className="border-t pt-2 mt-2">
+            <div className="flex justify-between items-center gap-2">
+              <span className="text-muted-foreground">Qty in Stock:</span>
+              <Input 
+                type="number"
+                min="0"
+                value={bale.quantity_in_stock}
+                onChange={async (e) => {
+                  const newQty = parseInt(e.target.value) || 0;
+                  try {
+                    const { error } = await supabase
+                      .from('bales')
+                      .update({ quantity_in_stock: newQty })
+                      .eq('id', bale.id);
+                    
+                    if (error) throw error;
+                    
+                    await loadData();
+                    toast({ title: "Success", description: "Quantity updated" });
+                  } catch (error: any) {
+                    toast({ title: "Error", description: error.message, variant: "destructive" });
+                  }
+                }}
+                className="w-20 h-7 text-sm"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
           </div>
         </div>
 
