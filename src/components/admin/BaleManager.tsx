@@ -27,6 +27,7 @@ interface ProductCategory {
   id: number;
   name: string;
   description: string | null;
+  display_order: number;
 }
 
 interface BaleItem {
@@ -97,7 +98,7 @@ export const BaleManager = () => {
         supabase.from('product_categories').select('*').eq('active', true).order('display_order'),
         supabase.from('bales').select(`
           *,
-          product_categories(id, name, description),
+          product_categories(id, name, description, display_order),
           bale_items(
             id,
             quantity,
@@ -794,7 +795,7 @@ export const BaleManager = () => {
         </form>
       </Card>
 
-      {/* Existing Bales Grid */}
+      {/* Existing Bales Grid - Grouped by Category */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Existing Bales</h3>
@@ -816,7 +817,7 @@ export const BaleManager = () => {
           </div>
         </div>
         
-        {isDraggingEnabled && filteredBales.length > 0 && (
+        {selectedCategoryFilter !== 0 && isDraggingEnabled && filteredBales.length > 0 && (
           <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg text-sm">
             <p className="text-foreground flex items-center gap-2">
               <GripVertical className="h-4 w-4" />
@@ -827,7 +828,8 @@ export const BaleManager = () => {
 
         {filteredBales.length === 0 ? (
           <p className="text-muted-foreground text-center py-8">No bales found</p>
-        ) : (
+        ) : selectedCategoryFilter !== 0 ? (
+          // Single category selected - show with drag and drop
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -854,6 +856,32 @@ export const BaleManager = () => {
               ) : null}
             </DragOverlay>
           </DndContext>
+        ) : (
+          // All categories - group by category with headers
+          <>
+            {productCategories
+              .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+              .map((category) => {
+                const categoryBales = bales
+                  .filter(b => b.product_category_id === category.id)
+                  .sort((a, b) => a.display_order - b.display_order);
+                if (categoryBales.length === 0) return null;
+
+                return (
+                  <div key={category.id} className="mb-8">
+                    <div className="flex items-center gap-2 mb-4 pb-2 border-b">
+                      <h4 className="text-lg font-semibold text-primary">{category.name}</h4>
+                      <span className="text-sm text-muted-foreground">({categoryBales.length} bales)</span>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {categoryBales.map((bale) => (
+                        <SortableCard key={bale.id} bale={bale} isDraggingEnabled={false} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+          </>
         )}
       </Card>
 
