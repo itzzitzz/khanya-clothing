@@ -465,12 +465,22 @@ export const BaleManager = () => {
         </div>
 
         <div className="space-y-1 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Items:</span>
-            <span className="font-medium">
-              {bale.bale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0}
-            </span>
-          </div>
+          {(() => {
+            const totalItems = bale.bale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+            const unitPrice = totalItems > 0 ? bale.actual_selling_price / totalItems : 0;
+            return (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Items:</span>
+                  <span className="font-medium">{totalItems}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Unit Price:</span>
+                  <span>R{unitPrice.toFixed(2)}</span>
+                </div>
+              </>
+            );
+          })()}
           <div className="flex justify-between items-center gap-2">
             <span className="text-muted-foreground">Qty in Stock:</span>
             <Input 
