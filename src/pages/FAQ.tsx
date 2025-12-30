@@ -62,6 +62,10 @@ const FAQ = () => {
         {
           question: "When do I need to pay?",
           answer: "For card payments, payment is taken immediately at checkout. For EFT or E-Wallet payments, you can place your order first and then make payment using the banking details provided. We'll process your order once payment is received."
+        },
+        {
+          question: "Do you supply tax invoices?",
+          answer: "Yes, we provide an invoice with every order. If you supply an email address during checkout, we'll send a digital invoice to your inbox. Additionally, a printed invoice is included with all deliveries. Please note that our invoices do not include VAT, as Khanya is not a VAT-registered business."
         }
       ]
     },
