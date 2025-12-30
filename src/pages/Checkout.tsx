@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import { Loader2, Mail, MessageCircle, CheckCircle2, Package, Truck, ShieldCheck, MapPin, User, CreditCard, Banknote, Wallet } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Link } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -60,6 +62,7 @@ const Checkout = () => {
   const [pin, setPin] = useState('');
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Load Paystack script
   useEffect(() => {
@@ -1119,7 +1122,36 @@ const Checkout = () => {
                   </div>
                 </div>
 
-                <Button type="submit" size="lg" className="w-full text-lg h-14 hover-scale" disabled={loading}>
+                {/* Terms of Service Acceptance */}
+                <div className="flex items-start space-x-3 p-4 border rounded-lg bg-card">
+                  <Checkbox
+                    id="terms"
+                    checked={termsAccepted}
+                    onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <label
+                      htmlFor="terms"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      I accept the{' '}
+                      <a
+                        href="/terms-of-service"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline hover:text-primary/80"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Terms of Service
+                      </a>
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      Please review and accept our terms before placing your order.
+                    </p>
+                  </div>
+                </div>
+
+                <Button type="submit" size="lg" className="w-full text-lg h-14 hover-scale" disabled={loading || !termsAccepted}>
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
