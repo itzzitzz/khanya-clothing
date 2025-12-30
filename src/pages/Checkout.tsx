@@ -63,6 +63,7 @@ const Checkout = () => {
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState(false);
 
   // Load Paystack script
   useEffect(() => {
@@ -365,6 +366,16 @@ const Checkout = () => {
       toast({
         title: 'PAXI Location Required',
         description: 'Please select a PAXI location and enter the details',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!termsAccepted) {
+      setTermsError(true);
+      toast({
+        title: 'Terms of Service Required',
+        description: 'Please accept the Terms of Service to continue',
         variant: 'destructive',
       });
       return;
@@ -1123,16 +1134,20 @@ const Checkout = () => {
                 </div>
 
                 {/* Terms of Service Acceptance */}
-                <div className="flex items-start space-x-3 p-4 border rounded-lg bg-card">
+                <div className={`flex items-start space-x-3 p-4 border rounded-lg bg-card transition-colors ${termsError && !termsAccepted ? 'border-destructive bg-destructive/5' : ''}`}>
                   <Checkbox
                     id="terms"
                     checked={termsAccepted}
-                    onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+                    onCheckedChange={(checked) => {
+                      setTermsAccepted(checked === true);
+                      if (checked) setTermsError(false);
+                    }}
+                    className={termsError && !termsAccepted ? 'border-destructive' : ''}
                   />
                   <div className="grid gap-1.5 leading-none">
                     <label
                       htmlFor="terms"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer ${termsError && !termsAccepted ? 'text-destructive' : ''}`}
                     >
                       I accept the{' '}
                       <a
@@ -1144,14 +1159,15 @@ const Checkout = () => {
                       >
                         Terms of Service
                       </a>
+                      {' *'}
                     </label>
-                    <p className="text-xs text-muted-foreground">
+                    <p className={`text-xs ${termsError && !termsAccepted ? 'text-destructive' : 'text-muted-foreground'}`}>
                       Please review and accept our terms before placing your order.
                     </p>
                   </div>
                 </div>
 
-                <Button type="submit" size="lg" className="w-full text-lg h-14 hover-scale" disabled={loading || !termsAccepted}>
+                <Button type="submit" size="lg" className="w-full text-lg h-14 hover-scale" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
