@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Package, FolderOpen, ShoppingCart, Box, Tags, BarChart3 } from "lucide-react";
+import { LogOut, Package, FolderOpen, ShoppingCart, Box, Tags, BarChart3, Megaphone } from "lucide-react";
 import { CategoryManager } from "@/components/admin/CategoryManager";
 import { StockItemManager } from "@/components/admin/StockItemManager";
 import { BaleManager } from "@/components/admin/BaleManager";
 import { ProductCategoryManager } from "@/components/admin/ProductCategoryManager";
 import OrderManager from "@/components/admin/OrderManager";
 import BaleMetricsManager from "@/components/admin/BaleMetricsManager";
+import { MarketingManager } from "@/components/admin/MarketingManager";
 import Header from "@/components/Header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
@@ -120,7 +121,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="stock-categories" className="w-full">
-          <TabsList className="w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 h-auto">
+          <TabsList className="w-full grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 h-auto">
             <TabsTrigger value="stock-categories" className="flex-shrink-0">
               <FolderOpen className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Stock Categories</span>
@@ -150,6 +151,11 @@ const Admin = () => {
               <span className="hidden sm:inline">Metrics</span>
               <span className="sm:hidden">Stats</span>
             </TabsTrigger>
+            <TabsTrigger value="marketing" className="flex-shrink-0">
+              <Megaphone className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Marketing</span>
+              <span className="sm:hidden">Market</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="stock-categories" className="mt-6">
@@ -174,6 +180,10 @@ const Admin = () => {
 
           <TabsContent value="metrics" className="mt-6">
             <BaleMetricsManager />
+          </TabsContent>
+
+          <TabsContent value="marketing" className="mt-6">
+            <MarketingManager />
           </TabsContent>
         </Tabs>
       </main>

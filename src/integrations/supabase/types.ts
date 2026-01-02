@@ -150,6 +150,38 @@ export type Database = {
           },
         ]
       }
+      campaign_sends: {
+        Row: {
+          campaign_id: string
+          customer_email: string
+          customer_name: string
+          id: string
+          sent_at: string
+        }
+        Insert: {
+          campaign_id: string
+          customer_email: string
+          customer_name: string
+          id?: string
+          sent_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          customer_email?: string
+          customer_name?: string
+          id?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_sends_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_verifications: {
         Row: {
           created_at: string
@@ -177,6 +209,30 @@ export type Database = {
           phone?: string | null
           pin_code?: string
           verified?: boolean
+        }
+        Relationships: []
+      }
+      marketing_campaigns: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
         }
         Relationships: []
       }
