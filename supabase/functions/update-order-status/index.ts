@@ -652,7 +652,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <p style="margin: 0 0 10px 0; font-size: 20px;">⭐⭐⭐⭐⭐</p>
                   <p style="margin: 0 0 5px 0; font-size: 18px; font-weight: bold; color: #2E4D38;">Enjoyed your experience?</p>
                   <p style="margin: 0 0 15px 0; font-size: 14px; color: #6b7b73;">Your feedback helps other customers find us and helps us improve!</p>
-                  <a href="https://g.co/kgs/E8A9Hsp" target="_blank" style="display: inline-block; background: #D6A220; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Leave a Google Review</a>
+                  <a href="https://www.google.com/search?hl=en-ZA&gl=za&q=Khanya+Clothing+Store,+0A+Jubie+Rd,+Barbeque+Downs,+Midrand,+1684&ludocid=12962748148169130712&lsig=AB86z5XBdMcvSXdinNFyJ3lib1lJ#lrd=0x1e95717a6f700c7d:0xb3e4eec2dc7942d8,3" target="_blank" style="display: inline-block; background: #D6A220; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Leave a Google Review</a>
                   <p style="margin: 15px 0 0 0; font-size: 12px; color: #8b7b73;">It only takes a minute and means the world to us! 🙏</p>
                 </div>
               </div>
