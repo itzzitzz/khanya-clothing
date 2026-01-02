@@ -647,6 +647,14 @@ const handler = async (req: Request): Promise<Response> => {
                   <p style="margin: 10px 0 0 0;">We appreciate your business. If you have any questions or concerns about your order, please don't hesitate to reach out.</p>
                 </div>
                 <p>We'd love to hear about your experience! If you're satisfied with our service, please consider ordering from us again.</p>
+                
+                <div style="background: linear-gradient(135deg, #fef9e7 0%, #fff7ed 100%); border: 2px solid #D6A220; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
+                  <p style="margin: 0 0 10px 0; font-size: 20px;">⭐⭐⭐⭐⭐</p>
+                  <p style="margin: 0 0 5px 0; font-size: 18px; font-weight: bold; color: #2E4D38;">Enjoyed your experience?</p>
+                  <p style="margin: 0 0 15px 0; font-size: 14px; color: #6b7b73;">Your feedback helps other customers find us and helps us improve!</p>
+                  <a href="https://g.co/kgs/E8A9Hsp" target="_blank" style="display: inline-block; background: #D6A220; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Leave a Google Review</a>
+                  <p style="margin: 15px 0 0 0; font-size: 12px; color: #8b7b73;">It only takes a minute and means the world to us! 🙏</p>
+                </div>
               </div>
               <div class="footer">
                 <p>Questions or feedback? Contact us at <a href="mailto:sales@khanya.store">sales@khanya.store</a></p>
