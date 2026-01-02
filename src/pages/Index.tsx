@@ -115,7 +115,7 @@ const Index = () => {
                 Start Your Own Clothing Business Today
               </h1>
               <p className="text-lg text-muted-foreground mb-6 max-w-xl">
-                Khanya empowers South African entrepreneurs to build their own clothing businesses with bales of quality secondhand clothing. Start for as little as R1,000 and serve your community with affordable fashion. Alternatively, buy for your kids and family.
+                Khanya clothing store sells A-grade second hand clothing in order to empower South African entrepreneurs to build their own clothing businesses. Buy clothing bales from as little as R600 and serve your community with affordable fashion. Alternatively, buy for your kids, family or staff or even for donations to orphanages.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button variant="hero" size="xl" asChild>
