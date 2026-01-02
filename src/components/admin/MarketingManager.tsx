@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Campaign {
   id: string;
@@ -61,6 +62,7 @@ export function MarketingManager() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [customers, setCustomers] = useState<CustomerWithStatus[]>([]);
+  const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [sending, setSending] = useState(false);
@@ -146,7 +148,17 @@ export function MarketingManager() {
         }
       });
 
-      setCustomers(Array.from(uniqueCustomers.values()));
+      const customerList = Array.from(uniqueCustomers.values());
+      setCustomers(customerList);
+      
+      // Set default selection: tick those who haven't received the email
+      const defaultSelected = new Set<string>();
+      customerList.forEach((customer) => {
+        if (!customer.sent) {
+          defaultSelected.add(customer.email);
+        }
+      });
+      setSelectedEmails(defaultSelected);
     } catch (error) {
       console.error("Error fetching customers:", error);
       toast({
@@ -202,14 +214,36 @@ export function MarketingManager() {
     }
   };
 
+  const toggleCustomerSelection = (email: string) => {
+    setSelectedEmails((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(email)) {
+        newSet.delete(email);
+      } else {
+        newSet.add(email);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleAllSelection = () => {
+    if (selectedEmails.size === customers.length) {
+      // Deselect all
+      setSelectedEmails(new Set());
+    } else {
+      // Select all
+      setSelectedEmails(new Set(customers.map((c) => c.email)));
+    }
+  };
+
   const sendCampaign = async () => {
     if (!selectedCampaignId) return;
 
-    const unsentCustomers = customers.filter((c) => !c.sent);
-    if (unsentCustomers.length === 0) {
+    const selectedCustomers = customers.filter((c) => selectedEmails.has(c.email));
+    if (selectedCustomers.length === 0) {
       toast({
-        title: "No recipients",
-        description: "All customers have already received this campaign",
+        title: "No recipients selected",
+        description: "Please select at least one customer to send the campaign to",
       });
       return;
     }
@@ -219,7 +253,7 @@ export function MarketingManager() {
       const { data, error } = await supabase.functions.invoke("send-marketing-campaign", {
         body: {
           campaign_id: selectedCampaignId,
-          recipients: unsentCustomers.map((c) => ({
+          recipients: selectedCustomers.map((c) => ({
             email: c.email,
             name: c.name,
           })),
@@ -230,7 +264,7 @@ export function MarketingManager() {
 
       toast({
         title: "Success",
-        description: `Campaign sent to ${unsentCustomers.length} customer(s)`,
+        description: `Campaign sent to ${selectedCustomers.length} customer(s)`,
       });
 
       // Refresh the customer list
@@ -250,6 +284,7 @@ export function MarketingManager() {
   const selectedCampaign = campaigns.find((c) => c.id === selectedCampaignId);
   const unsentCount = customers.filter((c) => !c.sent).length;
   const sentCount = customers.filter((c) => c.sent).length;
+  const selectedCount = selectedEmails.size;
 
   if (loading) {
     return (
@@ -387,14 +422,14 @@ export function MarketingManager() {
                   ))}
                 </SelectContent>
               </Select>
-              {selectedCampaignId && unsentCount > 0 && (
+              {selectedCampaignId && selectedCount > 0 && (
                 <Button onClick={sendCampaign} disabled={sending}>
                   {sending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
                     <Send className="h-4 w-4 mr-2" />
                   )}
-                  Send to {unsentCount} customer{unsentCount !== 1 ? "s" : ""}
+                  Send to {selectedCount} customer{selectedCount !== 1 ? "s" : ""}
                 </Button>
               )}
             </div>
@@ -421,6 +456,13 @@ export function MarketingManager() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={selectedEmails.size === customers.length && customers.length > 0}
+                      onCheckedChange={toggleAllSelection}
+                      aria-label="Select all customers"
+                    />
+                  </TableHead>
                   <TableHead>Customer Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Status</TableHead>
@@ -430,6 +472,13 @@ export function MarketingManager() {
               <TableBody>
                 {customers.map((customer) => (
                   <TableRow key={customer.email}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedEmails.has(customer.email)}
+                        onCheckedChange={() => toggleCustomerSelection(customer.email)}
+                        aria-label={`Select ${customer.name}`}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">
                       {customer.name}
                     </TableCell>
