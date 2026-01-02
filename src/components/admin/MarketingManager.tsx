@@ -109,10 +109,11 @@ export function MarketingManager() {
   const fetchCustomersForCampaign = async (campaignId: string) => {
     setLoadingCustomers(true);
     try {
-      // Fetch all unique customers from orders
+      // Fetch all unique customers from delivered orders only
       const { data: orders, error: ordersError } = await supabase
         .from("orders")
         .select("customer_email, customer_name")
+        .eq("order_status", "delivered")
         .order("created_at", { ascending: false });
 
       if (ordersError) throw ordersError;
