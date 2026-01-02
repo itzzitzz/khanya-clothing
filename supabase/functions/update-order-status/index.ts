@@ -703,10 +703,11 @@ const handler = async (req: Request): Promise<Response> => {
             } else if (new_status === 'shipped') {
               smsMessage = `Order ${order.order_number} shipped! ${paymentStatus}. Arrives 3-5 days. - Khanya`;
             } else if (new_status === 'delivered') {
+              const reviewUrl = 'https://g.page/r/CNlCedLi7uSzEBM/review';
               if (paymentStatus === 'Fully Paid') {
-                smsMessage = `Order ${order.order_number} delivered! ${paymentStatus}. Thanks for your business! - Khanya`;
+                smsMessage = `Order ${order.order_number} delivered! Thanks for your business! Leave a review: ${reviewUrl} - Khanya`;
               } else {
-                smsMessage = `Order ${order.order_number} delivered! ${paymentStatus}. Pay: FNB 63173001256, Ref: ${order.order_number} - Khanya`;
+                smsMessage = `Order ${order.order_number} delivered! ${paymentStatus}. Pay: FNB 63173001256, Ref: ${order.order_number}. Review us: ${reviewUrl} - Khanya`;
               }
             }
             
