@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.update-payment-status]
 verify_jwt = false
+
+[functions.send-marketing-campaign]
+verify_jwt = false
