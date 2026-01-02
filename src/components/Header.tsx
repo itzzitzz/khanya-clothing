@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export type ActiveKey = "business" | "gallery" | "contact" | "location" | "brand" | "bales" | "track" | "faq" | "blog" | undefined;
+export type ActiveKey = "business" | "gallery" | "contact" | "location" | "brand" | "bales" | "track" | "faq" | "blog" | "reviews" | undefined;
 
 const Header = ({ active }: { active?: ActiveKey }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -29,9 +29,10 @@ const Header = ({ active }: { active?: ActiveKey }) => {
   const learnMoreItems = [
     { key: "faq" as const, label: "Frequently asked questions (FAQ)", href: "/faq" },
     { key: "blog" as const, label: "How to start a clothing business", href: "/blog" },
+    { key: "reviews" as const, label: "Reviews", href: "/reviews" },
   ];
 
-  const isLearnMoreActive = active === "faq" || active === "blog";
+  const isLearnMoreActive = active === "faq" || active === "blog" || active === "reviews";
 
   const LinkItem = ({ href, label, isActive }: { href: string; label: string; isActive: boolean }) => (
     <a
