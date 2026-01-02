@@ -703,11 +703,11 @@ const handler = async (req: Request): Promise<Response> => {
             } else if (new_status === 'shipped') {
               smsMessage = `Order ${order.order_number} shipped! ${paymentStatus}. Arrives 3-5 days. - Khanya`;
             } else if (new_status === 'delivered') {
-              const reviewUrl = 'https://g.page/r/CNlCedLi7uSzEBM/review';
+              const reviewUrl = 'https://www.google.com/search?hl=en-ZA&gl=za&q=Khanya+Clothing+Store,+0A+Jubie+Rd,+Barbeque+Downs,+Midrand,+1684&ludocid=12962748148169130712&lsig=AB86z5XBdMcvSXdinNFyJ3lib1lJ#lrd=0x1e95717a6f700c7d:0xb3e4eec2dc7942d8,3';
               if (paymentStatus === 'Fully Paid') {
-                smsMessage = `Order ${order.order_number} delivered! Thanks for your business! Leave a review: ${reviewUrl} - Khanya`;
+                smsMessage = `Order ${order.order_number} delivered! Thanks! Review us: ${reviewUrl} - Khanya`;
               } else {
-                smsMessage = `Order ${order.order_number} delivered! ${paymentStatus}. Pay: FNB 63173001256, Ref: ${order.order_number}. Review us: ${reviewUrl} - Khanya`;
+                smsMessage = `Order ${order.order_number} delivered! Pay: FNB 63173001256, Ref: ${order.order_number}. Review: ${reviewUrl} - Khanya`;
               }
             }
             
