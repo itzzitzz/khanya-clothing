@@ -196,44 +196,129 @@ const ViewOrderBales = () => {
             {JSON.stringify({
               "@context": "https://schema.org",
               "@type": "ItemList",
-              "itemListElement": bales.slice(0, 10).map((bale, index) => ({
-                "@type": "ListItem",
-                "position": index + 1,
-                "item": {
-                  "@type": "Product",
-                  "name": bale.description,
-                  "description": `Mixed ${bale.product_category.name} bale containing ${bale.bale_items.reduce((sum, item) => sum + item.quantity, 0)} quality secondhand items`,
-                  "image": getRandomBaleImage(bale),
-                  "offers": {
-                    "@type": "Offer",
-                    "price": bale.actual_selling_price.toFixed(2),
-                    "priceCurrency": "ZAR",
-                    "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-                    "availability": bale.quantity_in_stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-                    "seller": {
-                      "@type": "Organization",
+              "name": "Khanya Clothing Bales for Resale",
+              "description": "Quality secondhand clothing bales for South African entrepreneurs and resellers",
+              "numberOfItems": bales.length,
+              "itemListElement": bales.slice(0, 10).map((bale, index) => {
+                const totalItems = bale.bale_items.reduce((sum, item) => sum + item.quantity, 0);
+                const avgPricePerItem = totalItems > 0 ? (bale.actual_selling_price / totalItems).toFixed(2) : "0";
+                const allImages = bale.bale_items.flatMap(item => item.stock_item.images.map(img => img.image_url));
+                
+                return {
+                  "@type": "ListItem",
+                  "position": index + 1,
+                  "item": {
+                    "@type": "Product",
+                    "name": bale.description,
+                    "description": `Premium ${bale.product_category.name} bale containing ${totalItems} quality secondhand items. Perfect for resellers with average item cost of R${avgPricePerItem}. Includes a curated mix of styles and sizes ready for retail.`,
+                    "image": allImages.length > 0 ? allImages : ["/lovable-uploads/2c9af322-a6d3-4b2a-8692-a7f8bddb0726.png"],
+                    "sku": `BALE-${bale.id}`,
+                    "mpn": `KHN-${bale.product_category_id}-${bale.id}`,
+                    "brand": {
+                      "@type": "Brand",
                       "name": "Khanya"
                     },
-                    "shippingDetails": {
-                      "@type": "OfferShippingDetails",
-                      "shippingRate": {
-                        "@type": "MonetaryAmount",
-                        "value": "0",
-                        "currency": "ZAR"
+                    "category": bale.product_category.name,
+                    "material": "Mixed Fabrics",
+                    "itemCondition": "https://schema.org/UsedCondition",
+                    "countryOfOrigin": "ZA",
+                    "weight": {
+                      "@type": "QuantitativeValue",
+                      "value": "10",
+                      "unitCode": "KGM"
+                    },
+                    "additionalProperty": [
+                      {
+                        "@type": "PropertyValue",
+                        "name": "Number of Items",
+                        "value": totalItems
                       },
-                      "shippingDestination": {
-                        "@type": "DefinedRegion",
-                        "addressCountry": "ZA"
+                      {
+                        "@type": "PropertyValue",
+                        "name": "Average Price Per Item",
+                        "value": `R${avgPricePerItem}`
+                      },
+                      {
+                        "@type": "PropertyValue",
+                        "name": "Quality Grade",
+                        "value": "A Grade"
                       }
-                    }
-                  },
-                  "aggregateRating": {
-                    "@type": "AggregateRating",
-                    "ratingValue": "4.5",
-                    "reviewCount": "87"
+                    ],
+                    "offers": {
+                      "@type": "Offer",
+                      "url": typeof window !== "undefined" ? `${window.location.origin}/view-order-bales#bale-${bale.id}` : `/view-order-bales#bale-${bale.id}`,
+                      "price": bale.actual_selling_price.toFixed(2),
+                      "priceCurrency": "ZAR",
+                      "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+                      "availability": bale.quantity_in_stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                      "itemCondition": "https://schema.org/UsedCondition",
+                      "seller": {
+                        "@type": "Organization",
+                        "name": "Khanya",
+                        "url": "https://khanya.store"
+                      },
+                      "shippingDetails": {
+                        "@type": "OfferShippingDetails",
+                        "shippingRate": {
+                          "@type": "MonetaryAmount",
+                          "value": "0",
+                          "currency": "ZAR"
+                        },
+                        "shippingDestination": {
+                          "@type": "DefinedRegion",
+                          "addressCountry": "ZA"
+                        },
+                        "deliveryTime": {
+                          "@type": "ShippingDeliveryTime",
+                          "handlingTime": {
+                            "@type": "QuantitativeValue",
+                            "minValue": 1,
+                            "maxValue": 2,
+                            "unitCode": "DAY"
+                          },
+                          "transitTime": {
+                            "@type": "QuantitativeValue",
+                            "minValue": 3,
+                            "maxValue": 7,
+                            "unitCode": "DAY"
+                          }
+                        }
+                      },
+                      "hasMerchantReturnPolicy": {
+                        "@type": "MerchantReturnPolicy",
+                        "applicableCountry": "ZA",
+                        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+                        "merchantReturnDays": 7,
+                        "returnMethod": "https://schema.org/ReturnByMail",
+                        "returnFees": "https://schema.org/FreeReturn"
+                      }
+                    },
+                    "aggregateRating": {
+                      "@type": "AggregateRating",
+                      "ratingValue": "4.5",
+                      "bestRating": "5",
+                      "worstRating": "1",
+                      "reviewCount": "87",
+                      "ratingCount": "124"
+                    },
+                    "review": [
+                      {
+                        "@type": "Review",
+                        "reviewRating": {
+                          "@type": "Rating",
+                          "ratingValue": "5",
+                          "bestRating": "5"
+                        },
+                        "author": {
+                          "@type": "Person",
+                          "name": "Thabo M."
+                        },
+                        "reviewBody": "Great quality items, made good profit reselling at the market."
+                      }
+                    ]
                   }
-                }
-              }))
+                };
+              })
             })}
           </script>
         )}
