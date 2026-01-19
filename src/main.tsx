@@ -2,4 +2,8 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-createRoot(document.getElementById("root")!).render(<App />);
+const root = createRoot(document.getElementById("root")!);
+root.render(<App />);
+
+// Dispatch event for pre-renderer to know when content is ready
+document.dispatchEvent(new Event("render-event"));
