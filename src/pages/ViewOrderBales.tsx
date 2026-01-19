@@ -208,6 +208,7 @@ const ViewOrderBales = () => {
                     "@type": "Offer",
                     "price": bale.actual_selling_price.toFixed(2),
                     "priceCurrency": "ZAR",
+                    "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
                     "availability": bale.quantity_in_stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
                     "seller": {
                       "@type": "Organization",
