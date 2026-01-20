@@ -10,11 +10,11 @@ const Location = () => {
         <meta name="description" content="Khanya payment options: EFT or FNB E-Wallet to 083 305 4532. Free delivery anywhere in South Africa. FNB Account 63173001256. Order clothing bales with free nationwide shipping." />
         <meta name="keywords" content="Khanya payment, EFT payment details, FNB E-Wallet, FNB banking, free delivery South Africa, nationwide shipping, clothing bales delivery, payment information" />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/location` : "/location"} />
+        <link rel="canonical" href="https://khanya.store/location" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Payment & Free Delivery | Khanya" />
         <meta property="og:description" content="Simple EFT payment with free delivery to anywhere in South Africa. View our banking details and shipping information." />
-        <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
+        <meta property="og:url" content="https://khanya.store/location" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",

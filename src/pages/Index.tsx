@@ -56,17 +56,17 @@ const Index = () => {
         <meta name="description" content="Start your own clothing business with Khanya. Secondhand clothing bales from R1,000. Perfect for informal traders and entrepreneurs. Free delivery nationwide." />
         <meta name="robots" content="index, follow" />
         <meta name="keywords" content="start clothing business, clothing bales R1000, second hand clothes, wholesale clothing South Africa, informal trader clothing, entrepreneur clothing business, reseller bales, township business" />
-        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/` : "/"} />
+        <link rel="canonical" href="https://khanya.store/" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Start Your Clothing Business from R1,000 | Khanya" />
         <meta property="og:description" content="Build your own clothing business with bales from R1,000. Free delivery. 2-3× profit margins. Perfect for informal market entrepreneurs." />
-        <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
+        <meta property="og:url" content="https://khanya.store/" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context":"https://schema.org",
             "@type":"Organization",
             "name":"Khanya",
-            "url": typeof window !== "undefined" ? window.location.origin : "",
+            "url": "https://khanya.store",
             "logo": "/lovable-uploads/5b6d7d92-ae7b-4906-b2ef-216c9365a312.png",
             "contactPoint":[{"@type":"ContactPoint","contactType":"sales","email":"sales@khanya.store","telephone":"+27 83 305 4532","areaServed":"ZA"}]
           })}
@@ -76,10 +76,10 @@ const Index = () => {
             "@context":"https://schema.org",
             "@type":"WebSite",
             "name":"Khanya",
-            "url": typeof window !== "undefined" ? window.location.origin : "",
+            "url": "https://khanya.store",
             "potentialAction": {
               "@type":"SearchAction",
-              "target": typeof window !== "undefined" ? `${window.location.origin}/?q={search_term_string}` : "/?q={search_term_string}",
+              "target": "https://khanya.store/view-order-bales?q={search_term_string}",
               "query-input":"required name=search_term_string"
             }
           })}

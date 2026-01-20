@@ -171,12 +171,12 @@ const ViewOrderBales = () => {
         <meta name="description" content="View our 10kg clothing bales and place your order. Mixed men's, women's, and children's clothing including jackets, pants, shirts, dresses and more." />
         <meta name="robots" content="index, follow" />
         <meta name="keywords" content="order clothing bales, view clothing bales, mixed clothing items, secondhand clothing types, men's women's children's clothes, jacket pants shirts dresses" />
-        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/view-order-bales` : "/view-order-bales"} />
+        <link rel="canonical" href="https://khanya.store/view-order-bales" />
         <meta property="og:type" content="webpage" />
         <meta property="og:title" content="View & Order Clothing Bales | Mixed Second-hand Items | Khanya" />
         <meta property="og:description" content="View and order our 10kg mixed bales - perfect variety for resellers." />
-        <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
-        <meta property="og:image" content={typeof window !== "undefined" ? `${window.location.origin}/lovable-uploads/2c9af322-a6d3-4b2a-8692-a7f8bddb0726.png` : ""} />
+        <meta property="og:url" content="https://khanya.store/view-order-bales" />
+        <meta property="og:image" content="https://khanya.store/lovable-uploads/2c9af322-a6d3-4b2a-8692-a7f8bddb0726.png" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
