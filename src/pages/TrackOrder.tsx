@@ -198,10 +198,11 @@ const TrackOrder = () => {
         <meta name="description" content="Track your Khanya clothing bales order. Enter your email or phone number and order number to view real-time shipping status and delivery updates." />
         <meta name="keywords" content="track order, order status, delivery tracking, shipping status, Khanya order tracking" />
         <meta name="robots" content="noindex, follow" />
-        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/track-order` : "/track-order"} />
+        <link rel="canonical" href="https://khanya.store/track-order" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Track Your Order | Khanya" />
         <meta property="og:description" content="Check the status of your clothing bales order with real-time tracking." />
+        <meta property="og:url" content="https://khanya.store/track-order" />
       </Helmet>
       <Header active="track" />
       <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background py-12">

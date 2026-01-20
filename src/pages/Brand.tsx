@@ -10,12 +10,12 @@ const Brand = () => {
         <meta name="description" content="Khanya is an African-inspired clothing brand celebrating pride, resilience, and possibility. Bold designs that uplift communities. Shop Khanya branded apparel." />
         <meta name="keywords" content="Khanya brand, African clothing brand, South African fashion, African-inspired apparel, township clothing, community uplift fashion, Khanya apparel" />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/brand` : "/brand"} />
+        <link rel="canonical" href="https://khanya.store/brand" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Khanya Brand - Clothing That Shines From the Inside Out" />
         <meta property="og:description" content="African-inspired clothing that radiates light, pride, and possibility. Wear Khanya, shine from within." />
-        <meta property="og:url" content={typeof window !== "undefined" ? `${window.location.href}` : ""} />
-        <meta property="og:image" content="/lovable-uploads/30d2102c-d664-4ad3-9cbb-0f88e0856966.png" />
+        <meta property="og:url" content="https://khanya.store/brand" />
+        <meta property="og:image" content="https://khanya.store/lovable-uploads/30d2102c-d664-4ad3-9cbb-0f88e0856966.png" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -23,9 +23,9 @@ const Brand = () => {
             "name": "Khanya",
             "slogan": "Clothing That Shines From the Inside Out",
             "description": "Khanya blends African patterns and modern comfort to celebrate pride, resilience, and possibility. Wear light. Shine from within.",
-            "url": typeof window !== "undefined" ? `${window.location.origin}/brand` : "/brand",
-            "logo": `${typeof window !== "undefined" ? window.location.origin : ""}/lovable-uploads/5b6d7d92-ae7b-4906-b2ef-216c9365a312.png`,
-            "image": `${typeof window !== "undefined" ? window.location.origin : ""}/lovable-uploads/30d2102c-d664-4ad3-9cbb-0f88e0856966.png`
+            "url": "https://khanya.store/brand",
+            "logo": "https://khanya.store/lovable-uploads/5b6d7d92-ae7b-4906-b2ef-216c9365a312.png",
+            "image": "https://khanya.store/lovable-uploads/30d2102c-d664-4ad3-9cbb-0f88e0856966.png"
           })}
         </script>
       </Helmet>

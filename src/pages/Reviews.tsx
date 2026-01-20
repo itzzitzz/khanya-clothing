@@ -28,6 +28,11 @@ const Reviews = () => {
           content="Read what our customers say about Khanya clothing bales. Real reviews from entrepreneurs and traders across South Africa."
         />
         <meta name="keywords" content="Khanya reviews, clothing bales reviews, wholesale clothing South Africa, customer testimonials" />
+        <link rel="canonical" href="https://khanya.store/reviews" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Customer Reviews | Khanya Clothing Bales" />
+        <meta property="og:description" content="Read what our customers say about Khanya clothing bales. Real reviews from entrepreneurs and traders across South Africa." />
+        <meta property="og:url" content="https://khanya.store/reviews" />
       </Helmet>
 
       <Header active="reviews" />

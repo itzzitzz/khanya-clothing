@@ -81,7 +81,7 @@ const Cart = () => {
         <title>{`Shopping Cart (${cartCount} ${cartCount === 1 ? 'Item' : 'Items'}) | Khanya`}</title>
         <meta name="description" content={`Review your cart with ${cartCount} clothing bale${cartCount === 1 ? '' : 's'}. Total: R${cartTotal.toFixed(2)}. Free delivery anywhere in South Africa.`} />
         <meta name="robots" content="noindex, follow" />
-        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/cart` : "/cart"} />
+        <link rel="canonical" href="https://khanya.store/cart" />
         <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17692351759"></script>
         <script>
           {`

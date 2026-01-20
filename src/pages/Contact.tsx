@@ -76,14 +76,15 @@ const Contact = () => {
       <Helmet>
         <title>Contact Khanya | Bulk Clothing Bales Supplier South Africa</title>
         <meta name="description" content="Contact Khanya to order bulk clothing bales (10kg). Delivery or collection available. Email sales@khanya.store or WhatsApp +27 83 305 4532." />
-        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/contact` : "/contact"} />
+        <link rel="canonical" href="https://khanya.store/contact" />
         <meta name="robots" content="index, follow" />
+        <meta property="og:url" content="https://khanya.store/contact" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "ContactPage",
             "name": "Contact Khanya",
-            "url": typeof window !== "undefined" ? `${window.location.origin}/contact` : "/contact"
+            "url": "https://khanya.store/contact"
           })}
         </script>
       </Helmet>

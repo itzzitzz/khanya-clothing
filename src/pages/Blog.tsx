@@ -14,7 +14,8 @@ const Blog = () => {
         <title>How to Start Selling Clothes in South Africa | Easy Guide | Khanya</title>
         <meta name="description" content="Learn how to start selling second hand clothes in South Africa. Easy step by step guide for beginners. Start your clothing business with R1,000. Free delivery." />
         <meta name="keywords" content="how to start selling clothes South Africa, sell second hand clothes, start clothing business township, informal trader clothes, make money selling clothes, buy clothing bales, wholesale clothes South Africa, resell clothes for profit, township business ideas, spaza shop clothes" />
-        <link rel="canonical" href={typeof window !== "undefined" ? `${window.location.origin}/blog` : "/blog"} />
+        <link rel="canonical" href="https://khanya.store/blog" />
+        <meta property="og:url" content="https://khanya.store/blog" />
         <meta property="og:type" content="article" />
         <meta property="og:title" content="How to Start Selling Clothes in South Africa | Easy Guide" />
         <meta property="og:description" content="Learn how to start selling second hand clothes. Easy guide for beginners. Start with R1,000 and make R1,000 to R2,000 profit." />
