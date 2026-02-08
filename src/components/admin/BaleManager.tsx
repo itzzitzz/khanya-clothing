@@ -538,39 +538,6 @@ export const BaleManager = () => {
               R{bale.bale_profit.toFixed(2)} ({bale.bale_margin_percentage.toFixed(1)}%)
             </span>
           </div>
-          
-          <div className="border-t pt-2 mt-2">
-            <div className="flex justify-between items-center gap-2">
-              <span className="text-muted-foreground">Qty in Stock:</span>
-              <Input 
-                type="number"
-                min="0"
-                defaultValue={bale.quantity_in_stock}
-                onBlur={async (e) => {
-                  const newQty = parseInt(e.target.value) || 0;
-                  if (newQty === bale.quantity_in_stock) return;
-                  try {
-                    const { error } = await supabase
-                      .from('bales')
-                      .update({ quantity_in_stock: newQty })
-                      .eq('id', bale.id);
-                    
-                    if (error) throw error;
-                    
-                    // Update local state instead of reloading to prevent card shuffle
-                    setBales(prev => prev.map(b => 
-                      b.id === bale.id ? { ...b, quantity_in_stock: newQty } : b
-                    ));
-                    toast({ title: "Success", description: "Quantity updated" });
-                  } catch (error: any) {
-                    toast({ title: "Error", description: error.message, variant: "destructive" });
-                  }
-                }}
-                className="w-20 h-7 text-sm"
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          </div>
         </div>
 
         <div className="flex gap-2 pt-2">
@@ -654,16 +621,6 @@ export const BaleManager = () => {
                 type="number"
                 value={formData.display_order} 
                 onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) })} 
-                required 
-              />
-            </div>
-            <div>
-              <Label>Quantity in Stock</Label>
-              <Input 
-                type="number"
-                min="0"
-                value={formData.quantity_in_stock} 
-                onChange={(e) => setFormData({ ...formData, quantity_in_stock: parseInt(e.target.value) || 0 })} 
                 required 
               />
             </div>
