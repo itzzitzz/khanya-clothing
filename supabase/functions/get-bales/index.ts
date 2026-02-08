@@ -15,6 +15,7 @@ interface BaleItem {
     description: string;
     age_range: string;
     selling_price: number;
+    stock_on_hand: number;
     images: Array<{
       id: number;
       image_url: string;
@@ -35,6 +36,7 @@ interface Bale {
   display_order: number;
   product_category_id: number;
   quantity_in_stock: number;
+  is_in_stock: boolean;
   product_category: {
     id: number;
     name: string;
@@ -101,7 +103,8 @@ Deno.serve(async (req) => {
           name,
           description,
           age_range,
-          selling_price
+          selling_price,
+          stock_on_hand
         )
       `)
       .in('bale_id', baleIds);
@@ -139,27 +142,39 @@ Deno.serve(async (req) => {
           description: stockItem?.description,
           age_range: stockItem?.age_range,
           selling_price: stockItem?.selling_price,
+          stock_on_hand: stockItem?.stock_on_hand ?? 0,
           images: imagesByStockItem[stockItem?.id] || []
         }
       });
       return acc;
     }, {} as Record<number, BaleItem[]>) || {};
 
+    // Helper function to check if a bale is in stock
+    // A bale is out of stock if any stock item has stock_on_hand < quantity required in the bale
+    const checkBaleInStock = (baleItems: BaleItem[]): boolean => {
+      if (!baleItems || baleItems.length === 0) return false;
+      return baleItems.every(item => item.stock_item.stock_on_hand >= item.quantity);
+    };
+
     // Combine bales with their items
-    const balesWithItems: Bale[] = bales?.map(bale => ({
-      id: bale.id,
-      description: bale.description,
-      actual_selling_price: bale.actual_selling_price,
-      recommended_sale_price: bale.recommended_sale_price,
-      total_cost_price: bale.total_cost_price,
-      bale_profit: bale.bale_profit,
-      bale_margin_percentage: bale.bale_margin_percentage,
-      display_order: bale.display_order,
-      product_category_id: bale.product_category_id,
-      quantity_in_stock: bale.quantity_in_stock,
-      product_category: (bale.product_categories as any) || {},
-      bale_items: itemsByBale[bale.id] || []
-    })) || [];
+    const balesWithItems: Bale[] = bales?.map(bale => {
+      const items = itemsByBale[bale.id] || [];
+      return {
+        id: bale.id,
+        description: bale.description,
+        actual_selling_price: bale.actual_selling_price,
+        recommended_sale_price: bale.recommended_sale_price,
+        total_cost_price: bale.total_cost_price,
+        bale_profit: bale.bale_profit,
+        bale_margin_percentage: bale.bale_margin_percentage,
+        display_order: bale.display_order,
+        product_category_id: bale.product_category_id,
+        quantity_in_stock: bale.quantity_in_stock,
+        is_in_stock: checkBaleInStock(items),
+        product_category: (bale.product_categories as any) || {},
+        bale_items: items
+      };
+    }) || [];
 
     return new Response(
       JSON.stringify({ success: true, bales: balesWithItems }),

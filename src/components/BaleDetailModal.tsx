@@ -17,6 +17,7 @@ interface StockItem {
   description: string;
   age_range: string;
   selling_price: number;
+  stock_on_hand: number;
   images: StockItemImage[];
 }
 
@@ -32,6 +33,7 @@ interface Bale {
   description: string;
   actual_selling_price: number;
   quantity_in_stock: number;
+  is_in_stock: boolean;
   bale_items: BaleItem[];
 }
 
@@ -291,9 +293,9 @@ export function BaleDetailModal({ bale, open, onOpenChange, onAddToCart }: BaleD
               }}
               className="w-full"
               size="lg"
-              disabled={bale.quantity_in_stock === 0}
+              disabled={!bale.is_in_stock}
             >
-              {bale.quantity_in_stock === 0 ? (
+              {!bale.is_in_stock ? (
                 "Out of Stock"
               ) : (
                 <>
