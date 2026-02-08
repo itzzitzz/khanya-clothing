@@ -328,6 +328,18 @@ const ViewOrderBales = () => {
       <Header active="bales" />
 
       <main>
+        {/* Low Stock Alert Banner */}
+        <section className="bg-amber-500/10 border-b border-amber-500/30">
+          <div className="container mx-auto py-3 px-4">
+            <div className="flex items-center justify-center gap-2 text-center">
+              <span className="text-amber-600 text-lg">⚠️</span>
+              <p className="text-sm md:text-base text-amber-800 dark:text-amber-200">
+                <strong>Low Stock Alert:</strong> Sales have been fantastic, especially summer wear! 🎉 More stock is on the ship—next shipment due <strong>end of March 2026</strong>. Order now while stocks last!
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section className="bg-gradient-to-br from-primary/10 to-accent/10 py-16">
           <div className="container mx-auto text-center">
             <div className="mb-6">
