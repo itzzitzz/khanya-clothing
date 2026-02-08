@@ -25,6 +25,7 @@ interface StockItem {
   description: string;
   age_range: string;
   selling_price: number;
+  stock_on_hand: number;
   images: StockItemImage[];
 }
 
@@ -53,6 +54,7 @@ interface Bale {
   display_order: number;
   product_category_id: number;
   quantity_in_stock: number;
+  is_in_stock: boolean;
   product_category: ProductCategory;
   bale_items: BaleItem[];
 }
@@ -250,7 +252,7 @@ const ViewOrderBales = () => {
                       "price": bale.actual_selling_price.toFixed(2),
                       "priceCurrency": "ZAR",
                       "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-                      "availability": bale.quantity_in_stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                      "availability": bale.is_in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
                       "itemCondition": "https://schema.org/UsedCondition",
                       "seller": {
                         "@type": "Organization",
@@ -417,9 +419,9 @@ const ViewOrderBales = () => {
                                 e.stopPropagation();
                                 handleAddToCart(bale);
                               }}
-                              disabled={bale.quantity_in_stock === 0}
+                              disabled={!bale.is_in_stock}
                             >
-                              {bale.quantity_in_stock === 0 ? (
+                              {!bale.is_in_stock ? (
                                 "Out of Stock"
                               ) : (
                                 <>
