@@ -328,7 +328,7 @@ const ViewOrderBales = () => {
       <Header active="bales" />
 
       <main>
-        <section className="bg-gradient-to-br from-primary/10 to-accent/10 pt-6 pb-4 md:py-16">
+        <section className="bg-gradient-to-br from-primary/10 to-accent/10 pt-6 pb-2 md:py-16">
           <div className="container mx-auto text-center">
             <div className="mb-3 md:mb-6">
               <Package className="h-12 w-12 md:h-16 md:w-16 mx-auto text-primary mb-2 md:mb-4" />
@@ -351,7 +351,7 @@ const ViewOrderBales = () => {
 
         {/* Low Stock Alert Banner */}
         <section className="bg-amber-500/10 border-b border-amber-500/30">
-          <div className="container mx-auto py-3 px-4">
+          <div className="container mx-auto py-2 md:py-3 px-4">
             <div className="flex items-center justify-center gap-2 text-center">
               <span className="text-amber-600 text-lg">⚠️</span>
               <p className="text-sm md:text-base text-amber-800 dark:text-amber-200">
