@@ -13,8 +13,8 @@ interface VerificationRequest {
   method: 'email' | 'sms';
 }
 
-// Branded email template with Khanya logo
-const LOGO_URL = "https://khanya-resell-africa.lovable.app/email-assets/khanya-logo.png?v=1";
+// Branded email template with Khanya logo - using Supabase storage bucket for reliable email delivery
+const LOGO_URL = "https://gozasfvvgshljziijuwr.supabase.co/storage/v1/object/public/email-assets/khanya-logo.png";
 
 function getEmailTemplate(content: string): string {
   return `
