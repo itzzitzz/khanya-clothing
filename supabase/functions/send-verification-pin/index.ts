@@ -31,7 +31,7 @@ function getEmailTemplate(content: string): string {
             <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
               <!-- Logo Header -->
               <tr>
-                <td style="background: linear-gradient(135deg, #2E4D38 0%, #1a3a24 100%); padding: 30px; text-align: center;">
+                <td style="background-color: #f2ecbd; padding: 30px; text-align: center;">
                   <img src="${LOGO_URL}" alt="Khanya" width="180" style="display: block; margin: 0 auto;" />
                 </td>
               </tr>
