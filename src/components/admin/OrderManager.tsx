@@ -670,6 +670,14 @@ const OrderManager = () => {
                         {order.delivery_postal_code}
                       </p>
                     </div>
+                    {order.customer_feedback && (
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="text-sm font-semibold mb-1 text-primary">💬 Customer Feedback:</p>
+                        <p className="text-sm text-muted-foreground italic bg-muted/50 p-2 rounded">
+                          "{order.customer_feedback}"
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div>
