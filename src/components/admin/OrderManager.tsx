@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, RefreshCw, Printer, Trash2, Send } from 'lucide-react';
+import { Loader2, RefreshCw, Printer, Trash2, Send, MessageSquare } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { OrderNoteModal } from './OrderNoteModal';
 
 const OrderManager = () => {
   const { toast } = useToast();
@@ -36,6 +37,13 @@ const OrderManager = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [sendingReminder, setSendingReminder] = useState<string | null>(null);
   const [updatingPayment, setUpdatingPayment] = useState<string | null>(null);
+  
+  // Shipping note modal state
+  const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [noteModalOrder, setNoteModalOrder] = useState<any>(null);
+  const [noteModalMode, setNoteModalMode] = useState<'shipped' | 'send'>('shipped');
+  const [pendingStatusChange, setPendingStatusChange] = useState<{ orderId: string; newStatus: string } | null>(null);
+  const [sendingNote, setSendingNote] = useState<string | null>(null);
 
   // Calculate sales statistics
   const calculateStats = () => {
@@ -102,6 +110,12 @@ const OrderManager = () => {
           *,
           order_items (
             *
+          ),
+          order_status_history (
+            id,
+            status,
+            notes,
+            changed_at
           )
         `)
         .order('created_at', { ascending: false });
@@ -154,9 +168,15 @@ const OrderManager = () => {
             })
           );
 
+          // Sort status history by date descending
+          const sortedHistory = (order.order_status_history || []).sort(
+            (a: any, b: any) => new Date(b.changed_at).getTime() - new Date(a.changed_at).getTime()
+          );
+
           return {
             ...order,
-            order_items: itemsWithBaleDetails
+            order_items: itemsWithBaleDetails,
+            order_status_history: sortedHistory
           };
         })
       );
@@ -177,7 +197,20 @@ const OrderManager = () => {
     fetchOrders();
   }, []);
 
-  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+  // Handle status change - show modal for shipped status
+  const handleStatusChange = (orderId: string, newStatus: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (newStatus === 'shipped' && order) {
+      setNoteModalOrder(order);
+      setNoteModalMode('shipped');
+      setPendingStatusChange({ orderId, newStatus });
+      setNoteModalOpen(true);
+    } else {
+      handleStatusUpdate(orderId, newStatus);
+    }
+  };
+
+  const handleStatusUpdate = async (orderId: string, newStatus: string, note?: string) => {
     setUpdating(orderId);
     try {
       const { error } = await supabase.functions.invoke('update-order-status', {
@@ -185,6 +218,7 @@ const OrderManager = () => {
           order_id: orderId,
           new_status: newStatus,
           payment_status: newStatus === 'packing' ? 'paid' : undefined,
+          note: note || undefined,
         },
       });
 
@@ -192,7 +226,9 @@ const OrderManager = () => {
 
       toast({
         title: 'Success',
-        description: 'Order status updated and customer notified',
+        description: note 
+          ? 'Order status updated with note and customer notified'
+          : 'Order status updated and customer notified',
       });
 
       await fetchOrders();
@@ -204,6 +240,62 @@ const OrderManager = () => {
       });
     } finally {
       setUpdating(null);
+    }
+  };
+
+  // Handle shipping note modal submission
+  const handleShippingNoteSubmit = async (note: string) => {
+    if (pendingStatusChange) {
+      await handleStatusUpdate(pendingStatusChange.orderId, pendingStatusChange.newStatus, note);
+      setPendingStatusChange(null);
+    }
+  };
+
+  // Handle sending a note via the note icon
+  const handleSendNoteClick = (order: any) => {
+    setNoteModalOrder(order);
+    setNoteModalMode('send');
+    setNoteModalOpen(true);
+  };
+
+  const handleSendNote = async (note: string) => {
+    if (!noteModalOrder || !note) return;
+    
+    setSendingNote(noteModalOrder.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-order-note', {
+        body: {
+          order_id: noteModalOrder.id,
+          note: note,
+        },
+      });
+
+      if (error) throw error;
+
+      const notificationInfo = data?.emailSent && data?.smsSent 
+        ? 'via email and SMS'
+        : data?.emailSent 
+        ? 'via email'
+        : data?.smsSent 
+        ? 'via SMS'
+        : '';
+
+      toast({
+        title: 'Note Sent',
+        description: notificationInfo 
+          ? `Note sent to ${noteModalOrder.customer_name} ${notificationInfo}` 
+          : 'Note recorded',
+      });
+
+      await fetchOrders();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to send note',
+        variant: 'destructive',
+      });
+    } finally {
+      setSendingNote(null);
     }
   };
 
@@ -509,6 +601,20 @@ const OrderManager = () => {
                       <Printer className="h-4 w-4" />
                     </Button>
                     <Button
+                      onClick={() => handleSendNoteClick(order)}
+                      variant="outline"
+                      size="sm"
+                      title="Send Note to Customer"
+                      disabled={sendingNote === order.id}
+                      className="text-blue-600 hover:text-blue-600 hover:bg-blue-50"
+                    >
+                      {sendingNote === order.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <MessageSquare className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button
                       onClick={() => handleDeleteClick(order)}
                       variant="outline"
                       size="sm"
@@ -597,7 +703,7 @@ const OrderManager = () => {
                     <label className="text-sm font-medium">Update Status:</label>
                     <Select
                       value={order.order_status}
-                      onValueChange={(value) => handleStatusUpdate(order.id, value)}
+                      onValueChange={(value) => handleStatusChange(order.id, value)}
                       disabled={updating === order.id}
                     >
                       <SelectTrigger>
@@ -681,6 +787,36 @@ const OrderManager = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Order Notes/History Section */}
+              {order.order_status_history && order.order_status_history.some((h: any) => h.notes) && (
+                <div className="border-t pt-4 mt-4">
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    Order Notes
+                  </h4>
+                  <div className="space-y-2">
+                    {order.order_status_history
+                      .filter((h: any) => h.notes)
+                      .map((history: any) => (
+                        <div key={history.id} className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm flex-1">{history.notes}</p>
+                            <div className="text-right shrink-0">
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(history.changed_at).toLocaleDateString()}
+                              </span>
+                              <br />
+                              <span className="text-xs font-medium capitalize text-blue-600 dark:text-blue-400">
+                                {history.status === 'note' ? 'Note' : history.status.replace(/_/g, ' ')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -735,6 +871,31 @@ const OrderManager = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Order Note Modal */}
+      <OrderNoteModal
+        open={noteModalOpen}
+        onOpenChange={(open) => {
+          setNoteModalOpen(open);
+          if (!open) {
+            setPendingStatusChange(null);
+          }
+        }}
+        orderNumber={noteModalOrder?.order_number || ''}
+        title={noteModalMode === 'shipped' 
+          ? 'Add Shipping Note' 
+          : 'Send Note to Customer'}
+        description={noteModalMode === 'shipped'
+          ? 'Add an optional note with tracking info, waybill number, or other shipping details. This will be included in the shipping notification email.'
+          : 'Send a note to the customer via email and SMS. Great for updates, tracking links, or important information.'}
+        submitLabel={noteModalMode === 'shipped' 
+          ? 'Update to Shipped' 
+          : 'Send Note'}
+        onSubmit={noteModalMode === 'shipped' 
+          ? handleShippingNoteSubmit 
+          : handleSendNote}
+        isLoading={updating === noteModalOrder?.id || sendingNote === noteModalOrder?.id}
+      />
     </div>
   );
 };
