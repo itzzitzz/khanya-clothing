@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
 import { Resend } from "npm:resend@2.0.0";
-// Using SMTP relay instead of Resend direct
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +11,59 @@ interface VerificationRequest {
   email?: string;
   phone?: string;
   method: 'email' | 'sms';
+}
+
+// Branded email template with Khanya logo
+const LOGO_URL = "https://khanya-resell-africa.lovable.app/email-assets/khanya-logo.png?v=1";
+
+function getEmailTemplate(content: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f0;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f0; padding: 40px 20px;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+              <!-- Logo Header -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #2E4D38 0%, #1a3a24 100%); padding: 30px; text-align: center;">
+                  <img src="${LOGO_URL}" alt="Khanya" width="180" style="display: block; margin: 0 auto;" />
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              ${content}
+              
+              <!-- Footer -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #D6A220 0%, #b8891a 100%); padding: 25px; text-align: center;">
+                  <p style="margin: 0 0 10px 0; color: #ffffff; font-size: 14px; font-weight: 600;">
+                    Quality Clothing Bales for Your Success
+                  </p>
+                  <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 12px;">
+                    Questions? Contact us at <a href="mailto:sales@khanya.store" style="color: #ffffff; text-decoration: underline;">sales@khanya.store</a>
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="background-color: #2E4D38; padding: 15px; text-align: center;">
+                  <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 11px;">
+                    © ${new Date().getFullYear()} Khanya. All rights reserved.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -74,19 +126,31 @@ const handler = async (req: Request): Promise<Response> => {
       const resend = new Resend(resendApiKey);
       const subject = `${pinCode} - Your Verification PIN - Khanya`;
       
-      const htmlBody = `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #222;">
-          <h2 style="margin: 0 0 16px;">Email Verification</h2>
-          <p>Your verification PIN is:</p>
-          <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
-            <h1 style="font-size: 32px; letter-spacing: 8px; color: #000; margin: 0;">${pinCode}</h1>
-          </div>
-          <p>This PIN will expire in 10 minutes.</p>
-          <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
-          <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;" />
-          <p style="font-size: 13px; color: #888;">Khanya - Quality secondhand clothing bales</p>
-        </div>
+      const emailContent = `
+        <tr>
+          <td style="padding: 40px 30px; text-align: center;">
+            <h1 style="margin: 0 0 20px 0; color: #2E4D38; font-size: 24px;">🔐 Verification Code</h1>
+            
+            <p style="margin: 0 0 30px 0; color: #333; font-size: 16px; line-height: 1.6;">
+              Enter this PIN to verify your email address:
+            </p>
+            
+            <div style="background: linear-gradient(135deg, #f5f5f0 0%, #e8e8e0 100%); border-radius: 12px; padding: 30px; margin: 0 auto 30px; max-width: 250px; border: 2px solid #D6A220;">
+              <p style="margin: 0; font-size: 36px; letter-spacing: 8px; color: #2E4D38; font-weight: bold;">${pinCode}</p>
+            </div>
+            
+            <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">
+              This PIN will expire in <strong>10 minutes</strong>.
+            </p>
+            
+            <p style="margin: 20px 0 0 0; color: #999; font-size: 13px;">
+              If you didn't request this, please ignore this email.
+            </p>
+          </td>
+        </tr>
       `;
+
+      const htmlBody = getEmailTemplate(emailContent);
 
       const emailResponse = await resend.emails.send({
         from: "Khanya <noreply@mail.khanya.store>",

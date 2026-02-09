@@ -303,23 +303,57 @@ const handler = async (req: Request): Promise<Response> => {
         
         // Generate email content based on status
         let subject = '';
-        let htmlBody = '';
+        let emailContent = '';
         
-        const baseStyles = `
-          <style>
-            body { font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1f2e27; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #faf9f6; }
-            .header { background: linear-gradient(135deg, #2E4D38 0%, #234130 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #ffffff; padding: 30px 20px; border: 1px solid #d9ded6; border-top: none; }
-            .order-number { font-size: 18px; font-weight: bold; color: #D6A220; margin: 10px 0; }
-            .status-badge { display: inline-block; padding: 8px 16px; border-radius: 6px; font-weight: 600; margin: 15px 0; }
-            .status-packing { background: #fef9e7; color: #8b7217; }
-            .status-shipped { background: #e8f1ed; color: #2E4D38; }
-            .status-delivered { background: #d1fae5; color: #065f46; }
-            .info-box { background: #f4f7f5; border-left: 4px solid #2E4D38; padding: 15px; margin: 20px 0; border-radius: 4px; }
-            .footer { text-align: center; color: #6b7b73; font-size: 12px; margin-top: 30px; padding: 20px; border-top: 1px solid #d9ded6; }
-            .button { display: inline-block; background: #D6A220; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0; font-weight: 600; }
-          </style>
+        // Branded email template with Khanya logo
+        const LOGO_URL = "https://khanya-resell-africa.lovable.app/email-assets/khanya-logo.png?v=1";
+        
+        const getEmailTemplate = (content: string) => `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f0;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f0; padding: 40px 20px;">
+              <tr>
+                <td align="center">
+                  <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <!-- Logo Header -->
+                    <tr>
+                      <td style="background: linear-gradient(135deg, #2E4D38 0%, #1a3a24 100%); padding: 30px; text-align: center;">
+                        <img src="${LOGO_URL}" alt="Khanya" width="180" style="display: block; margin: 0 auto;" />
+                      </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    ${content}
+                    
+                    <!-- Footer -->
+                    <tr>
+                      <td style="background: linear-gradient(135deg, #D6A220 0%, #b8891a 100%); padding: 25px; text-align: center;">
+                        <p style="margin: 0 0 10px 0; color: #ffffff; font-size: 14px; font-weight: 600;">
+                          Quality Clothing Bales for Your Success
+                        </p>
+                        <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 12px;">
+                          Questions? Contact us at <a href="mailto:sales@khanya.store" style="color: #ffffff; text-decoration: underline;">sales@khanya.store</a>
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="background-color: #2E4D38; padding: 15px; text-align: center;">
+                        <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 11px;">
+                          © ${new Date().getFullYear()} Khanya. All rights reserved.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>
         `;
         
         if (new_status === 'new_order') {

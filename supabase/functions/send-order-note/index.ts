@@ -11,6 +11,59 @@ interface SendNoteRequest {
   note: string;
 }
 
+// Branded email template with Khanya logo
+const LOGO_URL = "https://khanya-resell-africa.lovable.app/email-assets/khanya-logo.png?v=1";
+
+function getEmailTemplate(content: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f0;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f0; padding: 40px 20px;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+              <!-- Logo Header -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #2E4D38 0%, #1a3a24 100%); padding: 30px; text-align: center;">
+                  <img src="${LOGO_URL}" alt="Khanya" width="180" style="display: block; margin: 0 auto;" />
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              ${content}
+              
+              <!-- Footer -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #D6A220 0%, #b8891a 100%); padding: 25px; text-align: center;">
+                  <p style="margin: 0 0 10px 0; color: #ffffff; font-size: 14px; font-weight: 600;">
+                    Quality Clothing Bales for Your Success
+                  </p>
+                  <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 12px;">
+                    Questions? Contact us at <a href="mailto:sales@khanya.store" style="color: #ffffff; text-decoration: underline;">sales@khanya.store</a>
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="background-color: #2E4D38; padding: 15px; text-align: center;">
+                  <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 11px;">
+                    © ${new Date().getFullYear()} Khanya. All rights reserved.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -63,40 +116,37 @@ const handler = async (req: Request): Promise<Response> => {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (resendApiKey) {
       try {
-        const baseStyles = `
-          <style>
-            body { font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1f2e27; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #faf9f6; }
-            .header { background: linear-gradient(135deg, #2E4D38 0%, #234130 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #ffffff; padding: 30px 20px; border: 1px solid #d9ded6; border-top: none; }
-            .order-number { font-size: 18px; font-weight: bold; color: #D6A220; margin: 10px 0; }
-            .note-box { background: #e8f4fd; border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0; border-radius: 4px; }
-            .footer { text-align: center; color: #6b7b73; font-size: 12px; margin-top: 30px; padding: 20px; border-top: 1px solid #d9ded6; }
-          </style>
+        const emailContent = `
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h1 style="margin: 0 0 20px 0; color: #2E4D38; font-size: 24px; text-align: center;">📝 Order Update</h1>
+              
+              <p style="margin: 0 0 20px 0; color: #333; font-size: 16px; line-height: 1.6;">
+                Hello <strong>${order.customer_name}</strong>,
+              </p>
+              
+              <p style="margin: 0 0 20px 0; color: #333; font-size: 16px; line-height: 1.6;">
+                We have an update regarding your order:
+              </p>
+              
+              <div style="background: #f5f5f0; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center;">
+                <p style="margin: 0; color: #666; font-size: 14px;">Order Number</p>
+                <p style="margin: 5px 0 0 0; color: #D6A220; font-size: 20px; font-weight: bold;">${order.order_number}</p>
+              </div>
+              
+              <div style="background: linear-gradient(135deg, #e8f4fd 0%, #d1e9fc 100%); border-left: 4px solid #2E4D38; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
+                <p style="margin: 0 0 10px 0; color: #2E4D38; font-size: 14px; font-weight: 600;">Message from Khanya:</p>
+                <p style="margin: 0; color: #333; font-size: 16px; line-height: 1.6; white-space: pre-wrap;">${note}</p>
+              </div>
+              
+              <p style="margin: 20px 0 0 0; color: #333; font-size: 16px; line-height: 1.6;">
+                If you have any questions, please don't hesitate to contact us.
+              </p>
+            </td>
+          </tr>
         `;
 
-        const htmlBody = `
-          ${baseStyles}
-          <div class="container">
-            <div class="header">
-              <h1 style="margin: 0; font-size: 28px;">📝 Order Update</h1>
-            </div>
-            <div class="content">
-              <p>Hello ${order.customer_name},</p>
-              <p>We have an update regarding your order:</p>
-              <div class="order-number">Order Number: ${order.order_number}</div>
-              <div class="note-box">
-                <strong>Message from Khanya:</strong>
-                <p style="margin: 10px 0 0 0; white-space: pre-wrap;">${note}</p>
-              </div>
-              <p>If you have any questions, please don't hesitate to contact us.</p>
-            </div>
-            <div class="footer">
-              <p>Questions? Contact us at <a href="mailto:sales@khanya.store">sales@khanya.store</a></p>
-              <p>© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
-            </div>
-          </div>
-        `;
+        const htmlBody = getEmailTemplate(emailContent);
 
         const emailResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
@@ -105,7 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
             Authorization: `Bearer ${resendApiKey}`,
           },
           body: JSON.stringify({
-            from: "Khanya <sales@khanya.store>",
+            from: "Khanya <noreply@mail.khanya.store>",
             to: [order.customer_email],
             subject: `Order Update - ${order.order_number}`,
             html: htmlBody,
