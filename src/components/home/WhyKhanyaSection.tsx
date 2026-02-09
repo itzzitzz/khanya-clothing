@@ -47,7 +47,7 @@ const WhyKhanyaSection = () => (
 
     <div className="space-y-4 leading-relaxed text-base">
       <p>
-        <strong>Quality you can trust.</strong> Every Khanya bale contains A-grade second hand clothing — carefully checked to make sure you get good quality items. Each bale has 30-45 items depending on the clothing type, all for just R600-R1,600.
+        <strong>Quality you can trust.</strong> Every Khanya bale contains A-grade second hand clothing — carefully checked to make sure you get good quality items. Each bale has 10-100 items depending on the clothing type, all for just R600-R1,600.
       </p>
       <p>
         <strong>Something for everyone.</strong> Our bales come in different categories: men's jackets and jeans, women's dresses and tops, children's summer wear, and more. Pick the bales that suit your needs best.

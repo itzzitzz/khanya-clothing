@@ -11,7 +11,7 @@ const ResellersSection = () => (
       <div className="mb-8">
         <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 max-w-4xl mx-auto">
           <p className="text-sm md:text-base text-center">
-            <strong>Realistic weekly goal:</strong> Sell one bale (30-45 items) per week at an average of <strong>R70-R80</strong> per item. That's <strong>R2,100-R3,600 in sales</strong> and <strong>R1,000-R2,000 profit</strong> every week.
+            <strong>Realistic weekly goal:</strong> Sell one bale per week at an average of <strong>R70-R80</strong> per item. That's great profit every week depending on bale size.
           </p>
         </div>
       </div>
