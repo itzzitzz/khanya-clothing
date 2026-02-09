@@ -328,10 +328,10 @@ const ViewOrderBales = () => {
       <Header active="bales" />
 
       <main>
-        <section className="bg-gradient-to-br from-primary/10 to-accent/10 py-16">
+        <section className="bg-gradient-to-br from-primary/10 to-accent/10 py-8 md:py-16">
           <div className="container mx-auto text-center">
-            <div className="mb-6">
-              <Package className="h-16 w-16 mx-auto text-primary mb-4" />
+            <div className="mb-3 md:mb-6">
+              <Package className="h-12 w-12 md:h-16 md:w-16 mx-auto text-primary mb-2 md:mb-4" />
             </div>
             <div className="flex justify-center mb-4">
               <Badge variant="default" className="text-lg px-6 py-2 bg-primary hover:bg-primary/90 flex items-center gap-2">
@@ -339,10 +339,10 @@ const ViewOrderBales = () => {
                 High Quality A Grade
               </Badge>
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
+            <h1 className="text-3xl md:text-5xl font-extrabold leading-tight mb-2 md:mb-4">
               View & Order Bales
             </h1>
-            <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto inline-flex items-center justify-center gap-2 flex-wrap">
+            <p className="text-base md:text-lg text-muted-foreground mb-3 md:mb-6 max-w-2xl mx-auto inline-flex items-center justify-center gap-2 flex-wrap">
               <span>Start or grow your clothing business with bales of quality second-hand items—with FREE delivery to your address or any PAXI location (PEP store) nationwide!</span>
               <img src={saFlag} alt="South Africa flag" className="w-8 h-5 object-cover rounded-sm inline-block" />
             </p>
