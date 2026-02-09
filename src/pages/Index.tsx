@@ -274,7 +274,7 @@ const Index = () => {
 
       <footer className="border-t">
         <div className="container mx-auto py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-          <p>&copy; {typeof window !== "undefined" ? new Date().getFullYear() : "2025"} Khanya. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Khanya. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <a href="/terms-of-service" className="hover:underline text-muted-foreground">Terms of Service</a>
             <a href="#" className="hover:underline text-muted-foreground">Back to top</a>
