@@ -11,8 +11,8 @@ interface SendNoteRequest {
   note: string;
 }
 
-// Branded email template with Khanya logo - using Supabase storage bucket for reliable email delivery
-const LOGO_URL = "https://gozasfvvgshljziijuwr.supabase.co/storage/v1/object/public/email-assets/khanya-logo.png";
+// Branded email template with Khanya logo (hosted on primary domain for reliability)
+const LOGO_URL = "https://khanya.store/khanya-logo.png";
 
 function getEmailTemplate(content: string): string {
   return `
