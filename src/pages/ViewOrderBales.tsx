@@ -342,7 +342,7 @@ const ViewOrderBales = () => {
             <h1 className="text-3xl md:text-5xl font-extrabold leading-tight mb-2 md:mb-4">
               View & Order Bales
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground mb-3 md:mb-6 max-w-2xl mx-auto inline-flex items-center justify-center gap-2 flex-wrap">
+            <p className="text-base md:text-lg text-muted-foreground mb-0 md:mb-6 max-w-2xl mx-auto inline-flex items-center justify-center gap-2 flex-wrap">
               <span>Start or grow your clothing business with bales of quality second-hand items—with FREE delivery to your address or any PAXI location (PEP store) nationwide!</span>
               <img src={saFlag} alt="South Africa flag" className="w-8 h-5 object-cover rounded-sm inline-block" />
             </p>
