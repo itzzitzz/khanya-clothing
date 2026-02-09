@@ -19,6 +19,7 @@ import PackingList from "./pages/PackingList";
 import BalePackingList from "./pages/BalePackingList";
 import Invoice from "./pages/Invoice";
 import PrintOrder from "./pages/PrintOrder";
+import PrintPackingLists from "./pages/PrintPackingLists";
 import TermsOfService from "./pages/TermsOfService";
 import FAQ from "./pages/FAQ";
 import Blog from "./pages/Blog";
@@ -50,8 +51,9 @@ const App = () => (
               <Route path="/order-confirmation" element={<OrderConfirmation />} />
               <Route path="/packing-list" element={<PackingList />} />
               <Route path="/bale-packing-list" element={<BalePackingList />} />
-            <Route path="/invoice" element={<Invoice />} />
-            <Route path="/print-order" element={<PrintOrder />} />
+              <Route path="/invoice" element={<Invoice />} />
+              <Route path="/print-order" element={<PrintOrder />} />
+              <Route path="/print-packing-lists" element={<PrintPackingLists />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/blog" element={<Blog />} />
