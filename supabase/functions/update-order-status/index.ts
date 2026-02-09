@@ -358,39 +358,36 @@ const handler = async (req: Request): Promise<Response> => {
         
         if (new_status === 'new_order') {
           subject = `Order Confirmation - ${order.order_number}`;
-          htmlBody = `
-            ${baseStyles}
-            <div class="container">
-              <div class="header">
-                <h1 style="margin: 0; font-size: 28px;">Order Confirmed!</h1>
-              </div>
-              <div class="content">
-                <p>Hello ${order.customer_name},</p>
-                <p>Thank you for your order! We've received your order and will begin processing it once payment is confirmed.</p>
-                <div class="order-number">Order Number: ${order.order_number}</div>
+          const contentHtml = `
+            <tr>
+              <td style="padding: 30px;">
+                <h2 style="margin: 0 0 20px 0; color: #2E4D38; font-size: 24px;">Order Confirmed!</h2>
+                <p style="color: #333; line-height: 1.6;">Hello ${order.customer_name},</p>
+                <p style="color: #333; line-height: 1.6;">Thank you for your order! We've received your order and will begin processing it once payment is confirmed.</p>
+                <div style="background: #f4f7f5; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center;">
+                  <p style="margin: 0; font-size: 12px; color: #666;">Order Number</p>
+                  <p style="margin: 5px 0 0 0; font-size: 20px; font-weight: bold; color: #D6A220;">${order.order_number}</p>
+                </div>
                 <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 15px 0; border-radius: 4px;">
                   <p style="margin: 0; font-size: 14px; color: #92400e;">
-                    <strong>Payment Status:</strong> <span style="background: #fde68a; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${order.payment_tracking_status || 'Awaiting payment'}</span>
+                    <strong>Payment Status:</strong> ${order.payment_tracking_status || 'Awaiting payment'}
                   </p>
                   <p style="margin: 8px 0 0 0; font-size: 13px; color: #92400e;">
                     Amount Paid: <strong>R${Number(order.amount_paid || 0).toFixed(2)}</strong> / Total: <strong>R${Number(order.total_amount).toFixed(2)}</strong>
                   </p>
                 </div>
-                <div class="info-box">
-                  <strong>What happens next?</strong>
-                  <p style="margin: 10px 0 0 0;">Once we confirm your payment, we'll start preparing your bales for shipment. You'll receive an email update at each step of the process.</p>
+                <div style="background: #e8f5e9; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                  <strong style="color: #2E4D38;">What happens next?</strong>
+                  <p style="margin: 10px 0 0 0; color: #333; line-height: 1.6;">Once we confirm your payment, we'll start preparing your bales for shipment. You'll receive an email update at each step of the process.</p>
                 </div>
-                <p><strong>Order Total:</strong> R${Number(order.total_amount).toFixed(2)}</p>
-                <p><strong>Delivery Address:</strong><br>
+                <p style="color: #333;"><strong>Order Total:</strong> R${Number(order.total_amount).toFixed(2)}</p>
+                <p style="color: #333;"><strong>Delivery Address:</strong><br>
                 ${order.delivery_complex ? `${order.delivery_complex}<br>` : ''}${order.delivery_address}<br>
                 ${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}</p>
-              </div>
-              <div class="footer">
-                <p>Questions? Contact us at <a href="mailto:sales@khanya.store">sales@khanya.store</a></p>
-                <p>© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
-              </div>
-            </div>
+              </td>
+            </tr>
           `;
+          emailContent = getEmailTemplate(contentHtml);
         } else if (new_status === 'packing') {
           const totalAmount = Number(order.total_amount);
           const amountPaid = Number(order.amount_paid || 0);
@@ -398,7 +395,6 @@ const handler = async (req: Request): Promise<Response> => {
           const paymentStatus = order.payment_tracking_status || 'Awaiting payment';
           const isFullyPaid = paymentStatus === 'Fully Paid';
           
-          // Dynamic subject and header based on payment status
           const emailHeading = isFullyPaid 
             ? '🎉 Payment Confirmed - We\'re Packing Your Order!'
             : paymentStatus === 'Partially Paid'
@@ -413,26 +409,9 @@ const handler = async (req: Request): Promise<Response> => {
             ? `We've received R${amountPaid.toFixed(2)} of your payment and are packing your order. Please arrange payment for the remaining R${amountOwing.toFixed(2)} as soon as possible.`
             : `We're packing your order! Please note there is still R${amountOwing.toFixed(2)} outstanding. Kindly complete your payment to avoid delays.`;
           
-          const paymentBoxColor = isFullyPaid 
-            ? '#d1fae5' 
-            : paymentStatus === 'Partially Paid'
-            ? '#fef3c7'
-            : '#fee2e2';
-          const paymentBorderColor = isFullyPaid 
-            ? '#10b981' 
-            : paymentStatus === 'Partially Paid'
-            ? '#f59e0b'
-            : '#ef4444';
-          const paymentTextColor = isFullyPaid 
-            ? '#065f46' 
-            : paymentStatus === 'Partially Paid'
-            ? '#92400e'
-            : '#991b1b';
-          const paymentBadgeColor = isFullyPaid 
-            ? '#6ee7b7' 
-            : paymentStatus === 'Partially Paid'
-            ? '#fde68a'
-            : '#fecaca';
+          const paymentBoxColor = isFullyPaid ? '#d1fae5' : paymentStatus === 'Partially Paid' ? '#fef3c7' : '#fee2e2';
+          const paymentBorderColor = isFullyPaid ? '#10b981' : paymentStatus === 'Partially Paid' ? '#f59e0b' : '#ef4444';
+          const paymentTextColor = isFullyPaid ? '#065f46' : paymentStatus === 'Partially Paid' ? '#92400e' : '#991b1b';
           
           const orderDate = new Date(order.created_at).toLocaleDateString('en-ZA', { 
             year: 'numeric', 
@@ -440,29 +419,25 @@ const handler = async (req: Request): Promise<Response> => {
             day: 'numeric' 
           });
           
-          htmlBody = `
-            ${baseStyles}
-            <div class="container">
-              <div class="header">
-                <h1 style="margin: 0; font-size: 28px;">${emailHeading}</h1>
-              </div>
-              <div class="content">
-                <p>Hello ${order.customer_name},</p>
-                <p>${paymentMessage}</p>
-                <div class="order-number">Order Number: ${order.order_number}</div>
-                <span class="status-badge status-packing">Packing in Progress</span>
+          const contentHtml = `
+            <tr>
+              <td style="padding: 30px;">
+                <h2 style="margin: 0 0 20px 0; color: #2E4D38; font-size: 24px;">${emailHeading}</h2>
+                <p style="color: #333; line-height: 1.6;">Hello ${order.customer_name},</p>
+                <p style="color: #333; line-height: 1.6;">${paymentMessage}</p>
+                <div style="background: #f4f7f5; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center;">
+                  <p style="margin: 0; font-size: 12px; color: #666;">Order Number</p>
+                  <p style="margin: 5px 0 0 0; font-size: 20px; font-weight: bold; color: #D6A220;">${order.order_number}</p>
+                  <span style="display: inline-block; background: #3b82f6; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-top: 10px;">Packing in Progress</span>
+                </div>
                 <div style="background: ${paymentBoxColor}; border-left: 4px solid ${paymentBorderColor}; padding: 12px; margin: 15px 0; border-radius: 4px;">
                   <p style="margin: 0; font-size: 14px; color: ${paymentTextColor};">
-                    <strong>Payment Status:</strong> <span style="background: ${paymentBadgeColor}; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${paymentStatus}</span>
+                    <strong>Payment Status:</strong> ${paymentStatus}
                   </p>
                   <p style="margin: 8px 0 0 0; font-size: 13px; color: ${paymentTextColor};">
                     Amount Paid: <strong>R${amountPaid.toFixed(2)}</strong> / Total: <strong>R${totalAmount.toFixed(2)}</strong>
                   </p>
-                  ${!isFullyPaid ? `
-                    <p style="margin: 8px 0 0 0; font-size: 14px; font-weight: bold; color: ${paymentTextColor};">
-                      Amount Still Owing: <strong style="font-size: 16px;">R${amountOwing.toFixed(2)}</strong>
-                    </p>
-                  ` : ''}
+                  ${!isFullyPaid ? `<p style="margin: 8px 0 0 0; font-size: 14px; font-weight: bold; color: ${paymentTextColor};">Amount Still Owing: <strong style="font-size: 16px;">R${amountOwing.toFixed(2)}</strong></p>` : ''}
                 </div>
                 ${!isFullyPaid ? `
                   <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
@@ -474,110 +449,15 @@ const handler = async (req: Request): Promise<Response> => {
                     <p style="margin: 5px 0; font-size: 13px; color: #dc2626; font-weight: bold;"><strong>Reference:</strong> ${order.order_number}</p>
                   </div>
                 ` : ''}
-                <div class="info-box">
-                  <strong>What's happening now?</strong>
-                  <p style="margin: 10px 0 0 0;">Our team is carefully preparing your bales for shipment. You'll receive another update once your order has been dispatched.</p>
+                <div style="background: #e8f5e9; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                  <strong style="color: #2E4D38;">What's happening now?</strong>
+                  <p style="margin: 10px 0 0 0; color: #333; line-height: 1.6;">Our team is carefully preparing your bales for shipment. You'll receive another update once your order has been dispatched.</p>
                 </div>
-                <p><strong>Estimated Delivery:</strong> 3-5 business days after shipment</p>
-              </div>
-              <div class="footer">
-                <p>Questions? Contact us at <a href="mailto:sales@khanya.store">sales@khanya.store</a></p>
-                <p>© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
-              </div>
-            </div>
-            
-            <div style="max-width: 600px; margin: 40px auto; padding: 40px; background: white; border: 2px solid #d9ded6; font-family: Inter, Arial, sans-serif;">
-              <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="font-size: 36px; margin: 0; color: #2E4D38;">INVOICE</h1>
-              </div>
-              
-              <div style="margin-bottom: 20px;">
-                <h2 style="font-size: 18px; margin: 0 0 5px 0; color: #2E4D38;">Khanya</h2>
-                <p style="margin: 2px 0; font-size: 12px; color: #6b7b73;">sales@khanya.store</p>
-                <p style="margin: 2px 0; font-size: 12px; color: #6b7b73;">www.khanya.store</p>
-              </div>
-              
-              <div style="text-align: right; margin-bottom: 20px;">
-                <p style="margin: 3px 0; font-size: 12px;"><strong>Invoice Number:</strong> ${order.order_number}</p>
-                <p style="margin: 3px 0; font-size: 12px;"><strong>Date:</strong> ${orderDate}</p>
-                <p style="margin: 3px 0; font-size: 12px;"><strong>Payment Status:</strong> ${paymentStatus.toUpperCase()}</p>
-              </div>
-              
-              <div style="margin-bottom: 20px; clear: both;">
-                <h3 style="font-size: 14px; margin: 0 0 10px 0; font-weight: bold; color: #2E4D38;">BILL TO:</h3>
-                <p style="margin: 3px 0; font-size: 12px;">${order.customer_name}</p>
-                <p style="margin: 3px 0; font-size: 12px;">${order.customer_email}</p>
-                <p style="margin: 3px 0; font-size: 12px;">${order.customer_phone}</p>
-              </div>
-              
-              <div style="margin-bottom: 30px;">
-                <h3 style="font-size: 14px; margin: 0 0 10px 0; font-weight: bold; color: #2E4D38;">DELIVERY ADDRESS:</h3>
-                ${order.delivery_complex ? `<p style="margin: 3px 0; font-size: 12px;">${order.delivery_complex}</p>` : ''}
-                <p style="margin: 3px 0; font-size: 12px;">${order.delivery_address}</p>
-                <p style="margin: 3px 0; font-size: 12px;">${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}</p>
-              </div>
-              
-              <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                <thead style="background: #f4f7f5;">
-                  <tr>
-                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Item</th>
-                    <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Qty</th>
-                    <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Price</th>
-                    <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: bold; border-bottom: 2px solid #d9ded6; color: #2E4D38;">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${order.order_items.map((item: any) => {
-                    const baleItems = item.bale_details?.bale_items || [];
-                    const itemsSubtotal = baleItems.reduce((sum: number, bi: any) => 
-                      sum + (bi.stock_items?.selling_price || 0) * bi.quantity, 0);
-                    const baleDiscount = itemsSubtotal - item.price_per_unit;
-                    const hasDiscount = baleDiscount > 0;
-                    
-                    return `
-                    <tr>
-                      <td colspan="4" style="padding: 15px 12px 8px 12px; font-size: 13px; font-weight: bold; background: #f9fafb; border-bottom: 1px solid #d9ded6; color: #2E4D38;">${item.product_name} (x${item.quantity})</td>
-                    </tr>
-                    ${baleItems.map((baleItem: any) => `
-                      <tr>
-                        <td style="padding: 8px 12px 8px 24px; font-size: 11px; border-bottom: 1px solid #eee;">${baleItem.stock_items?.name || 'Item'}</td>
-                        <td style="padding: 8px 12px; font-size: 11px; text-align: center; border-bottom: 1px solid #eee;">${baleItem.quantity}</td>
-                        <td style="padding: 8px 12px; font-size: 11px; text-align: right; border-bottom: 1px solid #eee;">R${(baleItem.stock_items?.selling_price || 0).toFixed(2)}</td>
-                        <td style="padding: 8px 12px; font-size: 11px; text-align: right; border-bottom: 1px solid #eee;">R${((baleItem.stock_items?.selling_price || 0) * baleItem.quantity).toFixed(2)}</td>
-                      </tr>
-                    `).join('')}
-                    ${hasDiscount ? `
-                      <tr style="background: #fef9e7;">
-                        <td colspan="3" style="padding: 8px 12px 8px 24px; font-size: 11px; font-style: italic; color: #8b7217;">Individual Items Subtotal:</td>
-                        <td style="padding: 8px 12px; font-size: 11px; text-align: right; color: #8b7217;">R${itemsSubtotal.toFixed(2)}</td>
-                      </tr>
-                      <tr style="background: #d1fae5;">
-                        <td colspan="3" style="padding: 8px 12px 8px 24px; font-size: 11px; font-weight: bold; color: #065f46;">Bale Discount per unit:</td>
-                        <td style="padding: 8px 12px; font-size: 11px; text-align: right; font-weight: bold; color: #065f46;">-R${baleDiscount.toFixed(2)}</td>
-                      </tr>
-                    ` : ''}
-                    <tr style="background: #f4f7f5;">
-                      <td colspan="3" style="padding: 10px 12px; font-size: 12px; font-weight: bold; border-bottom: 1px solid #d9ded6;">Bale Price (x${item.quantity}):</td>
-                      <td style="padding: 10px 12px; font-size: 12px; text-align: right; font-weight: bold; border-bottom: 1px solid #d9ded6;">R${Number(item.subtotal).toFixed(2)}</td>
-                    </tr>
-                  `}).join('')}
-                  <tr style="background: #2E4D38; color: white;">
-                    <td colspan="3" style="padding: 15px 12px; font-size: 16px; font-weight: bold;">TOTAL</td>
-                    <td style="padding: 15px 12px; font-size: 16px; text-align: right; font-weight: bold;">R${Number(order.total_amount).toFixed(2)}</td>
-                  </tr>
-                </tbody>
-              </table>
-              
-              <div style="background: #fef9e7; padding: 15px; border-radius: 6px; margin-top: 20px; text-align: center; border-left: 3px solid #D6A220;">
-                <p style="margin: 0; font-size: 11px; color: #1f2e27;">This invoice does not include VAT. Khanya is not VAT registered.</p>
-              </div>
-              
-              <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #d9ded6; text-align: center;">
-                <p style="margin: 5px 0; font-size: 11px; color: #6b7b73;">Thank you for your business!</p>
-                <p style="margin: 5px 0; font-size: 11px; color: #6b7b73;">© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
-              </div>
-            </div>
+                <p style="color: #333;"><strong>Estimated Delivery:</strong> 3-5 business days after shipment</p>
+              </td>
+            </tr>
           `;
+          emailContent = getEmailTemplate(contentHtml);
         } else if (new_status === 'shipped') {
           const totalAmount = Number(order.total_amount);
           const amountPaid = Number(order.amount_paid || 0);
@@ -586,17 +466,17 @@ const handler = async (req: Request): Promise<Response> => {
           const isFullyPaid = paymentStatus === 'Fully Paid';
           
           subject = `Your Order is On Its Way! ${order.order_number}`;
-          htmlBody = `
-            ${baseStyles}
-            <div class="container">
-              <div class="header">
-                <h1 style="margin: 0; font-size: 28px;">📦 Order Shipped!</h1>
-              </div>
-              <div class="content">
-                <p>Hello ${order.customer_name},</p>
-                <p>Excellent news! Your order has been shipped and is on its way to you.</p>
-                <div class="order-number">Order Number: ${order.order_number}</div>
-                <span class="status-badge status-shipped">In Transit</span>
+          const contentHtml = `
+            <tr>
+              <td style="padding: 30px;">
+                <h2 style="margin: 0 0 20px 0; color: #2E4D38; font-size: 24px;">📦 Order Shipped!</h2>
+                <p style="color: #333; line-height: 1.6;">Hello ${order.customer_name},</p>
+                <p style="color: #333; line-height: 1.6;">Excellent news! Your order has been shipped and is on its way to you.</p>
+                <div style="background: #f4f7f5; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center;">
+                  <p style="margin: 0; font-size: 12px; color: #666;">Order Number</p>
+                  <p style="margin: 5px 0 0 0; font-size: 20px; font-weight: bold; color: #D6A220;">${order.order_number}</p>
+                  <span style="display: inline-block; background: #8b5cf6; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-top: 10px;">In Transit</span>
+                </div>
                 ${note ? `
                   <div style="background: #e8f4fd; border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0; border-radius: 4px;">
                     <strong style="color: #1565C0;">📝 Shipping Note:</strong>
@@ -605,42 +485,34 @@ const handler = async (req: Request): Promise<Response> => {
                 ` : ''}
                 <div style="background: ${isFullyPaid ? '#d1fae5' : '#fee2e2'}; border-left: 4px solid ${isFullyPaid ? '#10b981' : '#ef4444'}; padding: 12px; margin: 15px 0; border-radius: 4px;">
                   <p style="margin: 0; font-size: 14px; color: ${isFullyPaid ? '#065f46' : '#991b1b'};">
-                    <strong>Payment Status:</strong> <span style="background: ${isFullyPaid ? '#6ee7b7' : '#fecaca'}; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${paymentStatus}</span>
+                    <strong>Payment Status:</strong> ${paymentStatus}
                   </p>
                   <p style="margin: 8px 0 0 0; font-size: 13px; color: ${isFullyPaid ? '#065f46' : '#991b1b'};">
                     Amount Paid: <strong>R${amountPaid.toFixed(2)}</strong> / Total: <strong>R${totalAmount.toFixed(2)}</strong>
                   </p>
-                  ${!isFullyPaid ? `
-                    <p style="margin: 8px 0 0 0; font-size: 14px; font-weight: bold; color: #991b1b;">
-                      Amount Still Owing: <strong style="font-size: 16px;">R${amountOwing.toFixed(2)}</strong>
-                    </p>
-                  ` : ''}
+                  ${!isFullyPaid ? `<p style="margin: 8px 0 0 0; font-size: 14px; font-weight: bold; color: #991b1b;">Amount Still Owing: <strong style="font-size: 16px;">R${amountOwing.toFixed(2)}</strong></p>` : ''}
                 </div>
                 ${!isFullyPaid ? `
                   <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
                     <p style="margin: 0 0 10px 0; font-weight: bold; color: #92400e;">⚠️ Payment Outstanding - Please Complete</p>
                     <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Bank:</strong> FNB</p>
                     <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Account:</strong> 63173001256</p>
-                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Branch Code:</strong> 250655</p>
                     <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>E-Wallet:</strong> 083 305 4532</p>
                     <p style="margin: 5px 0; font-size: 13px; color: #dc2626; font-weight: bold;"><strong>Reference:</strong> ${order.order_number}</p>
                   </div>
                 ` : ''}
-                <div class="info-box">
-                  <strong>Delivery Information</strong>
-                  <p style="margin: 10px 0 0 0;"><strong>Shipping To:</strong><br>
+                <div style="background: #e8f5e9; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                  <strong style="color: #2E4D38;">Delivery Information</strong>
+                  <p style="margin: 10px 0 0 0; color: #333;"><strong>Shipping To:</strong><br>
                   ${order.delivery_complex ? `${order.delivery_complex}<br>` : ''}${order.delivery_address}<br>
                   ${order.delivery_city}, ${order.delivery_province} ${order.delivery_postal_code}</p>
-                  <p style="margin: 10px 0 0 0;"><strong>Estimated Delivery:</strong> 3-5 business days</p>
+                  <p style="margin: 10px 0 0 0; color: #333;"><strong>Estimated Delivery:</strong> 3-5 business days</p>
                 </div>
-                <p>Please ensure someone is available to receive the delivery. You'll receive a final confirmation once your order has been delivered.</p>
-              </div>
-              <div class="footer">
-                <p>Questions? Contact us at <a href="mailto:sales@khanya.store">sales@khanya.store</a></p>
-                <p>© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
-              </div>
-            </div>
+                <p style="color: #333;">Please ensure someone is available to receive the delivery. You'll receive a final confirmation once your order has been delivered.</p>
+              </td>
+            </tr>
           `;
+          emailContent = getEmailTemplate(contentHtml);
         } else if (new_status === 'delivered') {
           const totalAmount = Number(order.total_amount);
           const amountPaid = Number(order.amount_paid || 0);
@@ -649,29 +521,25 @@ const handler = async (req: Request): Promise<Response> => {
           const isFullyPaid = paymentStatus === 'Fully Paid';
           
           subject = `Order Delivered Successfully! ${order.order_number}`;
-          htmlBody = `
-            ${baseStyles}
-            <div class="container">
-              <div class="header">
-                <h1 style="margin: 0; font-size: 28px;">✅ Delivered!</h1>
-              </div>
-              <div class="content">
-                <p>Hello ${order.customer_name},</p>
-                <p>Your order has been successfully delivered! We hope you're satisfied with your purchase.</p>
-                <div class="order-number">Order Number: ${order.order_number}</div>
-                <span class="status-badge status-delivered">Delivered</span>
+          const contentHtml = `
+            <tr>
+              <td style="padding: 30px;">
+                <h2 style="margin: 0 0 20px 0; color: #2E4D38; font-size: 24px;">✅ Delivered!</h2>
+                <p style="color: #333; line-height: 1.6;">Hello ${order.customer_name},</p>
+                <p style="color: #333; line-height: 1.6;">Your order has been successfully delivered! We hope you're satisfied with your purchase.</p>
+                <div style="background: #f4f7f5; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center;">
+                  <p style="margin: 0; font-size: 12px; color: #666;">Order Number</p>
+                  <p style="margin: 5px 0 0 0; font-size: 20px; font-weight: bold; color: #D6A220;">${order.order_number}</p>
+                  <span style="display: inline-block; background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-top: 10px;">Delivered</span>
+                </div>
                 <div style="background: ${isFullyPaid ? '#d1fae5' : '#fee2e2'}; border-left: 4px solid ${isFullyPaid ? '#10b981' : '#ef4444'}; padding: 12px; margin: 15px 0; border-radius: 4px;">
                   <p style="margin: 0; font-size: 14px; color: ${isFullyPaid ? '#065f46' : '#991b1b'};">
-                    <strong>Payment Status:</strong> <span style="background: ${isFullyPaid ? '#6ee7b7' : '#fecaca'}; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${paymentStatus}</span>
+                    <strong>Payment Status:</strong> ${paymentStatus}
                   </p>
                   <p style="margin: 8px 0 0 0; font-size: 13px; color: ${isFullyPaid ? '#065f46' : '#991b1b'};">
                     Amount Paid: <strong>R${amountPaid.toFixed(2)}</strong> / Total: <strong>R${totalAmount.toFixed(2)}</strong>
                   </p>
-                  ${!isFullyPaid ? `
-                    <p style="margin: 8px 0 0 0; font-size: 14px; font-weight: bold; color: #991b1b;">
-                      Amount Still Owing: <strong style="font-size: 16px;">R${amountOwing.toFixed(2)}</strong>
-                    </p>
-                  ` : ''}
+                  ${!isFullyPaid ? `<p style="margin: 8px 0 0 0; font-size: 14px; font-weight: bold; color: #991b1b;">Amount Still Owing: <strong style="font-size: 16px;">R${amountOwing.toFixed(2)}</strong></p>` : ''}
                 </div>
                 ${!isFullyPaid ? `
                   <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
@@ -679,16 +547,15 @@ const handler = async (req: Request): Promise<Response> => {
                     <p style="margin: 5px 0; font-size: 13px; color: #92400e;">Your order has been delivered but payment is still outstanding. Please settle the balance as soon as possible.</p>
                     <p style="margin: 10px 0 5px 0; font-size: 13px; color: #92400e;"><strong>Bank:</strong> FNB</p>
                     <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Account:</strong> 63173001256</p>
-                    <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>Branch Code:</strong> 250655</p>
                     <p style="margin: 5px 0; font-size: 13px; color: #92400e;"><strong>E-Wallet:</strong> 083 305 4532</p>
                     <p style="margin: 5px 0; font-size: 13px; color: #dc2626; font-weight: bold;"><strong>Reference:</strong> ${order.order_number}</p>
                   </div>
                 ` : ''}
-                <div class="info-box">
-                  <strong>Thank you for choosing Khanya!</strong>
-                  <p style="margin: 10px 0 0 0;">We appreciate your business. If you have any questions or concerns about your order, please don't hesitate to reach out.</p>
+                <div style="background: #e8f5e9; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                  <strong style="color: #2E4D38;">Thank you for choosing Khanya!</strong>
+                  <p style="margin: 10px 0 0 0; color: #333; line-height: 1.6;">We appreciate your business. If you have any questions or concerns about your order, please don't hesitate to reach out.</p>
                 </div>
-                <p>We'd love to hear about your experience! If you're satisfied with our service, please consider ordering from us again.</p>
+                <p style="color: #333;">We'd love to hear about your experience! If you're satisfied with our service, please consider ordering from us again.</p>
                 
                 <div style="background: linear-gradient(135deg, #fef9e7 0%, #fff7ed 100%); border: 2px solid #D6A220; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
                   <p style="margin: 0 0 10px 0; font-size: 20px;">⭐⭐⭐⭐⭐</p>
@@ -697,31 +564,32 @@ const handler = async (req: Request): Promise<Response> => {
                   <a href="https://www.google.com/search?hl=en-ZA&gl=za&q=Khanya+Clothing+Store,+0A+Jubie+Rd,+Barbeque+Downs,+Midrand,+1684&ludocid=12962748148169130712&lsig=AB86z5XBdMcvSXdinNFyJ3lib1lJ#lrd=0x1e95717a6f700c7d:0xb3e4eec2dc7942d8,3" target="_blank" style="display: inline-block; background: #D6A220; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Leave a Google Review</a>
                   <p style="margin: 15px 0 0 0; font-size: 12px; color: #8b7b73;">It only takes a minute and means the world to us! 🙏</p>
                 </div>
-              </div>
-              <div class="footer">
-                <p>Questions or feedback? Contact us at <a href="mailto:sales@khanya.store">sales@khanya.store</a></p>
-                <p>© ${new Date().getFullYear()} Khanya. All rights reserved.</p>
-              </div>
-            </div>
+              </td>
+            </tr>
           `;
+          emailContent = getEmailTemplate(contentHtml);
         }
         
-        // No attachments needed - invoice is embedded in email body for packing status
-        const emailPayload: any = {
-          from: "Khanya <noreply@mail.khanya.store>",
-          to: [order.customer_email],
-          subject: subject,
-          html: htmlBody,
-        };
+        // Only send email if we have content
+        if (emailContent && subject) {
+          const emailPayload: any = {
+            from: "Khanya <noreply@mail.khanya.store>",
+            to: [order.customer_email],
+            subject: subject,
+            html: emailContent,
+          };
 
-        await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${resendApiKey}`,
-          },
-          body: JSON.stringify(emailPayload),
-        });
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${resendApiKey}`,
+            },
+            body: JSON.stringify(emailPayload),
+          });
+          
+          console.log(`Status update email sent successfully to ${order.customer_email} for status: ${new_status}`);
+        }
         
         console.log(`Status update email sent successfully to ${order.customer_email} for status: ${new_status}`);
         
