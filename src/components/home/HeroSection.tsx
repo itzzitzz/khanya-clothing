@@ -47,7 +47,7 @@ const HeroSection = ({ coords, onMouseMove }: HeroSectionProps) => (
           </Button>
         </div>
         <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-          {["Bales from R600", "A-grade quality", "Free delivery nationwide", "30-45 items per bale"].map((t) => (
+          {["Bales from R600", "A-grade quality", "Free delivery nationwide", "10-100 items per bale"].map((t) => (
             <li className="flex items-start gap-2" key={t}>
               <CheckCircle2 className="text-accent" />
               <span>{t}</span>
