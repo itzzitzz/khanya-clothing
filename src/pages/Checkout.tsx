@@ -64,6 +64,7 @@ const Checkout = () => {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState(false);
+  const [customerFeedback, setCustomerFeedback] = useState('');
 
   // Load Paystack script
   useEffect(() => {
@@ -391,8 +392,12 @@ const Checkout = () => {
             delivery_city: 'PAXI',
             delivery_province: 'N/A',
             delivery_postal_code: '0000',
+            customer_feedback: customerFeedback || undefined,
           }
-        : formData;
+        : {
+            ...formData,
+            customer_feedback: customerFeedback || undefined,
+          };
 
       // If Paystack payment method selected, handle differently
       if (formData.payment_method === 'card') {
@@ -1131,6 +1136,24 @@ const Checkout = () => {
                       <span>R{cartTotal.toFixed(2)}</span>
                     </div>
                   </div>
+                </div>
+
+                {/* Customer Feedback (Optional) */}
+                <div className="p-4 border rounded-lg bg-card">
+                  <Label htmlFor="customerFeedback" className="text-sm font-medium mb-2 block">
+                    Help us improve! (Optional)
+                  </Label>
+                  <textarea
+                    id="customerFeedback"
+                    value={customerFeedback}
+                    onChange={(e) => setCustomerFeedback(e.target.value)}
+                    placeholder="How was your experience using our website? Did you find what you were looking for? What do you plan to use the clothes for (reselling, personal use, donations)? Any suggestions to improve?"
+                    className="w-full min-h-[100px] p-3 text-sm border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+                    maxLength={1000}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Your feedback helps us serve you better. {customerFeedback.length}/1000
+                  </p>
                 </div>
 
                 {/* Terms of Service Acceptance */}

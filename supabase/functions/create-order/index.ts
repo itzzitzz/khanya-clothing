@@ -27,6 +27,7 @@ interface CreateOrderRequest {
   items: OrderItem[];
   is_paid?: boolean; // Flag for card payments that are already paid
   paystack_reference?: string;
+  customer_feedback?: string; // Optional customer feedback
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -81,6 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
         payment_tracking_status: paymentTrackingStatus,
         amount_paid: amountPaid,
         payment_status: isPaid ? 'paid' : 'pending',
+        customer_feedback: orderData.customer_feedback || null,
       })
       .select()
       .single();
