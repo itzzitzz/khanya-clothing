@@ -23,6 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { OrderNoteModal } from './OrderNoteModal';
+import { PrintSelectionModal } from './PrintSelectionModal';
 
 const OrderManager = () => {
   const { toast } = useToast();
@@ -44,6 +45,10 @@ const OrderManager = () => {
   const [noteModalMode, setNoteModalMode] = useState<'shipped' | 'send'>('shipped');
   const [pendingStatusChange, setPendingStatusChange] = useState<{ orderId: string; newStatus: string } | null>(null);
   const [sendingNote, setSendingNote] = useState<string | null>(null);
+
+  // Print selection modal state
+  const [printModalOpen, setPrintModalOpen] = useState(false);
+  const [printModalOrder, setPrintModalOrder] = useState<any>(null);
 
   // Calculate sales statistics
   const calculateStats = () => {
@@ -368,11 +373,27 @@ const OrderManager = () => {
     }
   };
 
-  const handlePrintPackingList = (order: any) => {
-    // Open single combined print page with all packing lists and invoice in same window
-    const url = `/print-order?orderId=${order.id}`;
-    console.log('Navigating to combined print page:', url);
-    window.location.href = url;
+  const handlePrintClick = (order: any) => {
+    setPrintModalOrder(order);
+    setPrintModalOpen(true);
+  };
+
+  const handlePrintSelection = (option: 'packing-lists' | 'invoice' | 'both') => {
+    if (!printModalOrder) return;
+    
+    setPrintModalOpen(false);
+    
+    if (option === 'packing-lists') {
+      window.location.href = `/print-packing-lists?orderId=${printModalOrder.id}`;
+    } else if (option === 'invoice') {
+      window.location.href = `/invoice?orderId=${printModalOrder.id}`;
+    } else if (option === 'both') {
+      // Open packing lists first (A5), then invoice (A4) in new tab
+      window.open(`/print-packing-lists?orderId=${printModalOrder.id}`, '_blank');
+      setTimeout(() => {
+        window.open(`/invoice?orderId=${printModalOrder.id}`, '_blank');
+      }, 500);
+    }
   };
 
   const handleSendPaymentReminder = async (order: any) => {
@@ -593,7 +614,7 @@ const OrderManager = () => {
                       </Button>
                     )}
                     <Button
-                      onClick={() => handlePrintPackingList(order)}
+                      onClick={() => handlePrintClick(order)}
                       variant="outline"
                       size="sm"
                       title="Print Packing Lists & Invoice"
@@ -895,6 +916,14 @@ const OrderManager = () => {
           ? handleShippingNoteSubmit 
           : handleSendNote}
         isLoading={updating === noteModalOrder?.id || sendingNote === noteModalOrder?.id}
+      />
+
+      {/* Print Selection Modal */}
+      <PrintSelectionModal
+        open={printModalOpen}
+        onOpenChange={setPrintModalOpen}
+        onSelect={handlePrintSelection}
+        orderNumber={printModalOrder?.order_number || ''}
       />
     </div>
   );
