@@ -10,6 +10,7 @@ interface UpdateStatusRequest {
   order_id: string;
   new_status: string;
   payment_status?: string;
+  note?: string;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -163,7 +164,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { order_id, new_status, payment_status }: UpdateStatusRequest = await req.json();
+    const { order_id, new_status, payment_status, note }: UpdateStatusRequest = await req.json();
 
     if (!order_id || !new_status) {
       return new Response(
@@ -243,12 +244,13 @@ const handler = async (req: Request): Promise<Response> => {
       throw updateError;
     }
 
-    // Log status change to history
+    // Log status change to history (with optional note)
     const { error: historyError } = await supabase
       .from("order_status_history")
       .insert({
         order_id: order_id,
         status: new_status,
+        notes: note || null,
         changed_at: new Date().toISOString()
       });
 
@@ -561,6 +563,12 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>Excellent news! Your order has been shipped and is on its way to you.</p>
                 <div class="order-number">Order Number: ${order.order_number}</div>
                 <span class="status-badge status-shipped">In Transit</span>
+                ${note ? `
+                  <div style="background: #e8f4fd; border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                    <strong style="color: #1565C0;">📝 Shipping Note:</strong>
+                    <p style="margin: 10px 0 0 0; white-space: pre-wrap; color: #1565C0;">${note}</p>
+                  </div>
+                ` : ''}
                 <div style="background: ${isFullyPaid ? '#d1fae5' : '#fee2e2'}; border-left: 4px solid ${isFullyPaid ? '#10b981' : '#ef4444'}; padding: 12px; margin: 15px 0; border-radius: 4px;">
                   <p style="margin: 0; font-size: 14px; color: ${isFullyPaid ? '#065f46' : '#991b1b'};">
                     <strong>Payment Status:</strong> <span style="background: ${isFullyPaid ? '#6ee7b7' : '#fecaca'}; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${paymentStatus}</span>
