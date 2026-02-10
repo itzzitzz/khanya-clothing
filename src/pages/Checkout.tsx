@@ -1147,7 +1147,7 @@ const Checkout = () => {
                     id="customerFeedback"
                     value={customerFeedback}
                     onChange={(e) => setCustomerFeedback(e.target.value)}
-                    placeholder="How was your experience using our website? Did you find what you were looking for? What do you plan to use the clothes for (reselling, personal use, donations)? Any suggestions to improve?"
+                    placeholder="How did you hear about Khanya? How was your experience using our website? Did you find what you were looking for? What do you plan to use the clothes for (reselling, personal use, donations)? Any suggestions to improve?"
                     className="w-full min-h-[100px] p-3 text-sm border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
                     maxLength={1000}
                   />
