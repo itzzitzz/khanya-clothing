@@ -132,8 +132,8 @@ const PrintPackingLists = () => {
               width: 100%;
             }
             @page {
-              size: A5 portrait;
-              margin: 8mm;
+              size: A4 portrait;
+              margin: 10mm;
             }
             .page-break {
               page-break-after: always;
@@ -144,11 +144,10 @@ const PrintPackingLists = () => {
             }
           }
           
-          /* A5 dimensions: 148mm × 210mm */
+          /* A5-sized content centered on top half of A4 */
           .a5-page {
             width: 148mm;
-            min-height: 210mm;
-            max-height: 210mm;
+            height: 148mm;
             overflow: hidden;
             margin: 0 auto;
             padding: 10mm;
