@@ -151,7 +151,7 @@ const PrintPackingLists = () => {
             max-height: 210mm;
             overflow: hidden;
             margin: 0 auto;
-            padding: 6mm;
+            padding: 10mm;
             box-sizing: border-box;
           }
           
@@ -181,39 +181,39 @@ const PrintPackingLists = () => {
             key={bale.id} 
             className={`a5-page ${index < bales.length - 1 ? 'page-break' : ''}`}
           >
-            {/* Compact Header */}
-            <div className="border-b border-gray-400 pb-2 mb-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <img src={khanyaLogo} alt="Khanya" className="w-10 h-10 object-contain" />
+            {/* Header */}
+            <div className="border-b-2 border-gray-400 pb-3 mb-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <img src={khanyaLogo} alt="Khanya" className="w-14 h-14 object-contain" />
                   <div>
-                    <h1 className="text-base font-bold text-gray-900 leading-tight">Khanya</h1>
-                    <p className="text-[9px] text-gray-500">www.khanya.store</p>
+                    <h1 className="text-xl font-bold text-gray-900 leading-tight">Khanya</h1>
+                    <p className="text-xs text-gray-500">www.khanya.store</p>
                   </div>
                 </div>
-                <div className="text-right text-[9px] leading-tight">
-                  <p className="font-semibold text-[10px]">{order.customer_name}</p>
+                <div className="text-right text-xs leading-snug">
+                  <p className="font-semibold text-sm">{order.customer_name}</p>
                   <p>{order.customer_phone}</p>
-                  <p className="truncate max-w-[100px]">{order.delivery_city}, {order.delivery_province}</p>
+                  <p>{order.delivery_city}, {order.delivery_province}</p>
                 </div>
               </div>
             </div>
 
             {/* Packing List Title */}
-            <div className="mb-2 flex items-center justify-between bg-gray-800 text-white px-2 py-1 rounded">
-              <span className="text-[10px] font-bold uppercase">Packing List</span>
-              <span className="text-[10px] font-bold truncate max-w-[120px]">{item.product_name}</span>
+            <div className="mb-3 flex items-center justify-between bg-gray-800 text-white px-3 py-2 rounded">
+              <span className="text-sm font-bold uppercase">Packing List</span>
+              <span className="text-sm font-bold truncate max-w-[160px]">{item.product_name}</span>
             </div>
 
             {/* Bale Contents Table */}
             <div className="border border-gray-400 rounded overflow-hidden">
               {bale.bale_items && bale.bale_items.length > 0 && (
-                <table className="w-full text-[9px]">
+                <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-gray-100 border-b border-gray-300">
-                      <th className="text-left py-1 px-1.5 font-semibold">Item</th>
-                      <th className="text-left py-1 px-1.5 font-semibold">Description</th>
-                      <th className="text-center py-1 px-1.5 font-semibold w-8">Qty</th>
+                      <th className="text-left py-1.5 px-2 font-semibold">Item</th>
+                      <th className="text-left py-1.5 px-2 font-semibold">Description</th>
+                      <th className="text-center py-1.5 px-2 font-semibold w-10">Qty</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -224,26 +224,26 @@ const PrintPackingLists = () => {
                           key={baleItem.id} 
                           className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
                         >
-                          <td className="py-0.5 px-1.5 border-b border-gray-200">
+                          <td className="py-1 px-2 border-b border-gray-200">
                             <p className="font-medium leading-tight">{stockItem?.name}</p>
                             {stockItem?.age_range && (
-                              <p className="text-[8px] text-gray-500">{stockItem.age_range}</p>
+                              <p className="text-[10px] text-gray-500">{stockItem.age_range}</p>
                             )}
                           </td>
-                          <td className="py-0.5 px-1.5 text-gray-600 border-b border-gray-200 truncate max-w-[80px]">
+                          <td className="py-1 px-2 text-gray-600 border-b border-gray-200">
                             {stockItem?.description || '-'}
                           </td>
-                          <td className="py-0.5 px-1.5 text-center font-semibold border-b border-gray-200">
+                          <td className="py-1 px-2 text-center font-semibold border-b border-gray-200">
                             {baleItem.quantity}
                           </td>
                         </tr>
                       );
                     })}
                     <tr className="bg-gray-800 text-white font-bold">
-                      <td className="py-1 px-1.5" colSpan={2}>
+                      <td className="py-1.5 px-2" colSpan={2}>
                         TOTAL ITEMS
                       </td>
-                      <td className="py-1 px-1.5 text-center text-sm">
+                      <td className="py-1.5 px-2 text-center text-base">
                         {calculateTotalItems(bale.bale_items)}
                       </td>
                     </tr>
@@ -252,12 +252,12 @@ const PrintPackingLists = () => {
               )}
             </div>
 
-            {/* Compact Footer */}
-            <div className="mt-2 pt-1 border-t border-gray-300 text-center">
-              <p className="text-[8px] text-gray-500">
+            {/* Footer */}
+            <div className="mt-3 pt-2 border-t border-gray-300 text-center">
+              <p className="text-[10px] text-gray-500">
                 📱 083 305 4532 • 🌐 www.khanya.store • 📧 sales@khanya.store
               </p>
-              <p className="text-[9px] font-bold text-gray-700 mt-0.5">Thank you for choosing Khanya!</p>
+              <p className="text-xs font-bold text-gray-700 mt-1">Thank you for choosing Khanya!</p>
             </div>
           </div>
         ))}
