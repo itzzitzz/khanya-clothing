@@ -6,12 +6,12 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FileText, Package, Files } from 'lucide-react';
+import { FileText, Package } from 'lucide-react';
 
 interface PrintSelectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelect: (option: 'packing-lists' | 'invoice' | 'both') => void;
+  onSelect: (option: 'packing-lists' | 'invoice') => void;
   orderNumber: string;
 }
 
@@ -53,19 +53,6 @@ export const PrintSelectionModal = ({
               <div className="font-semibold">Invoice Only</div>
               <div className="text-xs text-muted-foreground">
                 Print on A4 paper
-              </div>
-            </div>
-          </Button>
-          <Button
-            variant="outline"
-            className="justify-start h-auto py-4"
-            onClick={() => onSelect('both')}
-          >
-            <Files className="h-5 w-5 mr-3" />
-            <div className="text-left">
-              <div className="font-semibold">Both</div>
-              <div className="text-xs text-muted-foreground">
-                Print packing lists (A5) and invoice (A4) separately
               </div>
             </div>
           </Button>
