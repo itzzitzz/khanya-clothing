@@ -724,16 +724,45 @@ const Checkout = () => {
                     </Button>
                   ) : (
                     <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="pin">Enter 6-digit PIN</Label>
-                        <Input
-                          id="pin"
-                          value={pin}
-                          onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                          placeholder="000000"
-                          maxLength={6}
-                          className="text-center text-2xl tracking-widest"
-                        />
+                      <div className="space-y-3">
+                        <Label htmlFor="pin" className="text-base font-semibold text-center block">Enter 6-digit PIN</Label>
+                        <div className="flex justify-center gap-2">
+                          {[0, 1, 2, 3, 4, 5].map((i) => (
+                            <input
+                              key={i}
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={1}
+                              value={pin[i] || ''}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, '');
+                                const newPin = pin.split('');
+                                newPin[i] = val;
+                                const joined = newPin.join('').slice(0, 6);
+                                setPin(joined);
+                                if (val && i < 5) {
+                                  const next = e.target.parentElement?.children[i + 1] as HTMLInputElement;
+                                  next?.focus();
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Backspace' && !pin[i] && i > 0) {
+                                  const prev = (e.target as HTMLElement).parentElement?.children[i - 1] as HTMLInputElement;
+                                  prev?.focus();
+                                }
+                              }}
+                              onPaste={(e) => {
+                                e.preventDefault();
+                                const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                                setPin(pasted);
+                                const target = (e.target as HTMLElement).parentElement?.children[Math.min(pasted.length, 5)] as HTMLInputElement;
+                                target?.focus();
+                              }}
+                              className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold rounded-xl border-2 border-input bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                            />
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground text-center">Check your email or SMS for the PIN</p>
                       </div>
                       <Button
                         type="button"
