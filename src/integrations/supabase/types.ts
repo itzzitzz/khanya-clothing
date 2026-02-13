@@ -334,6 +334,7 @@ export type Database = {
           payment_method: string
           payment_status: string
           payment_tracking_status: string
+          refund_reason: string | null
           total_amount: number
           updated_at: string
         }
@@ -355,6 +356,7 @@ export type Database = {
           payment_method: string
           payment_status?: string
           payment_tracking_status?: string
+          refund_reason?: string | null
           total_amount: number
           updated_at?: string
         }
@@ -376,6 +378,7 @@ export type Database = {
           payment_method?: string
           payment_status?: string
           payment_tracking_status?: string
+          refund_reason?: string | null
           total_amount?: number
           updated_at?: string
         }

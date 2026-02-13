@@ -116,6 +116,7 @@ export function MarketingManager() {
         .from("orders")
         .select("customer_email, customer_name")
         .eq("order_status", "delivered")
+        .neq("payment_tracking_status", "Refunded")
         .order("created_at", { ascending: false });
 
       if (ordersError) throw ordersError;

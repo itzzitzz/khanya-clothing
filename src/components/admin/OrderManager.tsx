@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { OrderNoteModal } from './OrderNoteModal';
 import { PrintSelectionModal } from './PrintSelectionModal';
 
@@ -50,6 +51,11 @@ const OrderManager = () => {
   const [printModalOpen, setPrintModalOpen] = useState(false);
   const [printModalOrder, setPrintModalOrder] = useState<any>(null);
 
+  // Refund dialog state
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+  const [refundOrderId, setRefundOrderId] = useState<string | null>(null);
+  const [refundReason, setRefundReason] = useState('');
+
   // Calculate sales statistics
   const calculateStats = () => {
     const now = new Date();
@@ -72,6 +78,9 @@ const OrderManager = () => {
     let outstandingPayments = 0;
 
     orders.forEach(order => {
+      // Skip refunded orders from all stats
+      if (order.payment_tracking_status === 'Refunded') return;
+
       const orderDate = new Date(order.created_at);
       const totalAmount = Number(order.total_amount);
       const amountPaid = Number(order.amount_paid || 0);
@@ -328,20 +337,25 @@ const OrderManager = () => {
       'Awaiting payment': 'bg-yellow-100 text-yellow-800',
       'Partially Paid': 'bg-blue-100 text-blue-800',
       'Fully Paid': 'bg-green-100 text-green-800',
+      'Refunded': 'bg-red-100 text-red-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
-  const handlePaymentUpdate = async (orderId: string, paymentStatus: string, amountPaid?: number) => {
+  const handlePaymentUpdate = async (orderId: string, paymentStatus: string, amountPaid?: number, refundReasonText?: string) => {
     setUpdatingPayment(orderId);
     try {
-      // Call edge function to update payment status and send notifications
+      const body: any = {
+        order_id: orderId,
+        new_payment_status: paymentStatus,
+        amount_paid: amountPaid,
+      };
+      if (refundReasonText) {
+        body.refund_reason = refundReasonText;
+      }
+
       const { data, error } = await supabase.functions.invoke('update-payment-status', {
-        body: {
-          order_id: orderId,
-          new_payment_status: paymentStatus,
-          amount_paid: amountPaid,
-        },
+        body,
       });
 
       if (error) throw error;
@@ -371,6 +385,14 @@ const OrderManager = () => {
     } finally {
       setUpdatingPayment(null);
     }
+  };
+
+  const handleRefundConfirm = () => {
+    if (!refundOrderId || !refundReason.trim()) return;
+    handlePaymentUpdate(refundOrderId, 'Refunded', 0, refundReason.trim());
+    setRefundDialogOpen(false);
+    setRefundOrderId(null);
+    setRefundReason('');
   };
 
   const handlePrintClick = (order: any) => {
@@ -556,6 +578,7 @@ const OrderManager = () => {
                 <SelectItem value="Awaiting payment">Awaiting Payment</SelectItem>
                 <SelectItem value="Partially Paid">Partially Paid</SelectItem>
                 <SelectItem value="Fully Paid">Fully Paid</SelectItem>
+                <SelectItem value="Refunded">Refunded</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -678,6 +701,14 @@ const OrderManager = () => {
                         </p>
                       </div>
                     )}
+                    {order.refund_reason && (
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="text-sm font-semibold mb-1 text-red-600">🔄 Refund Reason:</p>
+                        <p className="text-sm text-muted-foreground italic bg-red-50 dark:bg-red-950/30 p-2 rounded">
+                          "{order.refund_reason}"
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div>
@@ -701,7 +732,11 @@ const OrderManager = () => {
                     <Select
                       value={order.payment_tracking_status}
                       onValueChange={(value) => {
-                        if (value === 'Fully Paid') {
+                        if (value === 'Refunded') {
+                          setRefundOrderId(order.id);
+                          setRefundReason('');
+                          setRefundDialogOpen(true);
+                        } else if (value === 'Fully Paid') {
                           handlePaymentUpdate(order.id, value, order.total_amount);
                         } else if (value === 'Partially Paid') {
                           const amount = prompt(`Enter amount paid (Total: R${order.total_amount}):`, order.amount_paid || '0');
@@ -718,9 +753,10 @@ const OrderManager = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Awaiting payment">Awaiting payment</SelectItem>
+                <SelectItem value="Awaiting payment">Awaiting payment</SelectItem>
                         <SelectItem value="Partially Paid">Partially Paid</SelectItem>
                         <SelectItem value="Fully Paid">Fully Paid</SelectItem>
+                        <SelectItem value="Refunded">Refunded</SelectItem>
                       </SelectContent>
                     </Select>
                     {updatingPayment === order.id && (
@@ -933,6 +969,47 @@ const OrderManager = () => {
         onSelect={handlePrintSelection}
         orderNumber={printModalOrder?.order_number || ''}
       />
+
+      {/* Refund Reason Dialog */}
+      <AlertDialog open={refundDialogOpen} onOpenChange={(open) => {
+        setRefundDialogOpen(open);
+        if (!open) {
+          setRefundOrderId(null);
+          setRefundReason('');
+        }
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Refund Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please provide a reason for this refund. The customer will be notified.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Label htmlFor="refund-reason">Refund Reason</Label>
+            <Textarea
+              id="refund-reason"
+              value={refundReason}
+              onChange={(e) => setRefundReason(e.target.value)}
+              placeholder="e.g., Customer requested cancellation, product unavailable..."
+              className="mt-2"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleRefundConfirm();
+              }}
+              disabled={!refundReason.trim()}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Process Refund
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

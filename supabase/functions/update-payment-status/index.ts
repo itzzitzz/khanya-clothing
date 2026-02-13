@@ -14,6 +14,7 @@ interface UpdatePaymentStatusRequest {
   order_id: string;
   new_payment_status: string;
   amount_paid?: number;
+  refund_reason?: string;
 }
 
 // Normalize South African phone numbers to 27XXXXXXXXX format for WinSMS
@@ -32,7 +33,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { order_id, new_payment_status, amount_paid }: UpdatePaymentStatusRequest = await req.json();
+    const { order_id, new_payment_status, amount_paid, refund_reason }: UpdatePaymentStatusRequest = await req.json();
 
     if (!order_id || !new_payment_status) {
       return new Response(
@@ -66,6 +67,9 @@ const handler = async (req: Request): Promise<Response> => {
     };
     if (amount_paid !== undefined) {
       updateData.amount_paid = amount_paid;
+    }
+    if (refund_reason !== undefined) {
+      updateData.refund_reason = refund_reason;
     }
 
     const { error: updateError } = await supabase
@@ -164,7 +168,58 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    if (new_payment_status === 'Fully Paid') {
+    if (new_payment_status === 'Refunded') {
+      subject = `🔄 Refund Processed - Order ${reference}`;
+      smsMessage = `Order ${reference}: Your refund has been processed. Contact sales@khanya.store for queries. - Khanya`;
+      
+      const emailContent = `
+        <tr>
+          <td style="padding: 40px 30px;">
+            <h1 style="margin: 0 0 25px 0; color: #2E4D38; font-size: 26px; text-align: center;">🔄 Refund Processed</h1>
+            
+            <p style="margin: 0 0 20px 0; color: #333; font-size: 16px; line-height: 1.7;">
+              Hi <strong>${finalOrder.customer_name}</strong>,
+            </p>
+            <p style="margin: 0 0 20px 0; color: #333; font-size: 16px; line-height: 1.7;">
+              We've processed a refund for your order <strong>${reference}</strong>.
+            </p>
+            
+            <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; margin: 25px 0; border-radius: 8px;">
+              <h2 style="margin: 0 0 15px 0; color: #991b1b; font-size: 18px; font-weight: bold;">
+                🔄 Refund Details
+              </h2>
+              <table width="100%" cellpadding="8" cellspacing="0">
+                <tr>
+                  <td style="color: #991b1b; font-weight: 600;">Order Number:</td>
+                  <td style="color: #991b1b; font-weight: bold;">${reference}</td>
+                </tr>
+                <tr>
+                  <td style="color: #991b1b; font-weight: 600;">Order Amount:</td>
+                  <td style="color: #991b1b; font-weight: bold;">R ${totalAmount.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td style="color: #991b1b; font-weight: 600;">Status:</td>
+                  <td style="color: #ef4444; font-weight: bold;">REFUNDED</td>
+                </tr>
+                ${finalOrder.refund_reason ? `
+                <tr>
+                  <td style="color: #991b1b; font-weight: 600;">Reason:</td>
+                  <td style="color: #991b1b;">${finalOrder.refund_reason}</td>
+                </tr>
+                ` : ''}
+              </table>
+            </div>
+            
+            <p style="margin: 30px 0 0 0; color: #333; font-size: 16px;">
+              If you have any questions, please contact us.<br>
+              <strong style="color: #2E4D38;">The Khanya Team</strong>
+            </p>
+          </td>
+        </tr>
+      `;
+      
+      emailBody = getEmailTemplate(emailContent);
+    } else if (new_payment_status === 'Fully Paid') {
       subject = `✅ Payment Confirmed - Order ${reference}`;
       smsMessage = `Order ${reference}: Payment of R${totalAmount.toFixed(0)} confirmed! Your order is ${getOrderStatusLabel()}. Thank you! - Khanya`;
       
